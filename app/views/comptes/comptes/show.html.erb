@@ -1,0 +1,9 @@
+<% if @compte %>
+
+  <h1>Compte : <%= @compte.nom %></h1>
+
+  <p>Solde : <%= @compte.solde / 100.0 %> €</p>
+
+<% else %>
+<p>Ce compte n'existe pas</p>
+<% end %>

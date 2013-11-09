@@ -1,0 +1,22 @@
+<h1>Creation d'un compte</h1>
+
+<%= form_for @compte, url: comptes_comptes_path do |form| %>
+  <% if @compte.errors.any?%>
+  <div id="error_explanation">
+    <h2><%= pluralize(@compte.errors.count, "erreur") %> empêchent le compte d'être créé:</h2>
+    <ul>
+    <% @compte.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+  <% end  %>
+
+  <p>
+    <%= form.label :nom %> &nbsp; <%= form.text_field :nom %>
+  </p>
+  <p>
+    <%= form.label :solde %> &nbsp; <%= form.text_field :solde %>
+  </p>
+  <%= form.submit "Créer le compte" %>
+<% end %>
