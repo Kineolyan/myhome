@@ -1,0 +1,2 @@
+module Comptes::TransactionsHelper
+end
