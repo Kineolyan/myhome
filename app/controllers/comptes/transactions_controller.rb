@@ -4,10 +4,39 @@ module Comptes
     def index
     end
 
-    def create
+    def ajouter
+      # nothing to do
     end
 
-    def new
+    # def new
+    # end
+
+    def create
+      @transaction = Transaction.new transaction_params
+      @transaction.jour = ApplicationHelper::make_date params[:operation_date]
+      logger.debug "Olivier #{@transaction.jour.class} #{@transaction.jour}"
+
+      if @transaction.save
+        logger.debug "Olivier -> transaction saved"
+        respond_to do |format|
+          format.html { render @transaction }
+          format.json do
+            render json: { transaction: {
+              id: @transaction.id,
+              titre: @transaction.titre,
+              somme: @transaction.somme,
+              compte: @transaction.compte.nom,
+              date: @transaction.jour.strftime("%d/%m/%Y")
+            }}.to_json
+          end
+        end
+      else
+        logger.debug "Olivier -> transaction fails\n#{@transaction.errors.inspect}"
+        respond_to do |format|
+          format.html { render "new" }
+          format.json { render json: { errors: @transaction.errors } }
+        end
+      end
     end
 
     def edit
@@ -21,6 +50,11 @@ module Comptes
 
     def liste
       @transactions = Transaction.all
+    end
+
+    private
+    def transaction_params
+      params.require(:comptes_transaction).permit(:titre, :somme, :compte_id)
     end
   end
 

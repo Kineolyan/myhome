@@ -1,0 +1,8 @@
+<h1>Ajouter de nouvelles transactions</h1>
+
+<% compte = Comptes::Transaction.new %>
+<%= render partial: 'ajax_form', locals: { compte: compte } %>
+
+<h2>Opérations enregistrées</h2>
+<ul>
+</ul>
