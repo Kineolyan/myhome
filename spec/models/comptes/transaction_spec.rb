@@ -3,6 +3,8 @@ require 'spec_helper'
 describe Comptes::Transaction do
 
   before(:all) do
+    DatabaseCleaner.clean
+
     @compte = Comptes::Compte.new(nom: 'Super compte', solde: 100)
   end
 

@@ -40,3 +40,11 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = "random"
 end
+
+if defined?(ActiveRecord::Base)
+  begin
+    require 'database_cleaner'
+    DatabaseCleaner.strategy = :truncation
+  rescue LoadError => ignore_if_database_cleaner_not_present
+  end
+end
