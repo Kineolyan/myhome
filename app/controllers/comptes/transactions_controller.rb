@@ -19,7 +19,7 @@ module Comptes
       if @transaction.save
         logger.debug "Olivier -> transaction saved"
         respond_to do |format|
-          format.html { render @transaction }
+          format.html { redirect_to @transaction }
           format.json do
             render json: { transaction: {
               id: @transaction.id,
