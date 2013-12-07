@@ -1,4 +1,6 @@
-<%= form_for(compte, url: comptes_transactions_path, remote: true, format: 'json') do |form| %>
+<%= form_for(compte, url: comptes_transactions_path(format: :json), remote: true) do |form| %>
+  <ul id="transaction-errors"></ul>
+
   <p>
     <%= form.label :titre %> <%= form.text_field :titre %>
   </p>
