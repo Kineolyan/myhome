@@ -1,12 +1,4 @@
 Myhome::Application.routes.draw do
-  get "comptes/new"
-  get "comptes/update"
-  get "transactions/index"
-  get "transactions/create"
-  get "transactions/new"
-  get "transactions/edit"
-  get "transactions/show"
-  get "transactions/update"
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
