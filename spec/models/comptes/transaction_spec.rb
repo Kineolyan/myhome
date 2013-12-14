@@ -6,6 +6,7 @@ describe Comptes::Transaction do
     DatabaseCleaner.clean
 
     @compte = Comptes::Compte.new(nom: 'Super compte', solde: 100)
+    expect(@compte.save).to be_true
   end
 
   def create_transaction(note = "C'est pas important")
@@ -64,6 +65,12 @@ describe Comptes::Transaction do
     expect {
       make_transaction(montant).save
     }.to change { @compte.solde }.by(montant)
+  end
+
+  it "enregistre les changements de solde" do
+    make_transaction(1200).save
+
+    expect(Comptes::Compte.find(@compte.id).solde).to eq(@compte.solde)
   end
 
   it "ne touche pas le solde du compte sans save" do

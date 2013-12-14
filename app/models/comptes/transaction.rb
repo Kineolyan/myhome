@@ -11,6 +11,17 @@ class Comptes::Transaction < ActiveRecord::Base
   private
   def make_transaction
     compte.solde += somme
-    # save or not the compte ?
+    unless compte.save
+      logger.error "Failed to update account #{@compte} solde."
+    end
+  end
+
+  public
+  def jour_formatte
+    jour.strftime("%d/%m/%Y")
+  end
+
+  def somme_formattee
+    ApplicationHelper::format_amount somme
   end
 end
