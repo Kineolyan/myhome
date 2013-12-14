@@ -1,0 +1,13 @@
+<h1>Liste des comptes</h1>
+
+<% if @comptes && @comptes.size > 0 %>
+<ul>
+  <% @comptes.each do |compte| %>
+  <li><%= link_to compte.nom, compte %> (<%= compte.solde_formatte %>)</li>
+  <% end %>
+</ul>
+<% else %>
+<p>
+  Aucun compte existant.
+</p>
+<% end %>

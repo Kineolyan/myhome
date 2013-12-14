@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  titre: MyString
+  somme: 1
+  jour: 2013-11-09 00:21:56
+  notes: MyText
+  compte_id: 
+
+two:
+  titre: MyString
+  somme: 1
+  jour: 2013-11-09 00:21:56
+  notes: MyText
+  compte_id: 
