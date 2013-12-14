@@ -18,7 +18,7 @@ $(document).ready ->
     add_last_transaction = (data) ->
       item = $('<li>')
       item.attr("transaction-id='#{data.id}'")
-      item.text("#{data.date} : #{data.titre} (#{data.somme})")
+      item.text("#{data.date} : #{data.titre} (#{data.somme} €)")
       transaction_list.append(item)
       return
 
