@@ -12,26 +12,25 @@ module Comptes
     # end
 
     def create
-      @transaction = Transaction.new transaction_params
+      parameters = format_params(transaction_params)
+
+      @transaction = Transaction.new parameters
       @transaction.jour = ApplicationHelper::make_date params[:operation_date]
-      logger.debug "Olivier #{@transaction.jour.class} #{@transaction.jour}"
 
       if @transaction.save
-        logger.debug "Olivier -> transaction saved"
         respond_to do |format|
           format.html { redirect_to @transaction }
           format.json do
             render json: { transaction: {
               id: @transaction.id,
               titre: @transaction.titre,
-              somme: @transaction.somme,
+              somme: @transaction.somme.to_f / 100,
               compte: @transaction.compte.nom,
-              date: @transaction.jour.strftime("%d/%m/%Y")
+              date: @transaction.jour_formatte
             }}.to_json
           end
         end
       else
-        logger.debug "Olivier -> transaction fails\n#{@transaction.errors.inspect}"
         respond_to do |format|
           format.html { render "new" }
           format.json { render json: { errors: @transaction.errors } }
@@ -56,6 +55,15 @@ module Comptes
     def transaction_params
       params.require(:comptes_transaction).permit(:titre, :somme, :compte_id)
     end
+
+    # Formate les parametres de la transaction
+    # * convertit la somme en centimes
+    def format_params parameters
+      parameters[:somme] = (parameters[:somme].to_f * 100).to_i
+
+      parameters
+    end
+
   end
 
 end
