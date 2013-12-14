@@ -4,6 +4,13 @@
 
   <p>Solde : <%= @compte.solde / 100.0 %> €</p>
 
+  <h2>Les dernières transactions</h2>
+  <ul>
+  <% Comptes::Transaction.where(compte: @compte).order(jour: :desc).limit(20).each do |transaction| %>
+    <li><%= transaction.jour_formatte %> : <%= transaction.titre %> (<%= transaction.somme_formattee %>)</li>
+  <% end %>
+  </ul>
+
 <% else %>
 <p>Ce compte n'existe pas</p>
 <% end %>
