@@ -1,3 +1,5 @@
+<%= render 'section_menu' %>
+
 <h1>Ajouter de nouvelles transactions</h1>
 
 <% compte = Comptes::Transaction.new %>
@@ -6,7 +8,3 @@
 <h2>Opérations enregistrées</h2>
 <ul id="transactions-list">
 </ul>
-
-<p>
-<%= link_to "<< Liste de transactions", comptes_transactions_liste_path %>
-</p>
