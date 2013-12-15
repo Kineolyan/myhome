@@ -1,4 +1,5 @@
 <%= render 'section_menu' %>
 
-<h1>Comptes::Transactions#index</h1>
-<p>Find me in app/views/comptes/transactions/index.html.erb</p>
+<h1>Dernières transactions</h1>
+
+<%= render partial: 'transactions', object: @transactions %>

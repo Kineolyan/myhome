@@ -1,10 +1,8 @@
 module Comptes
 
   class TransactionsController < ApplicationController
-    def index
-    end
 
-    def liste
+    def index
       @transactions = Transaction.order(jour: :desc)
     end
 
@@ -63,7 +61,7 @@ module Comptes
         flash[:error] = "Transaction invalide. Aucune suppression."
       end
 
-      redirect_to comptes_transactions_liste_path
+      redirect_to comptes_transactions_path
     end
 
     private
@@ -74,7 +72,8 @@ module Comptes
     # Formate les parametres de la transaction
     # * convertit la somme en centimes
     def format_params parameters
-      parameters[:somme] = (parameters[:somme].to_f * 100).to_i
+      somme = parameters[:somme]
+      parameters[:somme] = (somme.to_f * 100).to_i if ApplicationHelper::is_a_number? somme
 
       parameters
     end

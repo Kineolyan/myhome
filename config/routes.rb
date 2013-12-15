@@ -55,7 +55,6 @@ Myhome::Application.routes.draw do
   #   end
   namespace :comptes do
     get "/" => "transactions#liste"
-    get "/transactions/liste" => "transactions#liste"
     get "/transactions/ajouter" => "transactions#ajouter"
 
     resources :comptes

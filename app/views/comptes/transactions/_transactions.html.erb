@@ -1,9 +1,8 @@
-<%= render 'section_menu' %>
+<% allow_empty ||= false %>
 
-<h1>Dernières transactions</h1>
+<% if transactions && (allow_empty || !transactions.empty?) %>
 
-<% if @transactions && !@transactions.empty? %>
-<table class="table table-striped table-hover">
+<table id="transactions-table" class="table table-striped table-hover">
   <thead>
     <tr>
       <th>Date</th>
@@ -14,7 +13,7 @@
     </tr>
   </thead>
   <tbody>
-  <% @transactions.each do |transaction| %>
+  <% transactions.each do |transaction| %>
     <tr>
       <td><%= transaction.jour %></td>
       <td><%= transaction.titre %></td>
@@ -25,6 +24,7 @@
   <% end %>
   </tbody>
 </table>
+
 <% else %>
 <p>Aucune transaction pour le moment</p>
 <% end %>
