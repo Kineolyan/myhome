@@ -3,7 +3,7 @@ module Comptes
   class TransactionsController < ApplicationController
 
     def index
-      @transactions = Transaction.order(jour: :desc)
+      @transactions = Transaction.order(jour: :desc, updated_at: :desc)
     end
 
     def ajouter
