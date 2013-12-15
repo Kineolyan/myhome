@@ -48,7 +48,7 @@ module Comptes
     end
 
     def liste
-      @transactions = Transaction.all
+      @transactions = Transaction.order(jour: :desc)
     end
 
     private
