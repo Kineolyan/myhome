@@ -41,4 +41,5 @@ $(document).ready ->
     ).bind "ajax:error", (e, xhr, status, error) ->
       alert "ERROR: #{error}"
 
+    return
   )()
