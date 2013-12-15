@@ -6,5 +6,6 @@
 <%= render partial: 'ajax_form', locals: { compte: compte } %>
 
 <h2>Opérations enregistrées</h2>
-<ul id="transactions-list">
+<%= render partial: 'transactions', object: [], locals: { allow_empty: true } %>
+<ul >
 </ul>
