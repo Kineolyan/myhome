@@ -4,6 +4,10 @@ module Comptes
     def index
     end
 
+    def liste
+      @transactions = Transaction.order(jour: :desc)
+    end
+
     def ajouter
       # nothing to do
     end
@@ -47,8 +51,19 @@ module Comptes
     def update
     end
 
-    def liste
-      @transactions = Transaction.order(jour: :desc)
+    def destroy
+      @transaction = Comptes::Transaction.find_by_id(params[:id])
+      if @transaction
+        if @transaction.destroy
+          flash[:notice] = "Transaction supprimée avec succés"
+        else
+          flash[:error] = "Impossible de supprimer la transaction"
+        end
+      else
+        flash[:error] = "Transaction invalide. Aucune suppression."
+      end
+
+      redirect_to comptes_transactions_liste_path
     end
 
     private

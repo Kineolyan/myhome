@@ -10,6 +10,7 @@
       <th>Libellé</th>
       <th>Montant</th>
       <th>Compte</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
@@ -19,6 +20,7 @@
       <td><%= transaction.titre %></td>
       <td><%= transaction.somme_formattee %></td>
       <td><%= transaction.compte.nom %></td>
+      <td><%= link_to "Supprimer", transaction, method: :delete, data: { confirm: "Sûr de vouloir supprimer la transaction ?" } %></td>
     </tr>
   <% end %>
   </tbody>
