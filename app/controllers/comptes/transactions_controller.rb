@@ -4,6 +4,9 @@ module Comptes
 
     def index
       @transactions = Transaction.order(jour: :desc, updated_at: :desc)
+      if params.key? :compte_id
+        @transactions.where!(compte_id: params[:compte_id])
+      end
     end
 
     def ajouter
