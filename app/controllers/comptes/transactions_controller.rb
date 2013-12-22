@@ -7,7 +7,7 @@ module Comptes
     end
 
     def ajouter
-      # nothing to do
+      @compte_selectionne = Comptes::Compte.find_by_id params[:compte_id]
     end
 
     # def new

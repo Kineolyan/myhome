@@ -1,4 +1,4 @@
-<%= form_for(compte, url: comptes_transactions_path(format: :json), remote: true) do |form| %>
+<%= form_for(transaction, url: comptes_transactions_path(format: :json), remote: true) do |form| %>
   <ul id="transaction-errors"></ul>
 
   <p>
@@ -11,7 +11,11 @@
     <%= select_date Date.today, prefix: :operation_date %>
   </p>
   <p>
-    <%= collection_select(:comptes_transaction, :compte_id, Comptes::Compte.all, :id, :nom) %>
+    <%
+    collection_options = {}
+    collection_options[:selected] = compte_selectionne.id if compte_selectionne
+    %>
+    <%= form.collection_select(:compte_id, Comptes::Compte.all, :id, :nom, collection_options) %>
   </p>
   <%= form.submit "Ajouter l'opération" %>
 <% end %>
