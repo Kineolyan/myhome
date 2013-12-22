@@ -17,5 +17,5 @@
     %>
     <%= form.collection_select(:compte_id, Comptes::Compte.all, :id, :nom, collection_options) %>
   </p>
-  <%= form.submit "Ajouter l'opération" %>
+  <%= form.submit "Ajouter l'opération", class: "btn btn-primary" %>
 <% end %>
