@@ -12,6 +12,7 @@ $(document).ready ->
     reset_transaction_form = (form) ->
       transaction_form[0].reset()
       errors_list.empty()
+      transaction_form.find("input[name*='titre']").focus()
       return
 
     transaction_table = $("#transactions-table")
