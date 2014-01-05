@@ -7,70 +7,82 @@ describe Comptes::Transaction do
 
     @compte = Comptes::Compte.new(nom: 'Super compte', solde: 100)
     expect(@compte.save).to be_true
+
+    @transaction_attributes = { titre: 'Cadeau', somme: 1500, jour: Date.new(2014, 1, 1), compte: @compte }
   end
 
-  def create_transaction(note = "C'est pas important")
-    transaction = Comptes::Transaction.new(titre: 'Cadeau', somme: 1500, jour: Date.new(2014, 1, 1), compte: @compte)
-    transaction.notes = note unless note.empty?
-    transaction
+  def create_transaction(values = { notes: "C'est pas important" })
+    @transaction_attributes.merge! values
+
+    Comptes::Transaction.new @transaction_attributes
   end
 
-  def make_transaction(montant)
-    transaction = Comptes::Transaction.new(titre: 'Cadeau', somme: montant, jour: Date.new(2014, 1, 1), compte: @compte)
+  def make_transaction(values = {})
+    transaction = create_transaction(values)
 
-    transaction
+    return transaction, transaction.save
   end
 
   it 'creates with correct parameters' do
     transaction = create_transaction
+
     expect(transaction).to be_valid
   end
 
   it 'is valid without a note' do
-    transaction = create_transaction ''
+    transaction = create_transaction notes: ''
+
     expect(transaction).to be_valid
   end
 
   it "n'est pas valide sans titre" do
-    transaction = Comptes::Transaction.new(somme: 1500, jour: Date.new(2014, 1, 1), compte: @compte)
+    @transaction_attributes.delete :titre
+    transaction = Comptes::Transaction.new @transaction_attributes
+
     expect(transaction).not_to be_valid
   end
 
   it "n'est pas valide sans somme" do
-    transaction = Comptes::Transaction.new(titre: 'Cadeau', jour: Date.new(2014, 1, 1), compte: @compte)
+    @transaction_attributes.delete :somme
+    transaction = Comptes::Transaction.new @transaction_attributes
+
     expect(transaction).not_to be_valid
   end
 
   it "n'est pas valide avec une somme alphabétique" do
-    transaction = create_transaction
-    transaction.somme = 'abcde'
+    transaction = create_transaction somme: 'abcde'
+
     expect(transaction).not_to be_valid
   end
 
   it "n'est pas valide sans date" do
-    transaction = Comptes::Transaction.new(titre: 'Cadeau', somme: 1500, compte: @compte)
+    @transaction_attributes.delete :jour
+    transaction = Comptes::Transaction.new @transaction_attributes
+
     expect(transaction).not_to be_valid
   end
 
   it "n'est pas valide sans compte" do
-    transaction = Comptes::Transaction.new(titre: 'Cadeau', somme: 1500, jour: Date.new(2014, 1, 1))
+    @transaction_attributes.delete :compte
+    transaction = Comptes::Transaction.new @transaction_attributes
+
     expect(transaction).not_to be_valid
   end
 
   it "fait varier le solde du compte" do
     montant = 1200
     expect {
-      make_transaction(montant).save
+      make_transaction(somme: montant)
     }.to change { @compte.solde }.by(montant)
 
     montant = -180
     expect {
-      make_transaction(montant).save
+      make_transaction(somme: montant)
     }.to change { @compte.solde }.by(montant)
   end
 
   it "enregistre les changements de solde" do
-    make_transaction(1200).save
+    make_transaction(somme: 1200)
 
     expect(Comptes::Compte.find(@compte.id).solde).to eq(@compte.solde)
   end
@@ -81,14 +93,14 @@ describe Comptes::Transaction do
     new_solde = previous_solde + montant
 
     expect {
-      make_transaction(montant)
+      create_transaction(somme: montant)
     }.not_to change { @compte.solde }.from(previous_solde).to(new_solde)
   end
 
   it "recrédite le compte après une suppression" do
     montant = -1200
 
-    transaction = make_transaction montant
+    transaction, success = make_transaction somme: montant
     expect(transaction).not_to be_nil
 
     expect {
