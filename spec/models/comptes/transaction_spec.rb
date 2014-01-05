@@ -8,7 +8,7 @@ describe Comptes::Transaction do
     @compte = Comptes::Compte.new(nom: 'Super compte', solde: 100)
     expect(@compte.save).to be_true
 
-    @transaction_attributes = { titre: 'Cadeau', somme: 1500, jour: Date.new(2014, 1, 1), compte: @compte }
+    @transaction_attributes = { titre: 'Cadeau', somme: 1500, jour: Date.new(2014, 1, 1), compte: @compte, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT }
   end
 
   def create_transaction(values = { notes: "C'est pas important" })
@@ -66,6 +66,20 @@ describe Comptes::Transaction do
 
     it "n'est pas valide sans compte" do
       @transaction_attributes.delete :compte
+      transaction = Comptes::Transaction.new @transaction_attributes
+
+      expect(transaction).not_to be_valid
+    end
+
+    it "n'est pas valide sans type", todo: true do
+      @transaction_attributes.delete :type_paiement
+      transaction = Comptes::Transaction.new @transaction_attributes
+
+      expect(transaction).not_to be_valid
+    end
+
+    it "n'est pas valide avec un type erronné", todo: true do
+      @transaction_attributes[:type_paiement] = -1
       transaction = Comptes::Transaction.new @transaction_attributes
 
       expect(transaction).not_to be_valid

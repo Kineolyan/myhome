@@ -1,15 +1,25 @@
+require "enum_class"
+
 class Comptes::Transaction < ActiveRecord::Base
+  TypePaiement = EnumClass.new comptant: 0
+
   belongs_to :compte, validate: true
 
   validates :titre, presence: true
   validates :somme, presence: true, numericality: { only_integer: true }
   validates :jour, presence: true
   validates :compte, presence: true
+  validates :type_paiement, presence: true
+  validate :type_paiement_is_valid?
 
   after_save :make_transaction
   before_destroy :undo_transaction
 
   private
+  def type_paiement_is_valid?
+    errors.add(:type_paiement, "n'est pas un type valide") unless TypePaiement.is_valid? type_paiement
+  end
+
   def make_transaction
     compte.solde += somme
     unless compte.save
