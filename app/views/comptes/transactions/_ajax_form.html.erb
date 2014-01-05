@@ -4,12 +4,15 @@
   <p>
     <%= form.label :titre %> <%= form.text_field :titre %>
   </p>
+
   <p>
     <%= form.label :somme %> <%= form.text_field :somme %>
   </p>
+
   <p>
     <%= select_date Date.today, prefix: :operation_date %>
   </p>
+
   <p>
     <%
     collection_options = {}
@@ -17,5 +20,14 @@
     %>
     <%= form.collection_select(:compte_id, Comptes::Compte.all, :id, :nom, collection_options) %>
   </p>
+
+  <p>
+    Type de transactions<br/>
+    <% Comptes::Transaction::TypePaiement.each do |type| %>
+      <%= form.radio_button :type_paiement, type.value %>
+      <%= form.label "type_paiement_#{type.value}".to_sym, type.name, class: "radio-label" %><br/>
+    <% end %>
+  </p>
+
   <%= form.submit "Ajouter l'opération", class: "btn btn-primary" %>
 <% end %>

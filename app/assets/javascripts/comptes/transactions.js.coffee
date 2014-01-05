@@ -10,9 +10,10 @@ $(document).ready ->
 
     errors_list = $("#transaction-errors")
     reset_transaction_form = (form) ->
-      transaction_form[0].reset()
+      # Clean somme and title
       errors_list.empty()
-      transaction_form.find("input[name*='titre']").focus()
+      transaction_form.find("input[name*='titre']").val('').focus()
+      transaction_form.find("input[name*='somme']").val('')
       return
 
     transaction_table = $("#transactions-table")
@@ -20,7 +21,7 @@ $(document).ready ->
       # refer to _transactions.html.erb for row content
       row = $('<tr>')
       row.attr("transaction-id='#{data.id}'")
-      row.html("<td>#{data.date}</td><td>#{data.titre}</td><td>#{data.somme} €</td><td>#{data.compte}</td><td></td>")
+      row.html("<td>#{data.date}</td><td>#{data.titre}</td><td>#{data.somme} €</td><td>#{data.compte}</td><td>#{data.paiement}</td><td></td>")
       transaction_table.append(row)
       return
 

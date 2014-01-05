@@ -31,7 +31,8 @@ module Comptes
               titre: @transaction.titre,
               somme: @transaction.somme.to_f / 100,
               compte: @transaction.compte.nom,
-              date: @transaction.jour_formatte
+              date: @transaction.jour_formatte,
+              paiement: @transaction.paiement
             }}.to_json
           end
         end
@@ -69,7 +70,7 @@ module Comptes
 
     private
     def transaction_params
-      params.require(:comptes_transaction).permit(:titre, :somme, :compte_id)
+      params.require(:comptes_transaction).permit(:titre, :somme, :compte_id, :type_paiement)
     end
 
     # Formate les parametres de la transaction

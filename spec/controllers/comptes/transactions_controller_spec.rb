@@ -11,7 +11,7 @@ describe Comptes::TransactionsController do
     end
 
     before(:each) do
-      @transaction = { titre: "un titre", somme: 12.45, compte_id: @compte.id }
+      @transaction = { titre: "un titre", somme: 12.45, compte_id: @compte.id, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT }
       @operation_date = { year: 2013, month: 11, day: 21}
     end
 
@@ -40,6 +40,7 @@ describe Comptes::TransactionsController do
       expect(post_created[:titre]).to eq(@transaction[:titre])
       expect(post_created[:somme]).to eq(@transaction[:somme])
       expect(post_created[:compte]).to eq(@compte.nom)
+      expect(post_created[:paiement]).to eq(Comptes::Transaction::TypePaiement.value_of(@transaction[:type_paiement]).name)
       expect(post_created[:date]).to eq("#{@operation_date[:day]}/#{@operation_date[:month]}/#{@operation_date[:year]}")
     end
 
@@ -59,6 +60,7 @@ describe Comptes::TransactionsController do
       expect(transaction.titre).to eq(@transaction[:titre])
       expect(transaction.somme).to eq(@transaction[:somme] * 100)
       expect(transaction.compte.id).to eq(@compte.id)
+      expect(transaction.type_paiement).to eq(@transaction[:type_paiement])
       expect(Date.new(@operation_date[:year], @operation_date[:month], @operation_date[:day]) === transaction.jour).to be_true
     end
 
@@ -98,7 +100,6 @@ describe Comptes::TransactionsController do
       get_json_response
 
       expect(@json_response).to have_key :errors
-      p @json_response[:errors]
       expect(@json_response[:errors]).to have_at_least(1).items
     end
 
