@@ -10,9 +10,10 @@ $(document).ready ->
 
     errors_list = $("#transaction-errors")
     reset_transaction_form = (form) ->
-      transaction_form[0].reset()
+      # Clean somme and title
       errors_list.empty()
-      transaction_form.find("input[name*='titre']").focus()
+      transaction_form.find("input[name*='titre']").val('').focus()
+      transaction_form.find("input[name*='somme']").val('')
       return
 
     transaction_table = $("#transactions-table")
