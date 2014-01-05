@@ -43,4 +43,8 @@ class Comptes::Transaction < ActiveRecord::Base
   def somme_formattee
     ApplicationHelper::format_amount somme
   end
+
+  def paiement
+    TypePaiement.value_of(type_paiement).name
+  end
 end
