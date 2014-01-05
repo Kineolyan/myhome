@@ -1,11 +1,16 @@
 module Comptes
 
   class TransactionsController < ApplicationController
+
     def index
+      @transactions = Transaction.order(jour: :desc, updated_at: :desc)
+      if params.key? :compte_id
+        @transactions.where!(compte_id: params[:compte_id])
+      end
     end
 
     def ajouter
-      # nothing to do
+      @compte_selectionne = Comptes::Compte.find_by_id params[:compte_id]
     end
 
     # def new
@@ -47,8 +52,19 @@ module Comptes
     def update
     end
 
-    def liste
-      @transactions = Transaction.all
+    def destroy
+      @transaction = Comptes::Transaction.find_by_id(params[:id])
+      if @transaction
+        if @transaction.destroy
+          flash[:notice] = "Transaction supprimée avec succés"
+        else
+          flash[:error] = "Impossible de supprimer la transaction"
+        end
+      else
+        flash[:error] = "Transaction invalide. Aucune suppression."
+      end
+
+      redirect_to comptes_transactions_path
     end
 
     private
@@ -59,7 +75,8 @@ module Comptes
     # Formate les parametres de la transaction
     # * convertit la somme en centimes
     def format_params parameters
-      parameters[:somme] = (parameters[:somme].to_f * 100).to_i
+      somme = parameters[:somme]
+      parameters[:somme] = (somme.to_f * 100).to_i if ApplicationHelper::is_a_number? somme
 
       parameters
     end

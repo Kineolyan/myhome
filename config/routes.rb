@@ -54,11 +54,16 @@ Myhome::Application.routes.draw do
   #     resources :products
   #   end
   namespace :comptes do
-    get "/" => "transactions#liste"
-    get "/transactions/liste" => "transactions#liste"
-    get "/transactions/ajouter" => "transactions#ajouter"
+    get "/" => "transactions#index"
 
-    resources :comptes
-    resources :transactions
-   end
+    resources :transactions do
+      get "ajouter", on: :collection
+    end
+
+    resources :comptes do
+      resources :transactions, only: [ :index ] do
+        get "ajouter", on: :collection
+      end
+    end
+  end
 end

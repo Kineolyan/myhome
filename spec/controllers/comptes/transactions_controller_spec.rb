@@ -8,6 +8,9 @@ describe Comptes::TransactionsController do
       DatabaseCleaner.clean
 
       @compte = Comptes::Compte.create(nom: 'Super compte', solde: 100)
+    end
+
+    before(:each) do
       @transaction = { titre: "un titre", somme: 12.45, compte_id: @compte.id }
       @operation_date = { year: 2013, month: 11, day: 21}
     end
@@ -16,17 +19,21 @@ describe Comptes::TransactionsController do
       post :create, format: format, comptes_transaction: @transaction, operation_date: @operation_date
     end
 
+    def get_json_response
+      @json_response = JSON.parse(response.body, symbolize_names: true)
+    end
+
     it "returns a JSON with the transaction description" do
       post_transaction
 
-      json_response = JSON.parse(response.body, symbolize_names: true)
+      get_json_response
       # display errors if any to help
-      if json_response.has_key? :errors
-        json_response[:errors].each { |field, message| puts "#{field} -> #{message}" }
+      if @json_response.has_key? :errors
+        @json_response[:errors].each { |field, message| puts "#{field} -> #{message}" }
       end
-      expect(json_response).to have_key(:transaction)
+      expect(@json_response).to have_key(:transaction)
 
-      post_created = json_response[:transaction]
+      post_created = @json_response[:transaction]
       expect(post_created).not_to be_nil
       expect(post_created).to have_key(:id)
 
@@ -45,7 +52,7 @@ describe Comptes::TransactionsController do
     it "creates a new transaction with all information" do
       post_transaction
 
-      post_created = JSON.parse(response.body, symbolize_names: true)[:transaction]
+      post_created = get_json_response()[:transaction]
       expect(post_created).not_to be_nil
       transaction = Comptes::Transaction.find post_created[:id]
 
@@ -59,6 +66,40 @@ describe Comptes::TransactionsController do
       expect {
         post_transaction
       }.to change{ Comptes::Compte.find(@compte.id).solde }.by(@transaction[:somme] * 100)
+    end
+
+    it "refuse une transaction sans titre", todo: true do
+      # enlève le nom de la transaction
+      @transaction[:titre] = ""
+
+      post_transaction
+      get_json_response
+
+      expect(@json_response).to have_key :errors
+      expect(@json_response[:errors]).to have_at_least(1).items
+    end
+
+    it "refuse une transaction sans somme", todo: true do
+      # enlève la somme de la transaction
+      @transaction[:somme] = nil
+
+      post_transaction
+      get_json_response
+
+      expect(@json_response).to have_key :errors
+      expect(@json_response[:errors]).to have_at_least(1).items
+    end
+
+    it "refuse une transaction avec une somme non décimale", todo: true do
+      # enlève la somme de la transaction
+      @transaction[:somme] = "abcde"
+
+      post_transaction
+      get_json_response
+
+      expect(@json_response).to have_key :errors
+      p @json_response[:errors]
+      expect(@json_response[:errors]).to have_at_least(1).items
     end
 
   end

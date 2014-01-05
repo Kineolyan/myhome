@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Comptes::Transaction do
 
-  before(:all) do
+  before(:each) do
     DatabaseCleaner.clean
 
     @compte = Comptes::Compte.new(nom: 'Super compte', solde: 100)
@@ -17,6 +17,8 @@ describe Comptes::Transaction do
 
   def make_transaction(montant)
     transaction = Comptes::Transaction.new(titre: 'Cadeau', somme: montant, jour: Date.new(2014, 1, 1), compte: @compte)
+
+    transaction
   end
 
   it 'creates with correct parameters' do
@@ -81,6 +83,17 @@ describe Comptes::Transaction do
     expect {
       make_transaction(montant)
     }.not_to change { @compte.solde }.from(previous_solde).to(new_solde)
+  end
+
+  it "recrédite le compte après une suppression" do
+    montant = -1200
+
+    transaction = make_transaction montant
+    expect(transaction).not_to be_nil
+
+    expect {
+      expect(transaction.destroy).to be_true
+    }.to change{ Comptes::Compte.find(@compte.id).solde }.by(-montant)
   end
 
 end

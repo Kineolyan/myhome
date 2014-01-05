@@ -1,12 +1,12 @@
 <h1>Ajouter de nouvelles transactions</h1>
 
-<% compte = Comptes::Transaction.new %>
-<%= render partial: 'ajax_form', locals: { compte: compte } %>
+<%=
+  render partial: 'ajax_form', locals: {
+    transaction: Comptes::Transaction.new,
+    compte_selectionne: @compte_selectionne }
+%>
 
 <h2>Opérations enregistrées</h2>
-<ul id="transactions-list">
+<%= render partial: 'transactions', object: [], locals: { allow_empty: true } %>
+<ul >
 </ul>
-
-<p>
-<%= link_to "<< Liste de transactions", comptes_transactions_liste_path %>
-</p>

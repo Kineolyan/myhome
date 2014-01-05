@@ -12,14 +12,16 @@ $(document).ready ->
     reset_transaction_form = (form) ->
       transaction_form[0].reset()
       errors_list.empty()
+      transaction_form.find("input[name*='titre']").focus()
       return
 
-    transaction_list = $("#transactions-list")
+    transaction_table = $("#transactions-table")
     add_last_transaction = (data) ->
-      item = $('<li>')
-      item.attr("transaction-id='#{data.id}'")
-      item.text("#{data.date} : #{data.titre} (#{data.somme} €)")
-      transaction_list.append(item)
+      # refer to _transactions.html.erb for row content
+      row = $('<tr>')
+      row.attr("transaction-id='#{data.id}'")
+      row.html("<td>#{data.date}</td><td>#{data.titre}</td><td>#{data.somme} €</td><td>#{data.compte}</td><td></td>")
+      transaction_table.append(row)
       return
 
     display_errors = (errors) ->
@@ -40,4 +42,5 @@ $(document).ready ->
     ).bind "ajax:error", (e, xhr, status, error) ->
       alert "ERROR: #{error}"
 
+    return
   )()

@@ -1,0 +1,15 @@
+<div class="nav-col">
+  <%= link_to "MyHome", root_path %>
+  <ul class="nav">
+    <li><%= link_to "Espace comptes", comptes_path %>
+      <ul>
+        <li><%= link_to "Comptes", comptes_comptes_path %></li>
+        <li><%= link_to "Transactions", comptes_transactions_path %></li>
+      </ul>
+    </li>
+  </ul>
+
+  <hr/>
+
+  <%= render 'section_menu' %>
+</div>
