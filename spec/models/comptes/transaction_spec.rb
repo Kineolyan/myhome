@@ -71,14 +71,14 @@ describe Comptes::Transaction do
       expect(transaction).not_to be_valid
     end
 
-    it "n'est pas valide sans type", todo: true do
+    it "n'est pas valide sans type" do
       @transaction_attributes.delete :type_paiement
       transaction = Comptes::Transaction.new @transaction_attributes
 
       expect(transaction).not_to be_valid
     end
 
-    it "n'est pas valide avec un type erronné", todo: true do
+    it "n'est pas valide avec un type erronné" do
       @transaction_attributes[:type_paiement] = -1
       transaction = Comptes::Transaction.new @transaction_attributes
 
