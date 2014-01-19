@@ -3,7 +3,7 @@ require "enum_class"
 module Comptes
 
   class Transaction < ActiveRecord::Base
-    TypePaiement = EnumClass.new comptant: 0
+    TypePaiement = EnumClass.create_values comptant: 0
 
     belongs_to :compte, validate: true
 
@@ -11,17 +11,11 @@ module Comptes
     validates :somme, presence: true, numericality: { only_integer: true }
     validates :jour, presence: true
     validates :compte, presence: true
-    validates :type_paiement, presence: true
-    validate :type_paiement_is_valid?
 
     after_save :make_transaction
     before_destroy :undo_transaction
 
     private
-    def type_paiement_is_valid?
-      errors.add(:type_paiement, "n'est pas un type valide") unless TypePaiement.is_valid? type_paiement
-    end
-
     def make_transaction
       unless compte.save
         logger.error "Failed to update account #{@compte} solde."
