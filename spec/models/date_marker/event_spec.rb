@@ -12,6 +12,11 @@ describe DateMarker::Event do
       expect(event.save).to be_true
     end
 
+    it "creates a new event with 'stringged' date" do
+      event = DateMarker::Event.new({ title: "Test", day: '2014-01-01' })
+      expect(event.save).to be_true
+    end
+
     it "cannot create an event without title" do
       params = { day: Date.today }
       event = DateMarker::Event.new params

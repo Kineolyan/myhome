@@ -15,7 +15,7 @@ module DateMarker
 
     def create
       @event = Event.new event_params
-      @event.day = ApplicationHelper.make_date params[:event_date]
+      # @event.day = Date::parse
 
       if @event.save
         redirect_to @event
@@ -26,7 +26,7 @@ module DateMarker
 
     private
     def event_params
-      params.require(:date_marker_event).permit(:title)
+      params.require(:date_marker_event).permit(:title, :day)
     end
   end
 
