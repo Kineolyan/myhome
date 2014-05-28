@@ -1,0 +1,12 @@
+<h1>Ajouter de nouvelles transactions</h1>
+
+<%=
+  render partial: 'ajax_form', locals: {
+    transaction: Comptes::Transaction.new,
+    compte_selectionne: @compte_selectionne }
+%>
+
+<h2>Opérations enregistrées</h2>
+<%= render partial: 'transactions', object: [], locals: { allow_empty: true } %>
+<ul >
+</ul>

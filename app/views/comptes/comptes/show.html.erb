@@ -1,0 +1,15 @@
+<% if @compte %>
+
+<h1>Compte : <%= @compte.nom %></h1>
+
+<p>Solde : <%= @compte.solde / 100.0 %> €</p>
+
+<h2>Les dernières transactions</h2>
+<% transactions = Comptes::Transaction.where(compte: @compte).order(jour: :desc).limit(20) %>
+<%= render partial: 'comptes/transactions/transactions', object: transactions %>
+
+<%= link_to "Ajouter des transactions", ajouter_comptes_compte_transactions_path(@compte) %>
+
+<% else %>
+<p>Ce compte n'existe pas</p>
+<% end %>
