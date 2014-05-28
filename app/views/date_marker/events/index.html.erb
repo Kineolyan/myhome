@@ -2,11 +2,10 @@
 
 <% unless @events.empty? %>
 
+<div id='event-list'>
   <% @events.each_with_index do |event, index| %>
-  <div class='row'>
-    <%= '<hr/>' if index > 0 %>
-
-    <h2 class='span10'><%= event.title %></h2>
+  <div class='row event'>
+    <h2><%= link_to event.title, event %></h2>
 
     <p class='span5'>
       <strong class='label label-info'><%= pluralize(event.number_of_days , "jour") %></strong> depuis l'évenement
@@ -17,6 +16,7 @@
     </p>
   </div>
   <% end %>
+</div>
 
 <% else %>
 
