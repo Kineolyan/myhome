@@ -1,0 +1,27 @@
+<% if @event %>
+
+<h1><%= @event.title %></h1>
+
+<div class='row'>
+  <p class='span10'>
+      Nombre de mois depuis l'événement : <strong class='label label-info'><%= pluralize(@event.number_of_days , "jour") %></strong>
+  </p>
+</div>
+
+<div class='row'>
+  <p class='span10'>
+      Nombre de mois depuis l'événement : <strong class='label label-info'><%= pluralize(@event.number_of_months , "mois") %></strong>
+  </p>
+</div>
+
+<% else %>
+
+<p>
+  Aucun événement existant pour l'id <%= params[:id] %>
+</p>
+
+<% end %>
+
+<p>
+<%= link_to "Retour à la liste", date_marker_events_path %>
+</p>

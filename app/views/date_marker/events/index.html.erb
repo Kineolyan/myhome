@@ -1,0 +1,29 @@
+<h1>Liste de événements</h1>
+
+<% unless @events.empty? %>
+
+  <% @events.each_with_index do |event, index| %>
+  <div class='row'>
+    <%= '<hr/>' if index > 0 %>
+
+    <h2 class='span10'><%= event.title %></h2>
+
+    <p class='span5'>
+      <strong class='label label-info'><%= pluralize(event.number_of_days , "jour") %></strong> depuis l'évenement
+    </p>
+
+    <p class='span5'>
+      <strong class='label label-info'><%= pluralize(event.number_of_months , "mois") %></strong> depuis l'évenement
+    </p>
+  </div>
+  <% end %>
+
+<% else %>
+
+  <p>Aucun événement pour le moment</p>
+
+<% end %>
+
+<p>
+  <%= link_to "Ajouter un nouvel événement", new_date_marker_event_path %>
+</p>

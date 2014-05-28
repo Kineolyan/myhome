@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140105135000) do
+ActiveRecord::Schema.define(version: 20140527134710) do
 
   create_table "comptes_comptes", force: true do |t|
     t.string   "nom"
@@ -32,5 +32,12 @@ ActiveRecord::Schema.define(version: 20140105135000) do
   end
 
   add_index "comptes_transactions", ["compte_id"], name: "index_comptes_transactions_on_compte_id"
+
+  create_table "date_marker_events", force: true do |t|
+    t.string   "title"
+    t.date     "day"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
 end
