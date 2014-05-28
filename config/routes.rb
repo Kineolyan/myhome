@@ -66,4 +66,8 @@ Myhome::Application.routes.draw do
       end
     end
   end
+
+  namespace :date_marker do
+    resources :events
+  end
 end
