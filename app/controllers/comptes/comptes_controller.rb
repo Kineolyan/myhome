@@ -3,6 +3,11 @@ module Comptes
   class ComptesController < ApplicationController
     def index
       @comptes = Compte.all
+
+      respond_to do |format|
+        format.html { render }
+        format.json { render json: @comptes }
+      end
     end
 
     def new
