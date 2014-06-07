@@ -26,10 +26,10 @@ gem 'jbuilder', '~> 1.2'
 
 # Use bootstrap gem
 # Use LESS for stylesheets and particularly for bootstrap
-gem 'less-rails'
-gem 'twitter-bootstrap-rails'
+# gem 'less-rails'
+# gem 'twitter-bootstrap-rails'
 # See https://github.com/sstephenson/execjs#readme for more supported runtimes
-gem 'therubyracer', platforms: :ruby
+# gem 'therubyracer', platforms: :ruby
 
 group :doc do
   # bundle exec rake doc:rails generates the API under doc/api.
