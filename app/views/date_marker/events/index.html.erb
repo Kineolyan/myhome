@@ -7,11 +7,11 @@
   <div class='row event'>
     <h2><%= link_to event.title, event %></h2>
 
-    <p class='span5'>
+    <p class='col-md-6'>
       <strong class='label label-info'><%= pluralize(event.number_of_days , "jour") %></strong> depuis l'évenement
     </p>
 
-    <p class='span5'>
+    <p class='col-md-6'>
       <strong class='label label-info'><%= pluralize(event.number_of_months , "mois") %></strong> depuis l'évenement
     </p>
   </div>
