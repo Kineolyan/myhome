@@ -1,6 +1,6 @@
 <div class="row">
   <h2>Nouvelle transaction</h2>
-  
+
   <form ng-submit="ajouter()" class="form-horizontal">
     <ul id="transaction-errors" ng-show="hasErrors()">
       La transaction ne peut être ajoutée pour les raisons suivantes :
@@ -17,7 +17,7 @@
     <div class="form-group">
       <label for="somme" class="col-md-2 control-label">Montant</label>
       <div class="col-md-10">
-        <input type="number" id="somme" required ng-model="transaction.somme" class="form-control"/>
+        <input type="number" step="0.01" id="somme" required ng-model="transaction.somme" class="form-control"/>
       </div>
     </div>
 
