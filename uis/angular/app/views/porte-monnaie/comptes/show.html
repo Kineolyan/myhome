@@ -1,0 +1,8 @@
+<h1>Compte : {{ compte.nom }}</h1>
+
+<p>Solde : {{ compte.solde | currency }}</p>
+
+<h2>Les dernières transactions</h2>
+<transactions />
+
+<a ng-href="#/transactions/ajouter">Ajouter des transactions</a>

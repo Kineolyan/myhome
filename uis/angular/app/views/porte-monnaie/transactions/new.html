@@ -1,0 +1,49 @@
+<div class="row">
+  <h2>Nouvelle transaction</h2>
+  
+  <form ng-submit="ajouter()" class="form-horizontal">
+    <ul id="transaction-errors" ng-show="hasErrors()">
+      La transaction ne peut être ajoutée pour les raisons suivantes :
+      <li ng-repeat="erreur in erreurs">{{ erreur }}</li>
+    </ul>
+
+    <div class="form-group">
+      <label for="titre" class="col-md-2 control-label">Titre</label>
+      <div class="col-md-10">
+        <input type="text" id="titre" required ng-model="transaction.titre" class="form-control"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="somme" class="col-md-2 control-label">Montant</label>
+      <div class="col-md-10">
+        <input type="number" id="somme" required ng-model="transaction.somme" class="form-control"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="date" class="col-md-2 control-label">Date</label>
+      <div class="col-md-10">
+        <input type="date" id="date" required ng-model="transaction.jour" class="form-control"/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="compte" class="col-md-2 control-label">Compte</label>
+      <div class="col-md-10">
+        <select id="compte" ng-model="transaction.compte_id" class="form-control">
+          <option ng-repeat="compte in comptes" ng-value="{{ compte.id }}">{{ compte.nom }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <button class="btn btn-primary">Ajouter l'opération</button>
+    </div>
+  </form>
+</div>
+
+<div class="row" ng-show="transactions.length > 0">
+  <h2>Les dernières transactions</h2>
+  <transactions showProgress/>
+</div>

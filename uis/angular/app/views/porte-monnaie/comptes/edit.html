@@ -1,0 +1,22 @@
+<h1>Création d'un compte</h1>
+
+<form name="compteForm" class="form-horizontal" ng-submit="creer()">
+  <div id="error_explanation" ng-show="hasErrors()">
+    <h2>Les erreurs suivantes empêchent le compte d'être créé:</h2>
+    <ul>
+      <li ng-repeat="erreur in compte.erreurs">{{ erreur }}</li>
+    </ul>
+  </div>
+
+  <div class="form-group">
+    <label for="compte_nom" class="control-label">Nom</label>
+    <input type="text" id="compte_nom" name="compte[nom]" required class="form-control" ng-mddel="compte.nom" placeholder="Nom du compte"/>
+  </div>
+  
+  <div  class="form-group">
+    <label for="compte_solde" class="control-label">Solde</label>
+    <input type="number" id="compte_solde" name="compte[solde]" required class="form-control" ng-model="compte.solde" placeholder="Solde actuel"/>
+  </div>
+  
+  <button type="submit" class="btn btn-primary">Créer le compte</button>
+</form>
