@@ -12,14 +12,10 @@ services.factory('CompteLoader', [ 'Compte', '$q', '$route',
   return function() {
     var delay = $q.defer();
 
-    console.log('trying to get the account to ' + $route.current.params.compteId);
     Compte.get({id: $route.current.params.compteId }, function(compte) {
-      console.log('resolving');
       delay.resolve(compte);
-      console.log('... done');
     }, function() {
       delay.reject('Unable to fetch compte ' + $route.current.params.compte);
-      console.log('... rejected');
     });
 
     return delay.promise;
