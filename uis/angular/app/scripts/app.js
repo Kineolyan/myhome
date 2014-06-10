@@ -16,10 +16,10 @@ myhome.config(function ($routeProvider) {
     })
     .when('/porte-monnaie/comptes', {
       templateUrl: 'views/porte-monnaie/comptes/index.html',
-      controller: 'ComptesCtrl'//,
-      //~ resolve: {
-        //~ comptes: function(ComptesLoader) { return new ComptesLoader(); }
-      //~ }
+      controller: 'ComptesCtrl',
+      resolve: {
+        comptes: function(ComptesLoader) { return new ComptesLoader(); }
+      }
     })
     .when('/porte-monnaie/comptes/new', {
       templateUrl: 'views/porte-monnaie/comptes/edit.html',
@@ -27,10 +27,10 @@ myhome.config(function ($routeProvider) {
     })
     .when('/porte-monnaie/comptes/:compteId', {
       templateUrl: 'views/porte-monnaie/comptes/show.html',
-      controller: 'ComptesShowCtrl'//,
-      //~ resolve: {
-        //~ compte: function(CompteLoader) { return new CompteLoader(); }
-      //~ }
+      controller: 'ComptesShowCtrl',
+      resolve: {
+        compte: function(CompteLoader) { return new CompteLoader(); }
+      }
     })
     .when('/porte-monnaie/transactions', {
       templateUrl: 'views/porte-monnaie/transactions/index.html',
@@ -48,7 +48,7 @@ myhome.config(function ($routeProvider) {
 myhome.controller('RootCtrl', [ '$scope', function($scope)
 {
   $scope.actions = [];
-  
+
   $scope.registerActions = function(actions) {
     $scope.actions = actions;
   };

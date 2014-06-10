@@ -2,39 +2,32 @@
 
 var myhome = angular.module('comptesApp');
 
-myhome.controller('ComptesCtrl', [ '$scope',
-    function ($scope)
+myhome.controller('ComptesCtrl', [ '$scope', 'comptes',
+    function ($scope, comptes)
 {
-  $scope.comptes = [
-    { id: 1, nom: 'Olivier', solde: 1234, transactions: [] },
-    { id: 2, nom: 'Colombe', solde: 5678, transactions: [] }
-  ];
-  
+  $scope.comptes = comptes;
+
   //~ registerActions([
     //~ { name: 'Créer un compte', path: '#/comptes/new' },
     //~ { name: 'Liste des comptes', path: '#/comptes' }
   //~ ]);
 }]);
 
-myhome.controller('ComptesShowCtrl',
-    function ($scope)
+myhome.controller('ComptesShowCtrl', [ '$scope', 'compte',
+    function ($scope, compte)
 {
-  $scope.compte = {
-    id: 1,
-    nom: 'Olivier',
-    solde: 1234
-  };
+  $scope.compte = compte;
   $scope.transactions = [
     { titre: 'test',  }
   ];
-});
+}]);
 
 myhome.controller('ComptesNewCtrl', [ 'Compte', '$scope', '$location',
     function(Compte, $scope, $location)
 {
   $scope.compte = new Compte();
 
-  $scope.hasErrors = function() { 
+  $scope.hasErrors = function() {
     return false;
   };
 

@@ -26,6 +26,11 @@ module Comptes
 
     def show
       @compte = Compte.find_by_id(params[:id])
+
+      respond_to do |format|
+        format.html { render }
+        format.json { render json: @compte }
+      end
     end
 
     def update
