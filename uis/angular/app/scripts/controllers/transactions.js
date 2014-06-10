@@ -1,11 +1,8 @@
 'use strict';
 
 angular.module('comptesApp')
-  .controller('TransactionsCtrl', function ($scope) {
-    $scope.transactions = [
-      {'id':1, 'titre':'achat', 'somme':1000, 'jour':'2014-05-03', 'notes':null, 'compte_id':1, 'created_at':'2014-05-03T17:50:01.570Z','updated_at':'2014-05-03T17:50:01.570Z','type_paiement':0},
-      {'id':2, 'titre':'retrait', 'somme':2050, 'jour':'2014-05-03', 'notes':null, 'compte_id':1, 'created_at':'2014-05-03T17:50:01.570Z','updated_at':'2014-05-03T17:50:01.570Z','type_paiement':0}
-    ];
+  .controller('TransactionsCtrl', function ($scope, transactions) {
+    $scope.transactions = transactions;
   })
   .controller('TransactionsNewCtrl', function ($scope) {
     $scope.transaction = {};

@@ -34,7 +34,10 @@ myhome.config(function ($routeProvider) {
     })
     .when('/porte-monnaie/transactions', {
       templateUrl: 'views/porte-monnaie/transactions/index.html',
-      controller: 'TransactionsCtrl'
+      controller: 'TransactionsCtrl',
+      resolve: {
+        transactions: function(TransactionsLoader) { return new TransactionsLoader(); }
+      }
     })
     .when('/porte-monnaie/transactions/new', {
       templateUrl: 'views/porte-monnaie/transactions/new.html',

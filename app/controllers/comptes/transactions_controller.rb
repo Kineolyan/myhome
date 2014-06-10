@@ -7,6 +7,11 @@ module Comptes
       if params.key? :compte_id
         @transactions.where!(compte_id: params[:compte_id])
       end
+
+      respond_to do |format|
+        format.html { render }
+        format.json { render json: @transactions }
+      end
     end
 
     def ajouter
