@@ -15,6 +15,9 @@ describe('Filter: currency', function () {
     expect(currency(1000)).toBe('10,00 €');
     expect(currency(249)).toBe('2,49 €');
     expect(currency(80)).toBe('0,80 €');
+
+    expect(currency(-80)).toBe('-0,80 €');
+    expect(currency(-1234)).toBe('-12,34 €');
   });
 
 });

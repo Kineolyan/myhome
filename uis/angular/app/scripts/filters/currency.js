@@ -5,6 +5,6 @@ angular.module('comptesApp')
     return function (value) {
       if (value === undefined) { return ''; }
 
-      return parseInt(value / 100) + ',' + (value % 100) + ' €' ;
+      return parseInt(value / 100) + ',' + (Math.abs(value) % 100) + ' €' ;
     };
   });
