@@ -6,7 +6,7 @@ describe Comptes::Transaction do
     DatabaseCleaner.clean
 
     @compte = Comptes::Compte.new(nom: 'Super compte', solde: 100)
-    expect(@compte.save).to be_true
+    expect(@compte.save).to be true
 
     @transaction_attributes = { titre: 'Cadeau', somme: 1500, jour: Date.new(2014, 1, 1), compte: @compte, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT }
   end
@@ -109,12 +109,15 @@ describe Comptes::Transaction do
 
     it "ne touche pas le solde du compte sans save" do
       montant = 100
-      previous_solde = @compte.solde
-      new_solde = previous_solde + montant
+      transaction = nil
 
       expect {
-        create_transaction(somme: montant)
-      }.not_to change { @compte.solde }.from(previous_solde).to(new_solde)
+        transaction = create_transaction(somme: montant)
+      }.not_to change { @compte.solde }
+
+      expect {
+        transaction.save
+      }.to change { @compte.solde }.by montant
     end
 
   end
@@ -128,7 +131,7 @@ describe Comptes::Transaction do
       expect(transaction).not_to be_nil
 
       expect {
-        expect(transaction.destroy).to be_true
+        transaction.destroy
       }.to change{ Comptes::Compte.find(@compte.id).solde }.by(-montant)
     end
 
