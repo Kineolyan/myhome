@@ -5,7 +5,7 @@ describe Comptes::Transaction do
   before(:each) do
     DatabaseCleaner.clean
 
-    @compte = Comptes::Compte.new(nom: 'Super compte', solde: 100)
+    @compte = Comptes::Compte.new(nom: 'Super compte', solde_historique: 100)
     expect(@compte.save).to be true
 
     @transaction_attributes = { titre: 'Cadeau', somme: 1500, jour: Date.new(2014, 1, 1), compte: @compte, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT }

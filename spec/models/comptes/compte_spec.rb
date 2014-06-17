@@ -4,11 +4,11 @@ describe Comptes::Compte do
 
   before(:each) do
     DatabaseCleaner.clean
-    @compte = Comptes::Compte.create nom: "Compte de test", solde: 1370
+    @compte = Comptes::Compte.create nom: "Compte de test", solde_historique: 1370
   end
 
   def creer_compte
-    Comptes::Compte.new nom: "Compte de chouchou", solde: 100
+    Comptes::Compte.new nom: "Compte de chouchou", solde_historique: 100
   end
 
   it "peut être créé" do
@@ -17,7 +17,7 @@ describe Comptes::Compte do
   end
 
   it "ne peut pas être créé sans nom" do
-    compte = Comptes::Compte.new solde: 100
+    compte = Comptes::Compte.new solde_historique: 100
     expect(compte).not_to be_valid
   end
 
@@ -27,7 +27,7 @@ describe Comptes::Compte do
   end
 
   it "ne peut pas être créé avec un solde alphabétique" do
-    compte = Comptes::Compte.new nom: "Mon compte", solde: "abcde"
+    compte = Comptes::Compte.new nom: "Mon compte", solde_historique: "abcde"
     expect(compte).not_to be_valid
   end
 

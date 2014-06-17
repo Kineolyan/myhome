@@ -21,15 +21,12 @@ class Comptes::Transaction < ActiveRecord::Base
   end
 
   def make_transaction
-    compte.solde += somme
     unless compte.save
       logger.error "Failed to update account #{@compte} solde."
     end
   end
 
   def undo_transaction
-    logger
-    compte.solde -= somme
     unless compte.save
       logger.error "Failed to undo transaction #{self}."
     end
