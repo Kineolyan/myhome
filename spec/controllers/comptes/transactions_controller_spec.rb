@@ -7,16 +7,16 @@ describe Comptes::TransactionsController do
     before(:all) do
       DatabaseCleaner.clean
 
-      @compte = Comptes::Compte.create(nom: 'Super compte', solde: 100)
+      @compte = Comptes::Compte.create(nom: 'Super compte', solde_historique: 100)
     end
 
     before(:each) do
-      @transaction = { titre: "un titre", somme: 12.45, compte_id: @compte.id, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT }
-      @operation_date = { year: 2013, month: 11, day: 21}
+      @operation_date = Date.new 2013, 11, 21
+      @transaction = { titre: "un titre", somme: 12.45, compte_id: @compte.id, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT, jour: @operation_date }
     end
 
     def post_transaction format = "json"
-      post :create, format: format, comptes_transaction: @transaction, operation_date: @operation_date
+      post "/comptes/transactions.json", comptes_transaction: @transaction
     end
 
     def get_json_response
@@ -41,7 +41,7 @@ describe Comptes::TransactionsController do
       expect(post_created[:somme]).to eq(@transaction[:somme])
       expect(post_created[:compte]).to eq(@compte.nom)
       expect(post_created[:paiement]).to eq(Comptes::Transaction::TypePaiement.value_of(@transaction[:type_paiement]).name)
-      expect(post_created[:date]).to eq("#{@operation_date[:day]}/#{@operation_date[:month]}/#{@operation_date[:year]}")
+      expect(post_created[:date]).to eq "#{@operation_date.day}/#{@operation_date.month}/#{@operation_date.year}"
     end
 
     it "creates a new transaction" do
@@ -61,7 +61,7 @@ describe Comptes::TransactionsController do
       expect(transaction.somme).to eq(@transaction[:somme] * 100)
       expect(transaction.compte.id).to eq(@compte.id)
       expect(transaction.type_paiement).to eq(@transaction[:type_paiement])
-      expect(Date.new(@operation_date[:year], @operation_date[:month], @operation_date[:day]) === transaction.jour).to be_true
+      expect(@operation_date === transaction.jour).to be true
     end
 
     it "fait varier le solde du compte associé" do

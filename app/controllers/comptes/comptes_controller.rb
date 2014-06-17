@@ -27,7 +27,7 @@ module Comptes
     end
 
     def comptes_params
-      params.require(:comptes_compte).permit(:nom, :solde)
+      params.require(:comptes_compte).permit(:nom, :solde_historique)
     end
   end
 
