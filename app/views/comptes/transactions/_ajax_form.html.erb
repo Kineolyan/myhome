@@ -1,33 +1,48 @@
-<%= form_for(transaction, url: comptes_transactions_path(format: :json), remote: true) do |form| %>
+<%= form_for(transaction, url: comptes_transactions_path(format: :json), remote: true, html: {class: "form-horizontal"}) do |form| %>
   <ul id="transaction-errors"></ul>
 
-  <p>
-    <%= form.label :titre %> <%= form.text_field :titre %>
-  </p>
+  <div class="form-group">
+    <%= form.label :titre, class: "col-md-3 control-label" %>
+    <div class="col-md-9">
+      <%= form.text_field :titre, class: "form-control", placeholder: "Titre de la transaction", required: "" %>
+    </div>
+  </div>
 
-  <p>
-    <%= form.label :somme %> <%= form.text_field :somme %>
-  </p>
+  <div class="form-group">
+    <%= form.label :somme, class: "col-md-3 control-label" %>
+    <div class="col-md-9">
+      <%= form.number_field :somme, class: "form-control", step: 0.01, placeholder: "Montant de la transaction", required: "" %>
+    </div>
+  </div>
 
-  <p>
-    <%= select_date Date.today, prefix: :operation_date %>
-  </p>
-
-  <p>
+  <div class="form-group">
+    <%= form.label :compte_id, "Compte", class: "col-md-3 control-label" %>
     <%
     collection_options = {}
     collection_options[:selected] = compte_selectionne.id if compte_selectionne
     %>
-    <%= form.collection_select(:compte_id, Comptes::Compte.all, :id, :nom, collection_options) %>
-  </p>
+    <div class="col-md-9">
+      <%= form.collection_select(:compte_id, Comptes::Compte.all, :id, :nom, collection_options, class: "form-control", required: "") %>
+    </div>
+  </div>
 
-  <p>
-    Type de transactions<br/>
+  <div class="form-group">
+    <%= form.label :jour, "Date", class: "col-md-3 control-label" %>
+    <div class="col-md-9">
+      <%= form.date_field :jour, value: Date.today,  placeholder: "jj/mm/aaaa", required: "" %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :type_paiement, "Type de transactions", class: "col-md-3 control-label" %>
     <% Comptes::Transaction::TypePaiement.each do |type| %>
-      <%= form.radio_button :type_paiement, type.value %>
-      <%= form.label "type_paiement_#{type.value}".to_sym, type.name, class: "radio-label" %><br/>
+      <div class="radio col-md-9">
+        <label>
+          <%= form.radio_button :type_paiement, type.value %> <%= type.name %>
+        </label>
+      </div>
     <% end %>
-  </p>
+  </div>
 
   <%= form.submit "Ajouter l'opération", class: "btn btn-primary" %>
 <% end %>

@@ -10,11 +10,13 @@
 
 <div class="container">
   <div class="row">
-    <div class="span2">
+    <div class="col-md-3">
       <%= render "layouts/menu" %>
     </div>
-    <div class="span10">
-      <%= yield %>
+    <div class="col-md-9">
+      <div class="row">
+        <%= yield %>
+      </div>
     </div>
   </div>
 </div>
