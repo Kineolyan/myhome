@@ -10,7 +10,8 @@ module Comptes
     end
 
     def create
-      @compte = Compte.new comptes_params
+      parameters = format_params(comptes_params)
+      @compte = Compte.new parameters
 
       if @compte.save
         redirect_to @compte
@@ -26,8 +27,16 @@ module Comptes
     def update
     end
 
+    private
     def comptes_params
       params.require(:comptes_compte).permit(:nom, :solde_historique)
+    end
+
+    def format_params parameters
+      solde_historique = parameters[:solde_historique]
+      parameters[:solde_historique] = (solde_historique.to_f * 100).to_i if ApplicationHelper.is_a_number? solde_historique
+
+      parameters
     end
   end
 
