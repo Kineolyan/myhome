@@ -47,7 +47,7 @@ class EnumClass
     method_name = name.upcase
     _singleton_class.instance_exec(method_name) do |name|
       define_method(name) do
-        @values[key].value
+        @values[key]
       end
     end
   end
