@@ -1,6 +1,6 @@
 <% if @compte %>
 
-<h1>Compte : <%= @compte.nom %></h1>
+<h1>Compte : <%= @compte.nom %> <small><%= link_to raw('<i class="glyphicon glyphicon-pencil"></i>'), edit_comptes_compte_path(@compte) %></small></h1>
 
 <p>Solde : <%= @compte.solde / 100.0 %> €</p>
 

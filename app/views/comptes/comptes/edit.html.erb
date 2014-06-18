@@ -1,0 +1,15 @@
+<% if @compte %>
+
+<h1>Édition du compte <strong><%= @compte.nom %></strong></h1>
+
+<%= render "form" %>
+
+<% else %>
+
+<p>Le compte <%= params[:id] %> n'existe pas.</p>
+
+<% end %>
+
+<div clas="row">
+  <p class="col-md-12"><%= link_to "Retour à la liste", comptes_comptes_path %></p>
+</div>
