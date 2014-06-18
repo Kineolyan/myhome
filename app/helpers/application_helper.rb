@@ -6,7 +6,7 @@ module ApplicationHelper
 
   # Formats a value in cents into a decimal value with 2 decimals and a final €
   def self.format_amount value, with_currency = true
-    "%.2f €" % [ value.to_f ]
+    (with_currency ? "%.2f €" : "%.2f") % [ value.to_f ]
   end
 
   def self.is_a_number? value
