@@ -22,6 +22,7 @@ class EnumValue
 end
 
 class EnumClass
+  include Enumerable
 
   def initialize initial_values = {}
     @values = {}

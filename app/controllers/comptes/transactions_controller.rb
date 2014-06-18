@@ -32,13 +32,15 @@ module Comptes
               compte: @transaction.compte.nom,
               date: @transaction.jour_formatte,
               paiement: @transaction.paiement
-            }}.to_json
+            }}
           end
+          format.js {}
         end
       else
         respond_to do |format|
           format.html { render "new" }
           format.json { render json: { errors: @transaction.errors } }
+          format.js {}
         end
       end
     end
