@@ -46,12 +46,31 @@ module Comptes
     end
 
     def edit
+      @transaction = Transaction.find_by_id params[:id]
     end
 
     def show
+      @transaction = Transaction.find_by_id params[:id]
     end
 
     def update
+      @transaction = Transaction.find_by_id params[:id]
+      unless @transaction
+        respond_to do |format|
+          format.html { render :update }
+        end
+      end
+
+      parameters = format_params transaction_params
+      if @transaction.update parameters
+        respond_to do |format|
+          format.html { render :show }
+        end
+      else
+        respond_to do |format|
+          format.html { render :update }
+        end
+      end
     end
 
     def destroy
