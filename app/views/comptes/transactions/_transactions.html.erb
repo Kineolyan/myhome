@@ -14,16 +14,7 @@
     </tr>
   </thead>
   <tbody>
-  <% transactions.each do |transaction| %>
-    <tr>
-      <td><%= transaction.jour %></td>
-      <td><%= transaction.titre %></td>
-      <td><%= transaction.somme_formattee %></td>
-      <td><%= transaction.compte.nom %></td>
-      <td><%= transaction.paiement %></td>
-      <td><%= link_to raw('<i class="glyphicon glyphicon-trash"></i>'), transaction, method: :delete, data: { confirm: "Sûr de vouloir supprimer la transaction ?" }, class: "btn btn-danger" %></td>
-    </tr>
-  <% end %>
+  <%= render transactions %>
   </tbody>
 </table>
 
