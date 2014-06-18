@@ -20,7 +20,6 @@ module Comptes
       parameters = format_params(transaction_params)
 
       @transaction = Transaction.new parameters
-      @transaction.jour = ApplicationHelper::make_date params[:operation_date]
 
       if @transaction.save
         respond_to do |format|
@@ -70,7 +69,7 @@ module Comptes
 
     private
     def transaction_params
-      params.require(:comptes_transaction).permit(:titre, :somme, :compte_id, :type_paiement)
+      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type_paiement)
     end
 
     # Formate les parametres de la transaction

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Comptes::TransactionsController do
+RSpec.describe Comptes::TransactionsController, type: :controller do
 
   context "when POSTing a valid transaction" do
 
@@ -12,11 +12,11 @@ describe Comptes::TransactionsController do
 
     before(:each) do
       @operation_date = Date.new 2013, 11, 21
-      @transaction = { titre: "un titre", somme: 12.45, compte_id: @compte.id, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT, jour: @operation_date }
+      @transaction = { titre: "un titre", somme: 12.45, compte_id: @compte.id, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT.to_i, jour: @operation_date }
     end
 
     def post_transaction format = "json"
-      post "/comptes/transactions.json", comptes_transaction: @transaction
+      post :create, format: format, comptes_transaction: @transaction
     end
 
     def get_json_response
@@ -31,6 +31,8 @@ describe Comptes::TransactionsController do
       if @json_response.has_key? :errors
         @json_response[:errors].each { |field, message| puts "#{field} -> #{message}" }
       end
+      expect(@json_response).not_to have_key :errors
+
       expect(@json_response).to have_key(:transaction)
 
       post_created = @json_response[:transaction]
@@ -70,7 +72,7 @@ describe Comptes::TransactionsController do
       }.to change{ Comptes::Compte.find(@compte.id).solde }.by(@transaction[:somme] * 100)
     end
 
-    it "refuse une transaction sans titre", todo: true do
+    it "refuse une transaction sans titre" do
       # enlève le nom de la transaction
       @transaction[:titre] = ""
 
@@ -78,10 +80,10 @@ describe Comptes::TransactionsController do
       get_json_response
 
       expect(@json_response).to have_key :errors
-      expect(@json_response[:errors]).to have_at_least(1).items
+      expect(@json_response[:errors]).to have_key :titre
     end
 
-    it "refuse une transaction sans somme", todo: true do
+    it "refuse une transaction sans somme" do
       # enlève la somme de la transaction
       @transaction[:somme] = nil
 
@@ -89,10 +91,10 @@ describe Comptes::TransactionsController do
       get_json_response
 
       expect(@json_response).to have_key :errors
-      expect(@json_response[:errors]).to have_at_least(1).items
+      expect(@json_response[:errors]).to have_key :somme
     end
 
-    it "refuse une transaction avec une somme non décimale", todo: true do
+    it "refuse une transaction avec une somme non décimale" do
       # enlève la somme de la transaction
       @transaction[:somme] = "abcde"
 
@@ -100,7 +102,7 @@ describe Comptes::TransactionsController do
       get_json_response
 
       expect(@json_response).to have_key :errors
-      expect(@json_response[:errors]).to have_at_least(1).items
+      expect(@json_response[:errors]).to have_key :somme
     end
 
   end
