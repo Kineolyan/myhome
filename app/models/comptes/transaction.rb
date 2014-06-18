@@ -37,8 +37,8 @@ class Comptes::Transaction < ActiveRecord::Base
     jour.strftime("%d/%m/%Y")
   end
 
-  def somme_formattee
-    ApplicationHelper::format_amount somme
+  def somme_formattee with_currency = true
+    ApplicationHelper::format_amount somme.to_f / 100, with_currency
   end
 
   def paiement
