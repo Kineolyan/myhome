@@ -24,7 +24,34 @@ module Comptes
       @compte = Compte.find_by_id(params[:id])
     end
 
+    def edit
+      @compte = Compte.find_by_id(params[:id])
+    end
+
     def update
+      @compte = Compte.find_by_id params[:id]
+      unless @compte
+        respond_to do |format|
+          format.html { render :update }
+          format.json { render json: { errors: "Le compte #{params[:id]} n'existe pas." } }
+        end
+      end
+
+      parameters = format_params comptes_params
+      # Pour l'instant, on ne touche pas au solde
+      parameters.delete :solde_historique
+
+      if @compte.update parameters
+        respond_to do |format|
+          format.html { render :show }
+          format.json { render json: @compte }
+        end
+      else
+        respond_to do |format|
+          format.html { render :edit }
+          format.json { render json: { errors: @compte.errors } }
+        end
+      end
     end
 
     private
