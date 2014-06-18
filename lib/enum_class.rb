@@ -7,6 +7,14 @@ class EnumValue
     @value = value
   end
 
+  def to_i
+    @value.to_i
+  end
+
+  def to_f
+    @value.to_f
+  end
+
   def to_s
     "<#{@name}> (#{@value})"
   end
