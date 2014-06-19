@@ -2,8 +2,10 @@
 
 <%=
   render partial: 'ajax_form', locals: {
+    remote: true,
     transaction: Comptes::Transaction.new,
-    compte_selectionne: @compte_selectionne }
+    compte_selectionne: @compte_selectionne
+  }
 %>
 
 <h2>Opérations enregistrées</h2>

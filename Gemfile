@@ -42,7 +42,7 @@ group :development do
 end
 
 group :development, :test do
-  gem 'rspec-rails', '>= 2.14.0'
+  gem 'rspec-rails', '>= 3.0'
   gem 'cucumber-rails', '>= 1.4.0', require: false
   gem 'database_cleaner', '>= 1.2.0'
   gem 'webrat', '>= 0.7.3'

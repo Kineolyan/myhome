@@ -1,8 +1,10 @@
 <% if @compte %>
 
-<h1>Compte : <%= @compte.nom %></h1>
+<h1>Compte : <%= @compte.nom %> <small><%= link_to raw('<i class="glyphicon glyphicon-pencil"></i>'), edit_comptes_compte_path(@compte) %></small></h1>
 
-<p>Solde : <%= @compte.solde / 100.0 %> €</p>
+<p class="row lead col-md-12">
+  Solde : <span class="label label-info"><%= @compte.solde_formatte %></span>
+</p>
 
 <h2>Les dernières transactions</h2>
 <% transactions = Comptes::Transaction.where(compte: @compte).order(jour: :desc).limit(20) %>
@@ -11,5 +13,7 @@
 <%= link_to "Ajouter des transactions", ajouter_comptes_compte_transactions_path(@compte) %>
 
 <% else %>
-<p>Ce compte n'existe pas</p>
+<p class="row col-md-12">
+  Ce compte n'existe pas
+</p>
 <% end %>
