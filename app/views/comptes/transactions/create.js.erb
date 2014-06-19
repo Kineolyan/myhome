@@ -1,0 +1,24 @@
+var errors = $("#transaction-errors");
+errors.empty();
+
+<% unless @transaction.errors.any? %>
+
+  errors.removeClass('alert alert-danger');
+  $("<%= escape_javascript render @transaction %>").appendTo("#transactions-table tbody");
+
+  var transaction_form = $("#new_comptes_transaction");
+  transaction_form.find("input[name*='titre']").val('').focus()
+  transaction_form.find("input[name*='somme']").val('')
+
+<% else %>
+
+  $('<strong>').html("<%= pluralize @transaction.errors.count, 'erreur' %> empêchent l'opération")
+    .appendTo(errors);
+  var liste = $('<ul>');
+  <% @transaction.errors.full_messages.each do |msg| %>
+    liste.append("<li><%= msg %></li>");
+  <% end %>
+  liste.appendTo(errors);
+  errors.addClass('alert alert-danger');
+
+<% end %>

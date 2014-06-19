@@ -7,6 +7,14 @@ class EnumValue
     @value = value
   end
 
+  def to_i
+    @value.to_i
+  end
+
+  def to_f
+    @value.to_f
+  end
+
   def to_s
     "<#{@name}> (#{@value})"
   end
@@ -14,6 +22,7 @@ class EnumValue
 end
 
 class EnumClass
+  include Enumerable
 
   def initialize initial_values = {}
     @values = {}
@@ -39,7 +48,7 @@ class EnumClass
     method_name = name.upcase
     _singleton_class.instance_exec(method_name) do |name|
       define_method(name) do
-        @values[key].value
+        @values[key]
       end
     end
   end

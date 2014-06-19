@@ -1,2 +1,25 @@
-<h1>Comptes::Transactions#show</h1>
-<p>Find me in app/views/comptes/transactions/show.html.erb</p>
+<% if @transaction %>
+
+<h1><%= @transaction.titre %></h1>
+
+<p class='row col-md-12 lead'>
+  Montant : <span class="label label-info"><%= @transaction.somme_formattee %></span>
+</p>
+
+<p class='row col-md-12'>
+  Date : <%= @transaction.jour_formatte %><br/>
+  Type de paiement : <%= Comptes::Transaction::TypePaiement.value_of(@transaction.type_paiement).name %><br/>
+  Compte : <%= @transaction.compte.nom %>
+</p>
+
+<p class='row col-md-12'>
+  <%= link_to "Éditer", edit_comptes_transaction_path(@transaction) %>
+</p>
+
+<% else %>
+
+<p class="alert alert-danger row col-md-12">
+  La transaction <%= params[:id] %> n'existe pas.
+</p>
+
+<% end %>

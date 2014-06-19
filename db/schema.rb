@@ -11,11 +11,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140527134710) do
+ActiveRecord::Schema.define(version: 20140617203241) do
 
   create_table "comptes_comptes", force: true do |t|
     t.string   "nom"
-    t.integer  "solde"
+    t.integer  "solde_historique"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

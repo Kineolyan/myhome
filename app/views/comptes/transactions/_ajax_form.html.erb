@@ -1,5 +1,5 @@
-<%= form_for(transaction, url: comptes_transactions_path(format: :json), remote: true, html: {class: "form-horizontal"}) do |form| %>
-  <ul id="transaction-errors"></ul>
+<%= form_for transaction, remote: remote, html: { class: "form-horizontal" } do |form| %>
+  <div id="transaction-errors"></div>
 
   <div class="form-group">
     <%= form.label :titre, class: "col-md-3 control-label" %>
@@ -11,7 +11,7 @@
   <div class="form-group">
     <%= form.label :somme, class: "col-md-3 control-label" %>
     <div class="col-md-9">
-      <%= form.number_field :somme, class: "form-control", step: 0.01, placeholder: "Montant de la transaction", required: "" %>
+      <%= form.number_field :somme, value: (transaction.id ? transaction.somme_formattee(false) : ''), class: "form-control", step: 0.01, placeholder: "Montant de la transaction", required: "" %>
     </div>
   </div>
 
@@ -34,14 +34,10 @@
   </div>
 
   <div class="form-group">
-    <%= form.label :type_paiement, "Type de transactions", class: "col-md-3 control-label" %>
-    <% Comptes::Transaction::TypePaiement.each do |type| %>
-      <div class="radio col-md-9">
-        <label>
-          <%= form.radio_button :type_paiement, type.value %> <%= type.name %>
-        </label>
-      </div>
-    <% end %>
+    <%= form.label :type_paiement, "Type de transaction", class: "col-md-3 control-label" %>
+    <div class="col-md-9">
+      <%= form.collection_select(:type_paiement, Comptes::Transaction::TypePaiement, :value, :name, {}, class: "form-control", required: "") %>
+    </div>
   </div>
 
   <%= form.submit "Ajouter l'opération", class: "btn btn-primary" %>

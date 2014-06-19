@@ -1,31 +1,7 @@
 <h1>Creation d'un compte</h1>
 
-<%= form_for @compte, url: comptes_comptes_path, html: {class: "form-horizontal"} do |form| %>
-  <% if @compte.errors.any?%>
-  <div id="error_explanation">
-    <h2><%= pluralize(@compte.errors.count, "erreur") %> empêchent le compte d'être créé:</h2>
-    <ul>
-    <% @compte.errors.full_messages.each do |msg| %>
-      <li><%= msg %></li>
-    <% end %>
-    </ul>
-  </div>
-  <% end  %>
+<%= render "form" %>
 
-  <div class="form-group">
-    <%= form.label :nom, class: "col-md-3 control-label" %>
-    <div class="col-md-9">
-      <%= form.text_field :nom, class: "form-control", required: "", placeholder: "Nom du compte" %>
-    </div>
-  </div>
-  <div class="form-group">
-    <%= form.label :solde, class: "col-md-3 control-label" %>
-    <div class="col-md-9">
-      <%= form.number_field :solde, class: "form-control", step: 0.01, required: "", placeholder: "Montant actuel" %>
-    </div>
-  </div>
-
-  <div class="col-md-9 col-md-offset-3">
-    <%= form.submit "Créer le compte", class: 'btn btn-primary' %>
-  </div>
-<% end %>
+<div clas="row">
+  <p class="col-md-12"><%= link_to "Retour à la liste", comptes_comptes_path %></p>
+</div>

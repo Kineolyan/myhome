@@ -20,7 +20,6 @@ module Comptes
       parameters = format_params(transaction_params)
 
       @transaction = Transaction.new parameters
-      @transaction.jour = ApplicationHelper::make_date params[:operation_date]
 
       if @transaction.save
         respond_to do |format|
@@ -33,24 +32,45 @@ module Comptes
               compte: @transaction.compte.nom,
               date: @transaction.jour_formatte,
               paiement: @transaction.paiement
-            }}.to_json
+            }}
           end
+          format.js {}
         end
       else
         respond_to do |format|
           format.html { render "new" }
           format.json { render json: { errors: @transaction.errors } }
+          format.js {}
         end
       end
     end
 
     def edit
+      @transaction = Transaction.find_by_id params[:id]
     end
 
     def show
+      @transaction = Transaction.find_by_id params[:id]
     end
 
     def update
+      @transaction = Transaction.find_by_id params[:id]
+      unless @transaction
+        respond_to do |format|
+          format.html { render :update }
+        end
+      end
+
+      parameters = format_params transaction_params
+      if @transaction.update parameters
+        respond_to do |format|
+          format.html { render :show }
+        end
+      else
+        respond_to do |format|
+          format.html { render :update }
+        end
+      end
     end
 
     def destroy
@@ -70,7 +90,7 @@ module Comptes
 
     private
     def transaction_params
-      params.require(:comptes_transaction).permit(:titre, :somme, :compte_id, :type_paiement)
+      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type_paiement)
     end
 
     # Formate les parametres de la transaction

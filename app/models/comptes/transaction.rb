@@ -21,15 +21,12 @@ class Comptes::Transaction < ActiveRecord::Base
   end
 
   def make_transaction
-    compte.solde += somme
     unless compte.save
       logger.error "Failed to update account #{@compte} solde."
     end
   end
 
   def undo_transaction
-    logger
-    compte.solde -= somme
     unless compte.save
       logger.error "Failed to undo transaction #{self}."
     end
@@ -40,8 +37,8 @@ class Comptes::Transaction < ActiveRecord::Base
     jour.strftime("%d/%m/%Y")
   end
 
-  def somme_formattee
-    ApplicationHelper::format_amount somme
+  def somme_formattee with_currency = true
+    ApplicationHelper::format_amount somme.to_f / 100, with_currency
   end
 
   def paiement

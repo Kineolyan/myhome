@@ -1,2 +1,23 @@
-<h1>Comptes::Transactions#edit</h1>
-<p>Find me in app/views/comptes/transactions/edit.html.erb</p>
+<% if @transaction %>
+
+<h1>Édition de la transaction</h1>
+
+<%=
+  render partial: 'ajax_form', locals: {
+    remote: false,
+    transaction: @transaction,
+    compte_selectionne: @transaction.compte
+  }
+%>
+
+<p class='row col-md-12'>
+  <%= link_to "Retour", @transaction %>
+</p>
+
+<% else %>
+
+<p class="alert alert-danger">
+  La transaction <%= params[:id] %> n'existe pas.
+</p>
+
+<% end %>
