@@ -5,7 +5,7 @@
 <div id='event-list'>
   <% @events.each_with_index do |event, index| %>
   <div class='row event'>
-    <h2><%= link_to event.title, event %></h2>
+    <h2 class="col-md-12"><%= link_to event.title, event %></h2>
 
     <p class='col-md-6'>
       <strong class='label label-info'><%= pluralize(event.number_of_days , "jour") %></strong> depuis l'évenement

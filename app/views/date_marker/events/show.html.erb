@@ -1,18 +1,18 @@
 <% if @event %>
 
-<h1><%= @event.title %></h1>
+<h1><%= @event.title %> : <%= @event.day.strftime("%m/%d/%Y") %></h1>
 
-<div class='row'>
-  <p class='col-md-12'>
-      Nombre de mois depuis l'événement : <strong class='label label-info'><%= pluralize(@event.number_of_days , "jour") %></strong>
-  </p>
-</div>
+<p>
+    Nombre de mois depuis l'événement : <strong class='label label-info'><%= pluralize(@event.number_of_days , "jour") %></strong>
+</p>
 
-<div class='row'>
-  <p class='col-md-12'>
-      Nombre de mois depuis l'événement : <strong class='label label-info'><%= pluralize(@event.number_of_months , "mois") %></strong>
-  </p>
-</div>
+<p>
+    Nombre de mois depuis l'événement : <strong class='label label-info'><%= pluralize(@event.number_of_months , "mois") %></strong>
+</p>
+
+<p>
+  <%= link_to raw('Éditer <i class="glyphicon glyphicon-pencil"></i>'), edit_date_marker_event_path(@event) %>
+</p>
 
 <% else %>
 
@@ -23,5 +23,5 @@
 <% end %>
 
 <p>
-<%= link_to "Retour à la liste", date_marker_events_path %>
+  <%= link_to "Retour à la liste", date_marker_events_path %>
 </p>

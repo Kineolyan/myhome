@@ -24,6 +24,23 @@ module DateMarker
       end
     end
 
+    def edit
+      @event = Event.find_by_id params[:id]
+    end
+
+    def update
+      @event = Event.find_by_id params[:id]
+      unless @event
+        render :edit
+      end
+
+      if @event.update event_params
+        redirect_to @event
+      else
+        render :edit
+      end
+    end
+
     private
     def event_params
       params.require(:date_marker_event).permit(:title, :day)
