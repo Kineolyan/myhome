@@ -9,6 +9,9 @@ namespace :deploy do
     fail "Impossible to fetch #{branch}" unless system("git checkout #{branch} && git pull --rebase")
   end
 
+  desc "Update the database"
+  task :database => [ 'db:migrate' ]
+
   desc "Prepare assets"
   task :assets => [ 'assets:precompile' ]
 
