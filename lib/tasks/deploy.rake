@@ -1,12 +1,10 @@
 namespace :deploy do
 
-  task default: :all
-
-  desc "Fetchs the branch to deploy [ [branch] ]"
+  desc "Fetchs the branch to deploy"
   task :git, [:branch]  do |task, args|
     branch = args[:branch] || "master"
 
-    fail "Impossible to fetch #{branch}" unless system("git checkout #{branch} && git pull --rebase")
+    fail "Impossible to fetch #{branch}" unless system("git fetch && git checkout #{branch} && git pull")
   end
 
   desc "Update the database"
@@ -16,7 +14,6 @@ namespace :deploy do
   task :assets => [ 'assets:precompile' ]
 
   desc "Deploy rails server"
-  task :all => [ :git, :assets ] do
-  end
+  task :all => [ :git, :database, :assets, 'server:stop', 'server:daemon' ]
 
 end
