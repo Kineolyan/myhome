@@ -2,23 +2,23 @@
 
 <h1><%= @transaction.titre %></h1>
 
-<p class='row col-md-12 lead'>
+<p class="lead">
   Montant : <span class="label label-info"><%= @transaction.somme_formattee %></span>
 </p>
 
-<p class='row col-md-12'>
+<p>
   Date : <%= @transaction.jour_formatte %><br/>
   Type de paiement : <%= Comptes::Transaction::TypePaiement.value_of(@transaction.type_paiement).name %><br/>
   Compte : <%= @transaction.compte.nom %>
 </p>
 
-<p class='row col-md-12'>
+<p>
   <%= link_to "Éditer", edit_comptes_transaction_path(@transaction) %>
 </p>
 
 <% else %>
 
-<p class="alert alert-danger row col-md-12">
+<p class="alert alert-danger">
   La transaction <%= params[:id] %> n'existe pas.
 </p>
 
