@@ -12,23 +12,6 @@ module Comptes
     validates :jour, presence: true
     validates :compte, presence: true
 
-    after_save :make_transaction
-    before_destroy :undo_transaction
-
-    private
-    def make_transaction
-      unless compte.save
-        logger.error "Failed to update account #{@compte} solde."
-      end
-    end
-
-    def undo_transaction
-      unless compte.save
-        logger.error "Failed to undo transaction #{self}."
-      end
-    end
-
-    public
     def jour_formatte
       jour.strftime("%d/%m/%Y")
     end
