@@ -8,11 +8,11 @@ module Comptes
     validates :solde_historique, presence: true, numericality: { only_integer: true }
 
     def solde_formatte with_currency = true
-      ApplicationHelper::format_amount solde, with_currency
+      ComptesHelper::format_amount solde, with_currency
     end
 
     def solde
-      (solde_historique + Transaction.where(compte_id: id).sum(:somme)).to_f / 100
+      ComptesHelper.decode_amount(solde_historique + Transaction.where(compte_id: id).sum(:somme))
     end
   end
 
