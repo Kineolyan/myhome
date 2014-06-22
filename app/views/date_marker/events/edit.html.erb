@@ -1,0 +1,21 @@
+<% if @event %>
+
+<h1>Edition de l'événement</h1>
+
+<%= render 'form' %>
+
+<p>
+  <%= link_to "Retour à l'événement", @event %>
+</p>
+
+<% else %>
+
+<p>
+  L'événement <%= params[:id] %> n'existe pas.
+</p>
+
+<p>
+  <%= link_to "Retour à la liste d'événements", date_marker_events_path %>
+</p>
+
+<% end %>

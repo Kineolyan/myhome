@@ -61,7 +61,7 @@ module Comptes
 
     def format_params parameters
       solde_historique = parameters[:solde_historique]
-      parameters[:solde_historique] = (solde_historique.to_f * 100).to_i if ApplicationHelper.is_a_number? solde_historique
+      parameters[:solde_historique] = ComptesHelper.encode_amount solde_historique if ApplicationHelper.is_a_number? solde_historique
 
       parameters
     end

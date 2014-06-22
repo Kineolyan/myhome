@@ -28,7 +28,7 @@ module Comptes
             render json: { transaction: {
               id: @transaction.id,
               titre: @transaction.titre,
-              somme: @transaction.somme.to_f / 100,
+              somme: ComptesHelper.decode_amount(@transaction.somme),
               compte: @transaction.compte.nom,
               date: @transaction.jour_formatte,
               paiement: @transaction.paiement
@@ -97,7 +97,7 @@ module Comptes
     # * convertit la somme en centimes
     def format_params parameters
       somme = parameters[:somme]
-      parameters[:somme] = (somme.to_f * 100).to_i if ApplicationHelper::is_a_number? somme
+      parameters[:somme] = ComptesHelper.encode_amount somme if ApplicationHelper::is_a_number? somme
 
       parameters
     end
