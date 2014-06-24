@@ -1,7 +1,9 @@
 module Comptes
 
   class TransactionMonnaie < Transaction
-    TypePaiement.add_value :monnaie, 1
+    def type_name
+      "Monnaie"
+    end
   end
 
 end
