@@ -34,9 +34,9 @@
   </div>
 
   <div class="form-group">
-    <%= form.label :type_paiement, "Type de transaction", class: "col-md-3 control-label" %>
+    <%= form.label :type, "Type de transaction", class: "col-md-3 control-label" %>
     <div class="col-md-9">
-      <%= form.collection_select(:type_paiement, Comptes::Transaction::TypePaiement, :value, :name, {}, class: "form-control", required: "") %>
+      <%= form.collection_select(:type, Comptes::TransactionsController::Types, :value, :name, {}, class: "form-control", required: "") %>
     </div>
   </div>
 
