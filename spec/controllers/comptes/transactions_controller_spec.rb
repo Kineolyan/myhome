@@ -160,7 +160,7 @@ RSpec.describe Comptes::TransactionsController, type: :controller do
       get_json_response
 
       expect(@json_response).to have_key :errors
-      p @json_response
+      # TODO check the returned message
     end
 
   end

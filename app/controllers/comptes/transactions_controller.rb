@@ -29,7 +29,7 @@ module Comptes
 
       has_errors = false
       unless @transaction_type
-        @transaction.errors[:base] << "Type de transaction inconnu"
+        @transaction.errors.add :type, "Type de transaction inconnu"
         has_errors = true
       end
 
