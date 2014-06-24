@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140617203241) do
+ActiveRecord::Schema.define(version: 20140621121339) do
 
   create_table "comptes_comptes", force: true do |t|
     t.string   "nom"
@@ -28,7 +28,7 @@ ActiveRecord::Schema.define(version: 20140617203241) do
     t.integer  "compte_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "type_paiement"
+    t.string   "type"
   end
 
   add_index "comptes_transactions", ["compte_id"], name: "index_comptes_transactions_on_compte_id"

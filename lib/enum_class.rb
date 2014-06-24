@@ -24,10 +24,30 @@ end
 class EnumClass
   include Enumerable
 
-  def initialize initial_values = {}
+  class EnumError < RangeError
+  end
+
+  private
+  def initialize initial_values
     @values = {}
 
     initial_values.each { |key, value| add_value key, value }
+  end
+
+  public
+  def self.create_values values
+    self.new values
+  end
+
+  def self.create_series names, initial_value = 0
+    values = {}
+    enum_value = 0
+    names.each do |name|
+      values[name] = enum_value
+      enum_value += 1
+    end
+
+    self.new values
   end
 
   def _singleton_class
@@ -55,7 +75,8 @@ class EnumClass
 
   def value_of value
     @values.each_value { |enum_value| return enum_value if (value == enum_value.value) }
-    nil
+    # None of the values matches
+    raise EnumError, "No enum value of type #{self} corresponding to #{value}"
   end
 
   def each

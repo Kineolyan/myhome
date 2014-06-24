@@ -1,6 +1,11 @@
+require "enum_class"
+
 module Comptes
 
   class TransactionsController < ApplicationController
+    Types = EnumClass.create_series [:default, :monnaie, :carte]
+
+    @transaction_type = nil
 
     def index
       @transactions = Transaction.order(jour: :desc, updated_at: :desc)
@@ -19,9 +24,17 @@ module Comptes
     def create
       parameters = format_params(transaction_params)
 
-      @transaction = Transaction.new parameters
+      transaction_class = get_transaction_type
+      @transaction = transaction_class.new parameters
 
-      if @transaction.save
+      has_errors = false
+      unless @transaction_type
+        @transaction.errors.add :type, "Type de transaction inconnu"
+        has_errors = true
+      end
+
+      has_errors |= !@transaction.save
+      unless has_errors
         respond_to do |format|
           format.html { redirect_to @transaction }
           format.json do
@@ -31,7 +44,7 @@ module Comptes
               somme: ComptesHelper.decode_amount(@transaction.somme),
               compte: @transaction.compte.nom,
               date: @transaction.jour_formatte,
-              paiement: @transaction.paiement
+              type: @transaction.type_name
             }}
           end
           format.js {}
@@ -90,7 +103,7 @@ module Comptes
 
     private
     def transaction_params
-      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type_paiement)
+      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type)
     end
 
     # Formate les parametres de la transaction
@@ -99,9 +112,23 @@ module Comptes
       somme = parameters[:somme]
       parameters[:somme] = ComptesHelper.encode_amount somme if ApplicationHelper::is_a_number? somme
 
+      transaction_type = parameters[:type].to_i if parameters[:type]
+      parameters.delete :type
+      @transaction_type = Types.value_of transaction_type if Types.is_valid? transaction_type
+
       parameters
     end
 
+    def get_transaction_type
+      case @transaction_type
+      when Types.MONNAIE
+        TransactionMonnaie
+      when Types.CARTE
+        TransactionCarte
+      else
+        Transaction
+      end
+    end
   end
 
 end

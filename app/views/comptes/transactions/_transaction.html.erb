@@ -3,7 +3,7 @@
       <td><%= transaction.titre %></td>
       <td><%= transaction.somme_formattee %></td>
       <td><%= transaction.compte.nom %></td>
-      <td><%= transaction.paiement %></td>
+      <td><%= transaction.type_name %></td>
       <td>
         <%= link_to raw('<i class="glyphicon glyphicon-eye-open"></i>'), transaction, class: "btn btn-info" %>
         <%= link_to raw('<i class="glyphicon glyphicon-pencil"></i>'), edit_comptes_transaction_path(transaction), class: "btn btn-info" %>

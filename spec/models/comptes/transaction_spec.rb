@@ -8,7 +8,7 @@ describe Comptes::Transaction do
     @compte = Comptes::Compte.new(nom: 'Super compte', solde_historique: 100)
     expect(@compte.save).to be true
 
-    @transaction_attributes = { titre: 'Cadeau', somme: 1500, jour: Date.new(2014, 1, 1), compte: @compte, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT }
+    @transaction_attributes = { titre: 'Cadeau', somme: 1500, jour: Date.new(2014, 1, 1), compte: @compte }
   end
 
   def create_transaction(values = { notes: "C'est pas important" })
@@ -19,8 +19,9 @@ describe Comptes::Transaction do
 
   def make_transaction(values = {})
     transaction = create_transaction(values)
+    expect(transaction.save).to be true
 
-    return transaction, transaction.save
+    transaction
   end
 
   context "Validation à la création" do
@@ -71,34 +72,18 @@ describe Comptes::Transaction do
       expect(transaction).not_to be_valid
     end
 
-    it "n'est pas valide sans type", todo: true do
-      @transaction_attributes.delete :type_paiement
-      transaction = Comptes::Transaction.new @transaction_attributes
-
-      expect(transaction).not_to be_valid
-    end
-
-    it "n'est pas valide avec un type erronné", todo: true do
-      @transaction_attributes[:type_paiement] = -1
-      transaction = Comptes::Transaction.new @transaction_attributes
-
-      expect(transaction).not_to be_valid
-    end
-
   end
 
   context "Operations a la création" do
 
     it "fait varier le solde du compte" do
-      montant = 1200
-      expect {
-        make_transaction(somme: montant)
-      }.to change { @compte.solde }.by(montant)
+      solde_before_operation = @compte.solde
+      make_transaction(somme: 1200)
+      expect(@compte).to have_solde(solde_before_operation + 12)
 
-      montant = -180
-      expect {
-        make_transaction(somme: montant)
-      }.to change { @compte.solde }.by(montant)
+      solde_before_operation = @compte.solde
+      make_transaction(somme: -180)
+      expect(@compte).to have_solde(solde_before_operation - 1.8)
     end
 
     it "enregistre les changements de solde" do
@@ -108,16 +93,13 @@ describe Comptes::Transaction do
     end
 
     it "ne touche pas le solde du compte sans save" do
-      montant = 100
-      transaction = nil
+      initial_solde = @compte.solde
 
-      expect {
-        transaction = create_transaction(somme: montant)
-      }.not_to change { @compte.solde }
+      transaction = create_transaction(somme: 100)
+      expect(@compte).to have_solde(initial_solde)
 
-      expect {
-        transaction.save
-      }.to change { @compte.solde }.by montant
+      transaction.save
+      expect(@compte).to have_solde(initial_solde + 1)
     end
 
   end
@@ -125,14 +107,13 @@ describe Comptes::Transaction do
   context "Operations à la suppression" do
 
     it "recrédite le compte après une suppression" do
-      montant = -1200
 
-      transaction, success = make_transaction somme: montant
+      transaction, success = make_transaction somme: -1200
       expect(transaction).not_to be_nil
 
-      expect {
-        transaction.destroy
-      }.to change{ Comptes::Compte.find(@compte.id).solde }.by(-montant)
+      solde_before_destroy = @compte.solde
+      transaction.destroy
+      expect(@compte).to have_solde(solde_before_destroy + 12)
     end
 
   end
