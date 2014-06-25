@@ -4,7 +4,7 @@ class Comptes::CategoriesController < ApplicationController
   # GET /comptes/categories
   # GET /comptes/categories.json
   def index
-    @comptes_categories = Comptes::Categorie.all
+    @comptes_categories = Comptes::Categorie.order(nom: :asc)
   end
 
   # GET /comptes/categories/1
@@ -69,6 +69,6 @@ class Comptes::CategoriesController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def comptes_category_params
-      params.require(:comptes_category).permit(:nom)
+      params.require(:comptes_categorie).permit(:nom)
     end
 end
