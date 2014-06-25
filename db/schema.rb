@@ -11,6 +11,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+ActiveRecord::Schema.define(version: 20140625173508) do
+
+  create_table "comptes_categories", force: true do |t|
+    t.string   "nom"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
 ActiveRecord::Schema.define(version: 20140621121339) do
 
   create_table "comptes_comptes", force: true do |t|
