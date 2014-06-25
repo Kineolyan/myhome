@@ -1,7 +1,7 @@
 <h1>Ajouter de nouvelles transactions</h1>
 
 <%=
-  render partial: 'ajax_form', locals: {
+  render partial: 'form', locals: {
     remote: true,
     transaction: Comptes::Transaction.new,
     compte_selectionne: @compte_selectionne
