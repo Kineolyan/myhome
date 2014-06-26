@@ -4,7 +4,9 @@ module Comptes
     belongs_to :compte, validate: true
 
     has_many :categorizations
-    has_many :categories, through: :categorizations, source: :categorie
+    accepts_nested_attributes_for :categorizations
+    has_many :categories, through: :categorizations, source: :categorie, autosave: true, dependent: :destroy
+
 
     validates :titre, presence: true
     validates :somme, presence: true, numericality: { only_integer: true }

@@ -9,6 +9,8 @@ Myhome::Application.routes.draw do
     resources :transactions do
       get "ajouter", on: :collection
     end
+    resources :transaction_monnaies, controller: "transactions"
+    resources :transaction_cartes, controller: "transactions"
 
     resources :comptes do
       resources :transactions, only: [ :index ] do

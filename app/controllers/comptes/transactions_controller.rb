@@ -4,6 +4,31 @@ module Comptes
 
   class TransactionsController < ApplicationController
     Types = EnumClass.create_series [:default, :monnaie, :carte]
+    class << Types
+      def get_class type
+        case type
+        when Types.MONNAIE
+          Comptes::TransactionMonnaie
+        when Types.CARTE
+          Comptes::TransactionCarte
+        else
+          Comptes::Transaction
+        end
+      end
+
+      def from_class transaction
+        case transaction
+        when Comptes::TransactionCarte
+          Types.CARTE
+        when Comptes::TransactionMonnaie
+          Types.MONNAIE
+        when Comptes::Transaction
+          Types.DEFAULT
+        else
+          nil
+        end
+      end
+    end
 
     before_action :get_allowed_resources, only: [:ajouter, :edit, :update]
 
@@ -113,7 +138,7 @@ module Comptes
 
     private
     def transaction_params
-      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, { categories: [] })
+      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, { categories: [] }, { categorizations_attributes: [ :id, :categorie_id ] })
     end
 
     # Formate les parametres de la transaction
@@ -122,22 +147,16 @@ module Comptes
       somme = parameters[:somme]
       parameters[:somme] = ComptesHelper.encode_amount somme if ApplicationHelper::is_a_number? somme
 
-      transaction_type = parameters[:type].to_i if parameters[:type]
-      parameters.delete :type
+      transaction_type = parameters.delete(:type).to_i if parameters[:type]
       @transaction_type = Types.value_of transaction_type if Types.is_valid? transaction_type
 
       parameters
     end
 
-    def get_transaction_type
-      case @transaction_type
-      when Types.MONNAIE
-        TransactionMonnaie
-      when Types.CARTE
-        TransactionCarte
-      else
-        Transaction
-      end
+    def get_categories category_ids
+      category_ids ||= []
+
+      category_ids.collect{ |id| Categorie.find_by_id id }.keep_if{ |categorie| categorie }
     end
 
     def get_allowed_resources
