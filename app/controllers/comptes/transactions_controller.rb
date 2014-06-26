@@ -106,9 +106,7 @@ module Comptes
       end
 
       parameters = format_params transaction_params
-
-      ids_categories = parameters.delete :categories
-      @transaction.categories = ids_categories.collect{ |id| Categorie.find_by_id id }.keep_if{ |categorie| categorie }
+      @transaction.categories = get_categories parameters.delete(:categories)
 
       if @transaction.update parameters
         respond_to do |format|
