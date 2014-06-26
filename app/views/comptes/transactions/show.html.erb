@@ -13,6 +13,10 @@
 </p>
 
 <p>
+  Catégories: <%= @transaction.categories.collect{ |categorie| categorie.nom }.join ', ' %>
+</p>
+
+<p>
   <%= link_to "Éditer", edit_comptes_transaction_path(@transaction) %>
 </p>
 

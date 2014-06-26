@@ -5,6 +5,8 @@ module Comptes
   class TransactionsController < ApplicationController
     Types = EnumClass.create_series [:default, :monnaie, :carte]
 
+    before_action :get_allowed_resources, only: [:ajouter, :edit, :update]
+
     @transaction_type = nil
 
     def index
@@ -15,7 +17,7 @@ module Comptes
     end
 
     def ajouter
-      @compte_selectionne = Comptes::Compte.find_by_id params[:compte_id]
+      @transaction = Transaction.new compte: Comptes::Compte.find_by_id(params[:compte_id])
     end
 
     # def new
@@ -23,6 +25,7 @@ module Comptes
 
     def create
       parameters = format_params(transaction_params)
+      ids_categories = parameters.delete :categories
 
       transaction_class = get_transaction_type
       @transaction = transaction_class.new parameters
@@ -32,6 +35,8 @@ module Comptes
         @transaction.errors.add :type, "Type de transaction inconnu"
         has_errors = true
       end
+
+      @transaction.categories = ids_categories.collect{ |id| Categorie.find_by_id id }.keep_if{ |categorie| categorie }
 
       has_errors |= !@transaction.save
       unless has_errors
@@ -75,6 +80,10 @@ module Comptes
       end
 
       parameters = format_params transaction_params
+
+      ids_categories = parameters.delete :categories
+      @transaction.categories = ids_categories.collect{ |id| Categorie.find_by_id id }.keep_if{ |categorie| categorie }
+
       if @transaction.update parameters
         respond_to do |format|
           format.html { render :show }
@@ -103,7 +112,7 @@ module Comptes
 
     private
     def transaction_params
-      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type)
+      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, { categories: [] })
     end
 
     # Formate les parametres de la transaction
@@ -128,6 +137,10 @@ module Comptes
       else
         Transaction
       end
+    end
+
+    def get_allowed_resources
+      @categories = Categorie.order(nom: :asc)
     end
   end
 

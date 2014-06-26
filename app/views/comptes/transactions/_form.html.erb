@@ -41,9 +41,13 @@
   </div>
 
   <div class="form-group">
-    <%= form.label :categories, "Type de transaction", class: "col-md-3 control-label" %>
+    <%= form.label :categories, "Catégories", class: "col-md-3 control-label" %>
     <div class="col-md-9">
-      <%= form.collection_select(:categories, Comptes::Categorie.order(nom: :asc), :id, :nom, {}, class: "form-control", multiple: true) %>
+      <%
+      categories_options = {}
+      categories_options[:selected] = @transaction.categories.collect { |categorie| categorie.id }
+      %>
+      <%= form.collection_select(:categories, @categories, :id, :nom, categories_options, class: "form-control", multiple: true) %>
     </div>
   </div>
 
