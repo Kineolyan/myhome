@@ -1,5 +1,15 @@
-<%= form_for transaction, remote: remote, html: { class: "form-horizontal", role: "form" } do |form| %>
-  <div id="transaction-errors"></div>
+<%= form_for @transaction, remote: remote, html: { class: "form-horizontal", role: "form" } do |form| %>
+  <div id="transaction-errors">
+    <% if @transaction.errors.any? %>
+      <h2><%= pluralize(@transaction.errors.count, "error") %> prohibited this transaction from being saved:</h2>
+
+      <ul>
+      <% @transaction.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    <% end %>
+  </div>
 
   <div class="form-group">
     <%= form.label :titre, class: "col-md-3 control-label" %>
@@ -11,18 +21,18 @@
   <div class="form-group">
     <%= form.label :somme, class: "col-md-3 control-label" %>
     <div class="col-md-9">
-      <%= form.number_field :somme, value: (transaction.id ? transaction.somme_formattee(false) : ''), class: "form-control", step: 0.01, placeholder: "Montant de la transaction", required: "" %>
+      <%= form.number_field :somme, value: (@transaction.new_record? ? '' : @transaction.somme_formattee(false)), class: "form-control", step: 0.01, placeholder: "Montant de la transaction", required: "" %>
     </div>
   </div>
 
   <div class="form-group">
     <%= form.label :compte_id, "Compte", class: "col-md-3 control-label" %>
     <%
-    collection_options = {}
-    collection_options[:selected] = compte_selectionne.id if compte_selectionne
+    compte_options = {}
+    compte_options[:selected] = @transaction.compte.id if @transaction.compte
     %>
     <div class="col-md-9">
-      <%= form.collection_select(:compte_id, Comptes::Compte.all, :id, :nom, collection_options, class: "form-control", required: "") %>
+      <%= form.collection_select(:compte_id, @comptes, :id, :nom, compte_options, class: "form-control", required: "") %>
     </div>
   </div>
 
@@ -36,7 +46,11 @@
   <div class="form-group">
     <%= form.label :type, "Type de transaction", class: "col-md-3 control-label" %>
     <div class="col-md-9">
-      <%= form.collection_select(:type, Comptes::TransactionsController::Types, :value, :name, {}, class: "form-control", required: "") %>
+      <%
+      type_options = {}
+      type_options[:selected] = @transaction.type_name if @transaction.type_name
+      %>
+      <%= form.collection_select(:type, @types, :value, :name, type_options, class: "form-control", required: "") %>
     </div>
   </div>
 
@@ -51,5 +65,5 @@
     </div>
   </div>
 
-  <%= form.submit "Ajouter l'opération", class: "btn btn-primary" %>
+  <%= form.submit "#{@transaction.new_record? ? "Ajouter" : "Éditer"} l'opération", class: "btn btn-primary" %>
 <% end %>

@@ -73,9 +73,10 @@ module Comptes
 
     def update
       @transaction = Transaction.find_by_id params[:id]
+
       unless @transaction
         respond_to do |format|
-          format.html { render :update }
+          format.html { render :edit }
         end
       end
 
@@ -90,7 +91,7 @@ module Comptes
         end
       else
         respond_to do |format|
-          format.html { render :update }
+          format.html { render :edit }
         end
       end
     end
@@ -141,6 +142,8 @@ module Comptes
 
     def get_allowed_resources
       @categories = Categorie.order(nom: :asc)
+      @comptes = Compte.order(nom: :asc)
+      @types = Comptes::TransactionsController::Types
     end
   end
 
