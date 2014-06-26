@@ -56,12 +56,14 @@
 
   <div class="form-group">
     <% if @transaction.new_record? %>
+      <!--
       <%= form.fields_for :categorizations, @transaction.categorizations.build do |categorizations_form| %>
         <%= categorizations_form.label :categorie_id, "Catégories", class: "col-md-3 control-label" %>
         <div class="col-md-9">
           <%= categorizations_form.collection_select(:categorie_id, @categories, :id, :nom, {}, class: "form-control", multiple: true) %>
         </div>
       <% end %>
+      -->
     <% else %>
       <%= form.label :categories, "Catégories", class: "col-md-3 control-label" %>
       <div class="col-md-9">

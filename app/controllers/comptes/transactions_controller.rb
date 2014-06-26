@@ -50,9 +50,8 @@ module Comptes
 
     def create
       parameters = format_params(transaction_params)
-      ids_categories = parameters.delete :categories
 
-      transaction_class = get_transaction_type
+      transaction_class = Types.get_class @transaction_type
       @transaction = transaction_class.new parameters
 
       has_errors = false
@@ -60,8 +59,6 @@ module Comptes
         @transaction.errors.add :type, "Type de transaction inconnu"
         has_errors = true
       end
-
-      @transaction.categories = ids_categories.collect{ |id| Categorie.find_by_id id }.keep_if{ |categorie| categorie }
 
       has_errors |= !@transaction.save
       unless has_errors
@@ -74,7 +71,8 @@ module Comptes
               somme: ComptesHelper.decode_amount(@transaction.somme),
               compte: @transaction.compte.nom,
               date: @transaction.jour_formatte,
-              type: @transaction.type_name
+              type: @transaction.type_name,
+              categories: @transaction.categories.collect{ |categorie| categorie.nom }.join(', ')
             }}
           end
           format.js {}
@@ -136,7 +134,7 @@ module Comptes
 
     private
     def transaction_params
-      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, { categories: [] }, { categorizations_attributes: [ :id, :categorie_id ] })
+      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, { categories: [] }, { categorizations_attributes: [ :categorie_id ] })
     end
 
     # Formate les parametres de la transaction
