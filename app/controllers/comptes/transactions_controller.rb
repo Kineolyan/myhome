@@ -51,6 +51,8 @@ module Comptes
     def create
       parameters = format_params(transaction_params)
 
+      categories = get_categories parameters.delete(:categories)
+
       transaction_class = Types.get_class @transaction_type
       @transaction = transaction_class.new parameters
 
