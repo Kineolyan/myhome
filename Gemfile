@@ -47,6 +47,8 @@ group :test do
   gem 'rspec-rails', '>= 3.0'
   gem 'fuubar'
 
+  gem 'factory_girl_rails'
+
   gem 'guard-rspec'
   gem 'spork-rails', github: 'railstutorial/spork-rails'
   gem 'guard-spork'

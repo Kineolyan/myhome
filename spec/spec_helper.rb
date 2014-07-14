@@ -67,7 +67,6 @@ Spork.prefork do
   # need to restart spork for it take effect.
 
   load_env
-  require 'rspec/autorun'
 
   configure_rspec
   configure_active_record
