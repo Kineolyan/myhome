@@ -118,4 +118,50 @@ describe Comptes::Transaction do
 
   end
 
+  describe "categories", new: true do
+    let!(:category_1) { Comptes::Category.create! nom: "category_1" }
+    let!(:category_2) { Comptes::Category.create! nom: "category_2" }
+
+    let(:transaction) { Comptes::Transaction.new @transaction_attributes }
+
+    describe 'a la creation' do
+      it "categorise a la creation avec attributs" do
+        @transaction_attributes[:categorizations_attributes] = [ { category_id: category_1.id } ]
+        local_transaction = Comptes::Transaction.new @transaction_attributes
+
+        transaction.valid?
+        p transaction.errors.messages
+        expect(local_transaction).to be_valid
+      end
+
+      it "utilise categories#<<" do
+        transaction.categories << category_1
+
+        transaction.valid?
+        p transaction.errors.messages
+        expect(transaction).to be_valid
+      end
+
+      it "utilise categorizations#build" do
+        transaction.categorizations.build category: category_1
+
+        transaction.valid?
+        p transaction.errors.messages
+        expect(transaction).to be_valid
+      end
+    end
+
+    describe "met a jour" do
+      before(:each) do
+        transaction.save
+        transaction.categories << category_1
+        transaction.save
+      end
+
+      subject { transaction }
+      specify { expect(transaction.categories).to include category_1 }
+    end
+
+  end
+
 end
