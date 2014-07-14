@@ -3,11 +3,7 @@
 <h1>Édition de la transaction</h1>
 
 <%=
-  render partial: 'ajax_form', locals: {
-    remote: false,
-    transaction: @transaction,
-    compte_selectionne: @transaction.compte
-  }
+  render partial: 'form', locals: {remote: false}
 %>
 
 <p>

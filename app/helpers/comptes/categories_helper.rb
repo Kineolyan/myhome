@@ -1,0 +1,2 @@
+module Comptes::CategoriesHelper
+end

@@ -3,6 +3,10 @@ module Comptes
   class Transaction < ActiveRecord::Base
     belongs_to :compte, validate: true
 
+    has_many :categorizations, dependent: :destroy
+    accepts_nested_attributes_for :categorizations
+    has_many :categories, through: :categorizations
+
     validates :titre, presence: true
     validates :somme, presence: true, numericality: { only_integer: true }
     validates :jour, presence: true
