@@ -47,6 +47,10 @@ group :test do
   gem 'rspec-rails', '>= 3.0'
   gem 'fuubar'
 
+  gem 'guard-rspec'
+  gem 'spork-rails', github: 'railstutorial/spork-rails'
+  gem 'guard-spork'
+
   gem 'cucumber-rails', '>= 1.4.0', require: false
   gem 'webrat', '>= 0.7.3'
 
