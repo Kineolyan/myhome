@@ -154,7 +154,7 @@ module Comptes
     def get_categories category_ids
       category_ids ||= []
 
-      category_ids.collect{ |id| Category.find_by_id id }.keep_if{ |categorie| categorie }
+      category_ids.collect{ |id| Category.find_by_id id }.delete_if(&:nil?)
     end
 
     def get_allowed_resources
