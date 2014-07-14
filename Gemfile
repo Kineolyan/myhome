@@ -43,10 +43,14 @@ end
 
 group :test do
   gem 'pry'
+
   gem 'rspec-rails', '>= 3.0'
+  gem 'fuubar'
+
   gem 'cucumber-rails', '>= 1.4.0', require: false
-  gem 'database_cleaner', '>= 1.2.0'
   gem 'webrat', '>= 0.7.3'
+
+  gem 'database_cleaner', '>= 1.2.0'
 end
 
 # Use ActiveModel has_secure_password
