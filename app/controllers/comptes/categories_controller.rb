@@ -4,7 +4,7 @@ class Comptes::CategoriesController < ApplicationController
   # GET /comptes/categories
   # GET /comptes/categories.json
   def index
-    @comptes_categories = Comptes::Categorie.order(nom: :asc)
+    @comptes_categories = Comptes::Category.order(nom: :asc)
   end
 
   # GET /comptes/categories/1
@@ -14,7 +14,7 @@ class Comptes::CategoriesController < ApplicationController
 
   # GET /comptes/categories/new
   def new
-    @comptes_category = Comptes::Categorie.new
+    @comptes_category = Comptes::Category.new
   end
 
   # GET /comptes/categories/1/edit
@@ -24,11 +24,11 @@ class Comptes::CategoriesController < ApplicationController
   # POST /comptes/categories
   # POST /comptes/categories.json
   def create
-    @comptes_category = Comptes::Categorie.new(comptes_category_params)
+    @comptes_category = Comptes::Category.new(comptes_category_params)
 
     respond_to do |format|
       if @comptes_category.save
-        format.html { redirect_to @comptes_category, notice: 'Categorie was successfully created.' }
+        format.html { redirect_to @comptes_category, notice: 'Category was successfully created.' }
         format.json { render action: 'show', status: :created, location: @comptes_category }
       else
         format.html { render action: 'new' }
@@ -42,7 +42,7 @@ class Comptes::CategoriesController < ApplicationController
   def update
     respond_to do |format|
       if @comptes_category.update(comptes_category_params)
-        format.html { redirect_to @comptes_category, notice: 'Categorie was successfully updated.' }
+        format.html { redirect_to @comptes_category, notice: 'Category was successfully updated.' }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
@@ -64,11 +64,11 @@ class Comptes::CategoriesController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_comptes_category
-      @comptes_category = Comptes::Categorie.find_by_id(params[:id])
+      @comptes_category = Comptes::Category.find_by_id(params[:id])
     end
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def comptes_category_params
-      params.require(:comptes_categorie).permit(:nom)
+      params.require(:comptes_category).permit(:nom)
     end
 end

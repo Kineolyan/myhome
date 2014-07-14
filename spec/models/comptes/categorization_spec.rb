@@ -9,8 +9,8 @@ RSpec.describe Comptes::Categorization, :type => :model do
   describe "#create" do
     let!(:compte) { Comptes::Compte.create!(nom: "compte test", solde_historique: 1234) }
     let(:transaction) { Comptes::Transaction.create! titre: "Transaction test", somme: 123, jour: Date.today, compte: compte  }
-    let!(:categorie) { Comptes::Categorie.create! nom: "categorie test" }
-    let(:categorization) { Comptes::Categorization.new transaction: transaction, categorie: categorie }
+    let!(:category) { Comptes::Category.create! nom: "category test" }
+    let(:categorization) { Comptes::Categorization.new transaction: transaction, category: category }
 
     subject { categorization }
 
@@ -22,8 +22,8 @@ RSpec.describe Comptes::Categorization, :type => :model do
       it { should_not be_valid }
     end
 
-    describe "sans categorie" do
-      before(:each) { categorization.categorie = nil }
+    describe "sans category" do
+      before(:each) { categorization.category = nil }
 
       it { should_not be_valid }
     end

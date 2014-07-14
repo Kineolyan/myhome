@@ -1,7 +1,7 @@
 class Comptes::Categorization < ActiveRecord::Base
   belongs_to :transaction
-  belongs_to :categorie
+  belongs_to :category
 
   validates :transaction, presence: true
-  validates :categorie, presence: true
+  validates :category, presence: true
 end

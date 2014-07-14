@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Comptes::Categorie, :type => :model do
+RSpec.describe Comptes::Category, :type => :model do
 
   before(:each) do
     DatabaseCleaner.clean
@@ -8,19 +8,19 @@ RSpec.describe Comptes::Categorie, :type => :model do
 
   context "#create" do
     it "accepte une catégorie valide" do
-      expect(Comptes::Categorie.new nom: "test").to be_valid
+      expect(Comptes::Category.new nom: "test").to be_valid
     end
 
     it "refuse une catégorie sans nom" do
-      expect(Comptes::Categorie.new).not_to be_valid
+      expect(Comptes::Category.new).not_to be_valid
     end
 
     it "refuse une catégorie dupliquée" do
       nom_categorie = "ma categorie"
-      categorie = Comptes::Categorie.new nom: nom_categorie
+      categorie = Comptes::Category.new nom: nom_categorie
       categorie.save
 
-      expect(Comptes::Categorie.new nom: nom_categorie).not_to be_valid
+      expect(Comptes::Category.new nom: nom_categorie).not_to be_valid
     end
   end
 
