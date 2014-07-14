@@ -6,21 +6,28 @@ RSpec.describe Comptes::Categorization, :type => :model do
     DatabaseCleaner.clean
   end
 
-  context "#create" do
-    let(:transaction) { Comptes::Transaction.new titre: "Transaction test", somme: 123, jour: Date.today, compte: Comptes::Compte.new(nom: "compte test", solde_historique: 1234) }
-    let(:categorie) { Comptes::Categorie.new nom: "categorie test" }
+  describe "#create" do
+    let!(:compte) { Comptes::Compte.create!(nom: "compte test", solde_historique: 1234) }
+    let(:transaction) { Comptes::Transaction.create! titre: "Transaction test", somme: 123, jour: Date.today, compte: compte  }
+    let!(:categorie) { Comptes::Categorie.create! nom: "categorie test" }
+    let(:categorization) { Comptes::Categorization.new transaction: transaction, categorie: categorie }
 
-    it "fonctionne avec tous les éléments" do
-      expect(Comptes::Categorization.new transaction: transaction, categorie: categorie).to be_valid
+    subject { categorization }
+
+    it { should be_valid }
+
+    describe "sans transaction" do
+      before(:each) { categorization.transaction = nil }
+
+      it { should_not be_valid }
     end
 
-    it "fails sans transaction" do
-      expect(Comptes::Categorization.new categorie: categorie).not_to be_valid
+    describe "sans categorie" do
+      before(:each) { categorization.categorie = nil }
+
+      it { should_not be_valid }
     end
 
-    it "fails sans categorie" do
-      expect(Comptes::Categorization.new transaction: transaction).not_to be_valid
-    end
   end
 
 end
