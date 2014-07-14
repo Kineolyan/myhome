@@ -41,12 +41,12 @@ group :development do
   gem 'binding_of_caller'
 end
 
-group :development, :test do
+group :test do
+  gem 'pry'
   gem 'rspec-rails', '>= 3.0'
   gem 'cucumber-rails', '>= 1.4.0', require: false
   gem 'database_cleaner', '>= 1.2.0'
   gem 'webrat', '>= 0.7.3'
-  gem 'pry'
 end
 
 # Use ActiveModel has_secure_password
