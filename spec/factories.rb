@@ -8,4 +8,15 @@ FactoryGirl.define do
     nom "Compte de test"
     solde_historique 1370
   end
+
+  factory :comptes_transaction, class: "Comptes::Transaction" do
+    titre 'Cadeau'
+    somme 1500
+    jour Date.new(2014, 1, 1)
+    association :compte, factory: :comptes_compte
+  end
+
+  factory :comptes_category, class: "Comptes::Category" do
+    nom "test Category"
+  end
 end
