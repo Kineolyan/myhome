@@ -7,20 +7,21 @@ RSpec.describe Comptes::Category, :type => :model do
   end
 
   context "#create" do
-    it "accepte une catégorie valide" do
-      expect(Comptes::Category.new nom: "test").to be_valid
+    let(:category) { FactoryGirl.build :comptes_category }
+    subject { category }
+
+    it_behaves_like "a valid model"
+
+    describe "without nom" do
+      before { category.nom = "" }
+
+      it_behaves_like "an invalid model"
     end
 
-    it "refuse une catégorie sans nom" do
-      expect(Comptes::Category.new).not_to be_valid
-    end
+    describe "without duplication on nom" do
+      before { FactoryGirl.create :comptes_category, nom: category.nom }
 
-    it "refuse une catégorie dupliquée" do
-      nom_categorie = "ma categorie"
-      categorie = Comptes::Category.new nom: nom_categorie
-      categorie.save
-
-      expect(Comptes::Category.new nom: nom_categorie).not_to be_valid
+      it_behaves_like "an invalid model"
     end
   end
 
