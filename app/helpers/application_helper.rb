@@ -21,9 +21,9 @@ module ApplicationHelper
   # Returns the html for the glyphicon
   def self.glyphicon name, options = {}
     additional_classes=""
-    additional_classes << "btn btn-#{options[:btn]}" if options.key? :btn
+    additional_classes << " btn btn-#{options[:btn]}" if options.key? :btn
 
-    "<i class=\"glyphicon glyphicon-#{name} #{additional_classes}\">#{options[:text]}</i>".html_safe
+    "<i class=\"glyphicon glyphicon-#{name}#{additional_classes}\">#{options[:text]}</i>".html_safe
   end
 
 end
