@@ -7,10 +7,12 @@
 </p>
 
 <h2>Les dernières transactions</h2>
-<% transactions = Comptes::Transaction.where(compte: @compte).order(jour: :desc).limit(20) %>
-<%= render partial: 'comptes/transactions/transactions', object: transactions %>
+<%= render partial: 'comptes/transactions/transactions', object: @transactions %>
 
-<%= link_to "Ajouter des transactions", ajouter_comptes_compte_transactions_path(@compte) %>
+<p>
+	<%= link_to "Voir toutes les transactions", comptes_compte_transactions_path(@compte) %><br/>
+	<%= link_to "Ajouter des transactions", ajouter_comptes_compte_transactions_path(@compte) %>
+</p>
 
 <% else %>
 <p class="alert alert-danger">

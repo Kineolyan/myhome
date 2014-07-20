@@ -12,7 +12,7 @@ RSpec.describe Comptes::TransactionsController, type: :controller do
 
     before(:each) do
       @operation_date = Date.new 2013, 11, 21
-      @transaction = { titre: "un titre", somme: 12.45, compte_id: @compte.id, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT.to_i, jour: @operation_date }
+      @transaction = { titre: "un titre", somme: 12.45, compte_id: @compte.id, type: Comptes::TransactionsController::Types.DEFAULT.to_i, jour: @operation_date }
     end
 
     def post_transaction format = "json"
@@ -23,12 +23,11 @@ RSpec.describe Comptes::TransactionsController, type: :controller do
       @json_response = JSON.parse(response.body, symbolize_names: true)
     end
 
-    it "treats correctly -81.24" do
+    it "treats correctly -81.24", to_run: true do
       @transaction[:somme] = "-81.24"
       post_transaction
 
       get_json_response
-      p @json_response
       expect(@json_response).not_to have_key :errors
 
       post_created = @json_response[:transaction]

@@ -4,135 +4,142 @@ describe Comptes::Transaction do
 
   before(:each) do
     DatabaseCleaner.clean
-
-    @compte = Comptes::Compte.new(nom: 'Super compte', solde_historique: 100)
-    expect(@compte.save).to be true
-
-    @transaction_attributes = { titre: 'Cadeau', somme: 1500, jour: Date.new(2014, 1, 1), compte: @compte, type_paiement: Comptes::Transaction::TypePaiement.COMPTANT }
   end
 
-  def create_transaction(values = { notes: "C'est pas important" })
-    @transaction_attributes.merge! values
+  describe "#create" do
+    let(:transaction) { FactoryGirl.build :comptes_transaction }
+    subject { transaction }
 
-    Comptes::Transaction.new @transaction_attributes
-  end
+    it_behaves_like "a valid model"
 
-  def make_transaction(values = {})
-    transaction = create_transaction(values)
-
-    return transaction, transaction.save
-  end
-
-  context "Validation à la création" do
-
-    it 'creates with correct parameters' do
-      transaction = create_transaction
-
-      expect(transaction).to be_valid
+    describe "with notes" do
+      before { transaction.notes = "quelques notes" }
+      it_behaves_like "a valid model"
     end
 
-    it 'is valid without a note' do
-      transaction = create_transaction notes: ''
-
-      expect(transaction).to be_valid
+    describe "without titre" do
+      before { transaction.titre = "" }
+      it_behaves_like "an invalid model"
     end
 
-    it "n'est pas valide sans titre" do
-      @transaction_attributes.delete :titre
-      transaction = Comptes::Transaction.new @transaction_attributes
-
-      expect(transaction).not_to be_valid
+    describe "without somme" do
+      before { transaction.somme = nil }
+      it_behaves_like "an invalid model"
     end
 
-    it "n'est pas valide sans somme" do
-      @transaction_attributes.delete :somme
-      transaction = Comptes::Transaction.new @transaction_attributes
-
-      expect(transaction).not_to be_valid
+    describe "with an alphabetic somme" do
+      before { transaction.somme = "abcde" }
+      it_behaves_like "an invalid model"
     end
 
-    it "n'est pas valide avec une somme alphabétique" do
-      transaction = create_transaction somme: 'abcde'
-
-      expect(transaction).not_to be_valid
+    describe "without jour" do
+      before { transaction.jour = nil }
+      it_behaves_like "an invalid model"
     end
 
-    it "n'est pas valide sans date" do
-      @transaction_attributes.delete :jour
-      transaction = Comptes::Transaction.new @transaction_attributes
-
-      expect(transaction).not_to be_valid
-    end
-
-    it "n'est pas valide sans compte" do
-      @transaction_attributes.delete :compte
-      transaction = Comptes::Transaction.new @transaction_attributes
-
-      expect(transaction).not_to be_valid
-    end
-
-    it "n'est pas valide sans type", todo: true do
-      @transaction_attributes.delete :type_paiement
-      transaction = Comptes::Transaction.new @transaction_attributes
-
-      expect(transaction).not_to be_valid
-    end
-
-    it "n'est pas valide avec un type erronné", todo: true do
-      @transaction_attributes[:type_paiement] = -1
-      transaction = Comptes::Transaction.new @transaction_attributes
-
-      expect(transaction).not_to be_valid
+    describe "without compte" do
+      before { transaction.compte = nil }
+      it_behaves_like "an invalid model"
     end
 
   end
 
-  context "Operations a la création" do
+  describe "effects on compte" do
+    let!(:compte) { FactoryGirl.create :comptes_compte }
+    let!(:initial_solde) { compte.solde }
+    let(:transaction) { FactoryGirl.build :comptes_transaction, compte: compte }
 
-    it "fait varier le solde du compte" do
-      montant = 1200
-      expect {
-        make_transaction(somme: montant)
-      }.to change { @compte.solde }.by(montant)
+    subject { compte }
 
-      montant = -180
-      expect {
-        make_transaction(somme: montant)
-      }.to change { @compte.solde }.by(montant)
+    describe "change compte solde" do
+
+      it "does not affect before save" do
+        expect(subject).to have_solde initial_solde
+      end
+
+      describe "by 0" do
+        before do
+          transaction.somme = 0
+          transaction.save
+        end
+
+        it { is_expected.to have_solde initial_solde }
+      end
+
+      describe "by a positive somme" do
+        before do
+          transaction.somme = 1200
+          transaction.save
+        end
+
+        it { is_expected.to have_solde initial_solde + 12 }
+      end
+
+      describe "by a negative somme" do
+        before do
+          transaction.somme = -180
+          transaction.save
+        end
+
+        it { is_expected.to have_solde initial_solde - 1.8 }
+      end
+
     end
 
-    it "enregistre les changements de solde" do
-      make_transaction(somme: 1200)
-
-      expect(Comptes::Compte.find(@compte.id).solde).to eq(@compte.solde)
-    end
-
-    it "ne touche pas le solde du compte sans save" do
-      montant = 100
-      transaction = nil
-
-      expect {
-        transaction = create_transaction(somme: montant)
-      }.not_to change { @compte.solde }
-
-      expect {
+    describe "on transaction destruction" do
+      before do
         transaction.save
-      }.to change { @compte.solde }.by montant
+        transaction.destroy
+      end
+
+      it { is_expected.to have_solde initial_solde }
     end
 
   end
 
-  context "Operations à la suppression" do
+  describe "categories" do
+    let!(:category_1) { FactoryGirl.create :comptes_category, nom: "category_1" }
+    let!(:category_2) { FactoryGirl.create :comptes_category, nom: "category_2" }
 
-    it "recrédite le compte après une suppression" do
-      montant = -1200
+    describe 'at creation' do
+      let(:transaction) { FactoryGirl.build :comptes_transaction }
+      subject { transaction }
 
-      transaction, success = make_transaction somme: montant
-      expect(transaction).not_to be_nil
+      describe "through #new" do
+        let(:particular_transaction) { FactoryGirl.build :comptes_transaction, categorizations_attributes: [ { category_id: category_1.id } ] }
+        subject { particular_transaction }
 
-      expect {
-        transaction.destroy
-      }.to change{ Comptes::Compte.find(@compte.id).solde }.by(-montant)
+        pending "until an implementation is found" do
+          it_behaves_like "a valid model"
+        end
+      end
+
+      describe "through #categories#<<" do
+        before { transaction.categories << category_1 }
+
+        pending "until an implementation is found" do
+          it_behaves_like "a valid model"
+        end
+      end
+
+      describe "utilise #categorizations#build" do
+        before { transaction.categorizations.build category: category_1 }
+
+        pending "until an implementation is found" do
+          it_behaves_like "a valid model"
+        end
+      end
+    end
+
+    describe "at update" do
+      let(:transaction) { FactoryGirl.create :comptes_transaction }
+
+      before do
+        transaction.categories << category_1
+        transaction.save
+      end
+
+      specify { expect(transaction.categories).to include category_1 }
     end
 
   end

@@ -1,0 +1,71 @@
+<%= form_for @transaction.becomes(Comptes::Transaction), remote: remote, html: { class: "form-horizontal", role: "form" } do |form| %>
+  <div id="transaction-errors">
+    <% if @transaction.errors.any? %>
+      <h2><%= pluralize(@transaction.errors.count, "error") %> prohibited this transaction from being saved:</h2>
+
+      <ul>
+      <% @transaction.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+      </ul>
+    <% end %>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :titre, class: "col-md-3 control-label" %>
+    <div class="col-md-9">
+      <%= form.text_field :titre, class: "form-control", placeholder: "Titre de la transaction", required: "" %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :somme, class: "col-md-3 control-label" %>
+    <div class="col-md-9">
+      <%= form.number_field :somme, value: (@transaction.new_record? ? '' : @transaction.somme_formattee(false)), class: "form-control", step: 0.01, placeholder: "Montant de la transaction", required: "" %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :compte_id, "Compte", class: "col-md-3 control-label" %>
+    <%
+    compte_options = {}
+    compte_options[:selected] = @transaction.compte.id if @transaction.compte
+    %>
+    <div class="col-md-9">
+      <%= form.collection_select(:compte_id, @comptes, :id, :nom, compte_options, class: "form-control", required: "") %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :jour, "Date", class: "col-md-3 control-label" %>
+    <div class="col-md-9">
+      <%= form.date_field :jour, value: Date.today,  placeholder: "jj/mm/aaaa", required: "" %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :type, "Type de transaction", class: "col-md-3 control-label" %>
+    <div class="col-md-9">
+      <%
+      type_options = {}
+      type_options[:selected] = Comptes::TransactionsController::Types.from_class(@transaction).value if @transaction.type_name
+      %>
+      <%= form.collection_select(:type, @types, :value, :name, type_options, class: "form-control", required: "", readonly: !@transaction.new_record?) %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :categories, "Catégories", class: "col-md-3 control-label" %>
+    <div class="col-md-9">
+      <%
+      categories_options = {}
+      categories_options[:selected] = @transaction.categories.collect { |categorie| categorie.id }
+      %>
+      <%= form.collection_select(:categories, @categories, :id, :nom, categories_options, class: "form-control", multiple: true) %>
+    </div>
+  </div>
+
+  <div class="col-md-offset-3 col-md-9">
+    <%= form.submit "#{@transaction.new_record? ? "Ajouter" : "Éditer"} l'opération", class: "btn btn-primary" %>
+  </div>
+<% end %>

@@ -1,16 +1,49 @@
+require "enum_class"
+
 module Comptes
 
   class TransactionsController < ApplicationController
+    Types = EnumClass.create_series [:default, :monnaie, :carte]
+    class << Types
+      def get_class type
+        case type
+        when Types.MONNAIE
+          Comptes::TransactionMonnaie
+        when Types.CARTE
+          Comptes::TransactionCarte
+        else
+          Comptes::Transaction
+        end
+      end
 
-    def index
-      @transactions = Transaction.order(jour: :desc, updated_at: :desc)
-      if params.key? :compte_id
-        @transactions.where!(compte_id: params[:compte_id])
+      def from_class transaction
+        case transaction
+        when Comptes::TransactionCarte
+          Types.CARTE
+        when Comptes::TransactionMonnaie
+          Types.MONNAIE
+        when Comptes::Transaction
+          Types.DEFAULT
+        else
+          nil
+        end
       end
     end
 
+    before_action :get_allowed_resources, only: [:ajouter, :edit, :update]
+
+    @transaction_type = nil
+
+    def index
+      @transactions = Transaction.all
+      if params.key? :compte_id
+        @transactions.where!(compte_id: params[:compte_id])
+      end
+      @transactions = @transactions.paginate(page: params[:page], per_page: 20).order(jour: :desc, updated_at: :desc)
+    end
+
     def ajouter
-      @compte_selectionne = Comptes::Compte.find_by_id params[:compte_id]
+      @transaction = Transaction.new compte: Comptes::Compte.find_by_id(params[:compte_id])
     end
 
     # def new
@@ -19,9 +52,19 @@ module Comptes
     def create
       parameters = format_params(transaction_params)
 
-      @transaction = Transaction.new parameters
+      categories = get_categories parameters.delete(:categories)
 
-      if @transaction.save
+      transaction_class = Types.get_class @transaction_type
+      @transaction = transaction_class.new parameters
+
+      has_errors = false
+      unless @transaction_type
+        @transaction.errors.add :type, "Type de transaction inconnu"
+        has_errors = true
+      end
+
+      has_errors |= !@transaction.save
+      unless has_errors
         respond_to do |format|
           format.html { redirect_to @transaction }
           format.json do
@@ -31,7 +74,8 @@ module Comptes
               somme: ComptesHelper.decode_amount(@transaction.somme),
               compte: @transaction.compte.nom,
               date: @transaction.jour_formatte,
-              paiement: @transaction.paiement
+              type: @transaction.type_name,
+              categories: @transaction.categories.collect{ |categorie| categorie.nom }.join(', ')
             }}
           end
           format.js {}
@@ -55,20 +99,23 @@ module Comptes
 
     def update
       @transaction = Transaction.find_by_id params[:id]
+
       unless @transaction
         respond_to do |format|
-          format.html { render :update }
+          format.html { render :edit }
         end
       end
 
       parameters = format_params transaction_params
+      @transaction.categories = get_categories parameters.delete(:categories)
+
       if @transaction.update parameters
         respond_to do |format|
           format.html { render :show }
         end
       else
         respond_to do |format|
-          format.html { render :update }
+          format.html { render :edit }
         end
       end
     end
@@ -90,7 +137,7 @@ module Comptes
 
     private
     def transaction_params
-      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type_paiement)
+      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, { categories: [] }, { categorizations_attributes: [ :categorie_id ] })
     end
 
     # Formate les parametres de la transaction
@@ -99,9 +146,23 @@ module Comptes
       somme = parameters[:somme]
       parameters[:somme] = ComptesHelper.encode_amount somme if ApplicationHelper::is_a_number? somme
 
+      transaction_type = parameters.delete(:type).to_i if parameters[:type]
+      @transaction_type = Types.value_of transaction_type if Types.is_valid? transaction_type
+
       parameters
     end
 
+    def get_categories category_ids
+      category_ids ||= []
+
+      category_ids.collect{ |id| Category.find_by_id id }.delete_if(&:nil?)
+    end
+
+    def get_allowed_resources
+      @categories = Category.order(nom: :asc)
+      @comptes = Compte.order(nom: :asc)
+      @types = Comptes::TransactionsController::Types
+    end
   end
 
 end

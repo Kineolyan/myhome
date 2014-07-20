@@ -1,0 +1,17 @@
+<% if @comptes_category %>
+
+<h1>Edition de <%= @comptes_category.nom %></h1>
+
+<%= render 'form' %>
+
+<%= link_to ApplicationHelper.glyphicon("eye-open", { text: 'Voir'}), edit_comptes_category_path(@comptes_category) %> |
+
+<% else %>
+
+<p>
+  La catégorie demandéé (<%= params[:id] %>) n'existe pas.
+</p>
+
+<% end %>
+
+<%= link_to ApplicationHelper.glyphicon("arrow-left", { text: 'Back'}), comptes_categories_path %>

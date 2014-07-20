@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe HomeController do
+RSpec.describe HomeController, type: :controller do
 
   it "rend welcome accessible" do
     get :welcome

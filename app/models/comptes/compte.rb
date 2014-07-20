@@ -12,7 +12,11 @@ module Comptes
     end
 
     def solde
-      ComptesHelper.decode_amount(solde_historique + Transaction.where(compte_id: id).sum(:somme))
+      total_transactions = Transaction.where(compte_id: id).sum(:somme)
+      # Ne pas compter les paiements en monnaie
+      total_tansactions_monnaie = TransactionMonnaie.where(compte_id: id).sum(:somme)
+
+      ComptesHelper.decode_amount(solde_historique + (total_transactions - total_tansactions_monnaie))
     end
   end
 

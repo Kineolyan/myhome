@@ -11,7 +11,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140617203241) do
+ActiveRecord::Schema.define(version: 20140625173508) do
+
+  create_table "comptes_categories", force: true do |t|
+    t.string   "nom"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "comptes_categorizations", force: true do |t|
+    t.integer  "transaction_id"
+    t.integer  "category_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "comptes_categorizations", ["category_id"], name: "index_comptes_categorizations_on_category_id"
+  add_index "comptes_categorizations", ["transaction_id"], name: "index_comptes_categorizations_on_transaction_id"
 
   create_table "comptes_comptes", force: true do |t|
     t.string   "nom"
@@ -28,7 +44,7 @@ ActiveRecord::Schema.define(version: 20140617203241) do
     t.integer  "compte_id"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "type_paiement"
+    t.string   "type"
   end
 
   add_index "comptes_transactions", ["compte_id"], name: "index_comptes_transactions_on_compte_id"

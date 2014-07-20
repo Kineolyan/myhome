@@ -1,0 +1,21 @@
+<% if notice %>
+  <p id="alert alert-success"><%= notice %></p>
+<% end %>
+
+<% if @comptes_category %>
+
+<p>
+  Nom : <strong><%= @comptes_category.nom %></strong>
+</p>
+
+<%= link_to ApplicationHelper.glyphicon(:pencil, { text: 'Edit'}), edit_comptes_category_path(@comptes_category) %> |
+
+<% else %>
+
+<p>
+  La catégorie demandéé (<%= params[:id] %>) n'existe pas.
+</p>
+
+<% end %>
+
+<%= link_to ApplicationHelper.glyphicon("arrow-left", { text: 'Back'}), comptes_categories_path %>

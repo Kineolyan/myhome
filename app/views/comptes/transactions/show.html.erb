@@ -8,8 +8,12 @@
 
 <p>
   Date : <%= @transaction.jour_formatte %><br/>
-  Type de paiement : <%= Comptes::Transaction::TypePaiement.value_of(@transaction.type_paiement).name %><br/>
+  Type de paiement : <%= @transaction.type_name %><br/>
   Compte : <%= @transaction.compte.nom %>
+</p>
+
+<p>
+  Catégories: <%= @transaction.categories.collect{ |categorie| categorie.nom }.join ', ' %>
 </p>
 
 <p>
