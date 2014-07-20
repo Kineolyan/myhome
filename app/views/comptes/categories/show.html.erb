@@ -3,6 +3,7 @@
 <% end %>
 
 <% if @comptes_category %>
+<% provide :title, "Catégorie #{@comptes_category.nom}" %>
 
 <p>
   Nom : <strong><%= @comptes_category.nom %></strong>
@@ -11,6 +12,7 @@
 <%= link_to ApplicationHelper.glyphicon(:pencil, { text: 'Edit'}), edit_comptes_category_path(@comptes_category) %> |
 
 <% else %>
+<% provide :title, "Catégorie inexistante" %>
 
 <p>
   La catégorie demandéé (<%= params[:id] %>) n'existe pas.
