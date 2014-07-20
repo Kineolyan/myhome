@@ -4,6 +4,7 @@ namespace :server do
     command = "rails server"
     command << " --daemon" if args[:daemon]
     command << " -e #{args[:env]}" if args[:env]
+    command << " > /dev/null" if args[:silent]
 
     command
   end
@@ -54,5 +55,8 @@ namespace :server do
       puts "No daemon to stop"
     end
   end
+
+  desc "Restart a running daemon server"
+  task restart: [ :stop, :daemon ]
 
 end
