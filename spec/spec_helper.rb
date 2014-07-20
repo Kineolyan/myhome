@@ -39,6 +39,8 @@ def configure_rspec
     # as the one that triggered the failure.
     Kernel.srand config.seed
 
+    config.include Capybara::DSL
+
     config.expect_with :rspec do |expectations|
       # Enable only the newer, non-monkey-patching expect syntax.
       # For more details, see:
