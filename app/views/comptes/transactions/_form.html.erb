@@ -1,15 +1,5 @@
 <%= form_for @transaction.becomes(Comptes::Transaction), remote: remote, html: { class: "form-horizontal", role: "form" } do |form| %>
-  <div id="transaction-errors">
-    <% if @transaction.errors.any? %>
-      <h2><%= pluralize(@transaction.errors.count, "error") %> prohibited this transaction from being saved:</h2>
-
-      <ul>
-      <% @transaction.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
-      <% end %>
-      </ul>
-    <% end %>
-  </div>
+  <%= render "shared/form_errors", model: @transaction %>
 
   <div class="form-group">
     <%= form.label :titre, class: "col-md-3 control-label" %>
