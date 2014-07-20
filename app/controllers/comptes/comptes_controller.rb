@@ -22,6 +22,7 @@ module Comptes
 
     def show
       @compte = Compte.find_by_id(params[:id])
+      @transactions = @compte.transactions.limit(5)
     end
 
     def edit

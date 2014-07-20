@@ -1,3 +1,5 @@
 <h1>Dernières transactions</h1>
 
+<%= will_paginate @transactions %>
 <%= render partial: 'transactions', object: @transactions %>
+<%= will_paginate @transactions %>

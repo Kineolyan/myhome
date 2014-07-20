@@ -35,10 +35,11 @@ module Comptes
     @transaction_type = nil
 
     def index
-      @transactions = Transaction.order(jour: :desc, updated_at: :desc)
+      @transactions = Transaction.all
       if params.key? :compte_id
         @transactions.where!(compte_id: params[:compte_id])
       end
+      @transactions = @transactions.paginate(page: params[:page], per_page: 20).order(jour: :desc, updated_at: :desc)
     end
 
     def ajouter
