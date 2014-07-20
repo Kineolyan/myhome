@@ -24,6 +24,9 @@ gem 'turbolinks'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 1.2'
 
+gem 'will_paginate', '3.0.4'
+gem 'bootstrap-will_paginate', '0.0.9'
+
 # Use bootstrap gem
 # Use LESS for stylesheets and particularly for bootstrap
 # gem 'less-rails'
