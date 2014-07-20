@@ -24,6 +24,9 @@ gem 'turbolinks'
 # Build JSON APIs with ease. Read more: https://github.com/rails/jbuilder
 gem 'jbuilder', '~> 1.2'
 
+gem 'will_paginate', '3.0.4'
+gem 'bootstrap-will_paginate', '0.0.9'
+
 # Use bootstrap gem
 # Use LESS for stylesheets and particularly for bootstrap
 # gem 'less-rails'
@@ -53,8 +56,10 @@ group :test do
   gem 'spork-rails', github: 'railstutorial/spork-rails'
   gem 'guard-spork'
 
+  gem 'selenium-webdriver', '2.35.1'
+  gem 'capybara', '2.4.1'
+
   gem 'cucumber-rails', '>= 1.4.0', require: false
-  gem 'webrat', '>= 0.7.3'
 
   gem 'database_cleaner', '>= 1.2.0'
 end
