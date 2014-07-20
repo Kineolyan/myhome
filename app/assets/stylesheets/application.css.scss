@@ -10,8 +10,9 @@
  *
  *= require_self
  *= require_tree .
- *= require bootstrap.min
  */
+
+@import "bootstrap";
 
 body {
   padding-top: 10px;

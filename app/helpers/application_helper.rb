@@ -26,4 +26,9 @@ module ApplicationHelper
     "<i class=\"glyphicon glyphicon-#{name}#{additional_classes}\">#{options[:text]}</i>".html_safe
   end
 
+  TITLE = "My home"
+  def self.page_title title = nil
+    title.nil? || title.empty? ? TITLE : "#{TITLE} | #{title}"
+  end
+
 end

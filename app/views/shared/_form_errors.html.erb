@@ -1,0 +1,15 @@
+<%
+  wrapper_id ||= "error_explanations"
+%>
+
+<% if model.errors.any? %>
+  <div id="<%= wrapper_id %>" class="alert alert-danger">
+    <strong>La procédure est bloquée par <%= pluralize(model.errors.count, "erreur") %> :</strong>
+
+    <ul>
+    <% model.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>

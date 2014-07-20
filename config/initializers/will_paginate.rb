@@ -1,6 +1,12 @@
 # https://gist.github.com/1214011
 
 module WillPaginate
+
+  module ViewHelpers
+    self.pagination_options[:inner_window] = 2
+    self.pagination_options[:outer_window] = 0
+  end
+
 	module ActionView
 		def will_paginate(collection = nil, options = {})
 			options[:renderer] ||= BootstrapLinkRenderer
@@ -28,4 +34,5 @@ module WillPaginate
 
 		end
 	end
+
 end

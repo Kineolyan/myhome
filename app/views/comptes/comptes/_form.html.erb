@@ -1,14 +1,5 @@
 <%= form_for @compte, html: {class: "form-horizontal"} do |form| %>
-  <% if @compte.errors.any?%>
-  <div id="error_explanation">
-    <h2><%= pluralize(@compte.errors.count, "erreur") %> empêchent le compte d'être créé:</h2>
-    <ul>
-    <% @compte.errors.full_messages.each do |msg| %>
-      <li><%= msg %></li>
-    <% end %>
-    </ul>
-  </div>
-  <% end  %>
+  <%= render "shared/form_errors", model: @compte %>
 
   <div class="form-group">
     <%= form.label :nom, class: "col-md-3 control-label" %>
