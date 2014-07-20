@@ -4,48 +4,44 @@ describe Comptes::Compte do
 
   before(:each) do
     DatabaseCleaner.clean
-    @compte = Comptes::Compte.create nom: "Compte de test", solde_historique: 1370
   end
 
-  def creer_compte
-    Comptes::Compte.new nom: "Compte de chouchou", solde_historique: 100
+  let(:compte) { FactoryGirl.build :comptes_compte }
+  subject { compte }
+
+  it { is_expected.to be_valid }
+
+  describe "without nom" do
+    before(:each) { compte.nom = nil }
+
+    it { is_expected.not_to be_valid }
   end
 
-  it "peut être créé" do
-    compte = creer_compte
-    expect(compte).to be_valid
+  describe "without solde_historique" do
+    before(:each) { compte.solde_historique = nil }
+
+    it { is_expected.not_to be_valid }
   end
 
-  it "ne peut pas être créé sans nom" do
-    compte = Comptes::Compte.new solde_historique: 100
-    expect(compte).not_to be_valid
+  describe "with an alphabetical solde_historique" do
+    before(:each) { compte.solde_historique = "abcde" }
+
+    it { is_expected.not_to be_valid }
   end
 
-  it "ne peut pas être créé sans solde" do
-    compte = Comptes::Compte.new nom: "Compte de chouchou"
-    expect(compte).not_to be_valid
+  describe "avoid duplication on nom" do
+    before(:each) { FactoryGirl.create :comptes_compte }
+
+    it { is_expected.not_to be_valid }
   end
 
-  it "ne peut pas être créé avec un solde alphabétique" do
-    compte = Comptes::Compte.new nom: "Mon compte", solde_historique: "abcde"
-    expect(compte).not_to be_valid
-  end
+  describe "on saved compte" do
+    before(:each) { compte.save! }
 
-  it "ne peut pas créer un compte avec un nom existant" do
-    compte = creer_compte
-    expect(compte).to be_valid
-    expect(compte.save).to be true
-
-    compte_deux = creer_compte
-    expect(compte_deux).not_to be_valid
-  end
-
-  it "peut changer de nom" do
-    @compte.nom = "Nouveau mom du compte"
-    expect(@compte.save).to be true
-
-    database_compte = Comptes::Compte.find(@compte.id)
-    expect(database_compte.nom).to eq(@compte.nom)
+    it "change of nom" do
+      compte.nom = "Nouveau mom du compte"
+      expect(compte.save).to be true
+    end
   end
 
   it "peut changer de solde" do

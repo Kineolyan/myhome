@@ -41,12 +41,22 @@ group :development do
   gem 'binding_of_caller'
 end
 
-group :development, :test do
-  gem 'rspec-rails', '>= 3.0'
-  gem 'cucumber-rails', '>= 1.4.0', require: false
-  gem 'database_cleaner', '>= 1.2.0'
-  gem 'webrat', '>= 0.7.3'
+group :test do
   gem 'pry'
+
+  gem 'rspec-rails', '>= 3.0'
+  gem 'fuubar'
+
+  gem 'factory_girl_rails'
+
+  gem 'guard-rspec'
+  gem 'spork-rails', github: 'railstutorial/spork-rails'
+  gem 'guard-spork'
+
+  gem 'cucumber-rails', '>= 1.4.0', require: false
+  gem 'webrat', '>= 0.7.3'
+
+  gem 'database_cleaner', '>= 1.2.0'
 end
 
 # Use ActiveModel has_secure_password

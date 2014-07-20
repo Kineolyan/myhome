@@ -6,62 +6,62 @@ describe DateMarker::Event do
     DatabaseCleaner.clean
   end
 
-  context "creation" do
-    it "creates a new event" do
-      event = DateMarker::Event.new({ title: "Test", day: Date.new(1988, 9, 13) })
-      expect(event.save).to be_true
+  describe "creation" do
+    let(:event) { FactoryGirl.build :datemarker_event }
+
+    specify { expect(event.save).to be true  }
+
+    describe "accepts 'stringged' date" do
+      before(:each) { event.day = '2014-01-01' }
+
+      specify { expect(event.save).to be true  }
     end
 
-    it "creates a new event with 'stringged' date" do
-      event = DateMarker::Event.new({ title: "Test", day: '2014-01-01' })
-      expect(event.save).to be_true
+    describe "without title" do
+      before(:each) { event.title = nil }
+
+      specify { expect(event.save).to be false  }
     end
 
-    it "cannot create an event without title" do
-      params = { day: Date.today }
-      event = DateMarker::Event.new params
-      expect(event.save).to be_false
+    describe "without day" do
+      before(:each) { event.day = nil }
 
-      params[:title] = "test"
-      event = DateMarker::Event.new params
-      expect(event.save).to be_true
-    end
-
-    it "cannot create an event without day" do
-      params = { title: "test" }
-      event = DateMarker::Event.new params
-      expect(event.save).to be_false
-
-      params[:day] = Date.today
-      event = DateMarker::Event.new params
-      expect(event.save).to be_true
+      specify { expect(event.save).to be false }
     end
   end
 
-  context "Period calculation" do
-    it "gets the correct number of days" do
-      event_day = Date.today
-      event_day -= 5
+  describe "Period calculation" do
+    describe "#number_of_days" do
+      let(:event) { FactoryGirl.create :datemarker_event, day: Date.today - 5 }
 
-      event = DateMarker::Event.new title: "test", day: event_day
-      expect(event.number_of_days).to eql 5
+      specify { expect(event.number_of_days).to eql 5 }
     end
 
-    it "gets the correct number of months" do
-      event_day = Date.today <<  5
-      event = DateMarker::Event.new title: "test", day: event_day
+    describe "#number_of_months" do
+      let(:event) { FactoryGirl.create :datemarker_event, day: Date.today << 5 }
 
-      expect(event.number_of_months).to eql 5
+      specify { expect(event.number_of_months).to eql 5 }
     end
 
-    it "gets the correct number of years" do
-      event_day = Date.today << 7
+    describe "#number_of_months" do
+      let(:event) { FactoryGirl.create :datemarker_event, day: Date.today << 5 }
 
-      event = DateMarker::Event.new title: "test", day: event_day
-      expect(event.number_of_years).to eql 0
+      specify { expect(event.number_of_months).to eql 5 }
+    end
 
-      event.day <<= 24
-      expect(event.number_of_years).to eql 2
+    describe "#number_of_years" do
+
+      describe "on the same year" do
+        let(:event) { FactoryGirl.create :datemarker_event, day: Date.today }
+
+        specify { expect(event.number_of_years).to eq 0 }
+      end
+
+      describe "400 days ago" do
+        let(:event) { FactoryGirl.create :datemarker_event, day: 400.days.ago }
+
+        specify { expect(event.number_of_years).to eq 1 }
+      end
     end
   end
 end
