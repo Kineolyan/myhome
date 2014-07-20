@@ -53,8 +53,10 @@ group :test do
   gem 'spork-rails', github: 'railstutorial/spork-rails'
   gem 'guard-spork'
 
+  gem 'selenium-webdriver', '2.35.1'
+  gem 'capybara', '2.4.1'
+
   gem 'cucumber-rails', '>= 1.4.0', require: false
-  gem 'webrat', '>= 0.7.3'
 
   gem 'database_cleaner', '>= 1.2.0'
 end
