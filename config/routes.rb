@@ -16,6 +16,11 @@ Myhome::Application.routes.draw do
       resources :transactions, only: [ :index ] do
         get "ajouter", on: :collection
       end
+
+      member do
+        get :solde
+        post :solde
+      end
     end
 
     resources :categories

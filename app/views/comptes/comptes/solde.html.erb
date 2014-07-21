@@ -1,0 +1,30 @@
+<% provide :page_title, "Comptes - Solde interactif" %>
+<% provide :title, "Solde interactif" %>
+
+<% if @compte %>
+
+	<%= form_for @compte, url: { action: :solde }, method: :post, remote: true, html: { class: "form-inline row", role: "form" } do |f| %>
+	  <div class="form-group col-md-8 col-md-offset-2">
+	    <div class="input-group">
+      	<div class="input-group-addon">
+					<%= label_tag :date, "Date" %>
+				</div>
+
+				<%= date_field_tag :date, "", class: "form-control", max: Date.today, required: true, value: Date.today %>
+
+	     	<div class="input-group-btn">
+					<%= submit_tag "Voir le solde", class: "btn" %>
+				</div>
+	    </div>
+	  </div>
+	<% end %>
+
+	<ul id="solde-values">
+		<%= render "solde", date: @date, solde: @solde if @date %>
+	</ul>
+
+<% else %>
+
+	<p>Le compte <%= params[:id] %> n'existe pas</p>
+
+<% end %>

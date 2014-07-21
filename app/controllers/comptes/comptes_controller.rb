@@ -1,6 +1,8 @@
 module Comptes
 
   class ComptesController < ApplicationController
+    before_action :get_compte, [:show, :edit, :udpate, :solde]
+
     def index
       @comptes = Compte.all
     end
@@ -21,16 +23,13 @@ module Comptes
     end
 
     def show
-      @compte = Compte.find_by_id(params[:id])
-      @transactions = @compte.transactions.limit(5)
+      @transactions = @compte.transactions.limit(5) if @compte
     end
 
     def edit
-      @compte = Compte.find_by_id(params[:id])
     end
 
     def update
-      @compte = Compte.find_by_id params[:id]
       unless @compte
         respond_to do |format|
           format.html { render :update }
@@ -55,17 +54,30 @@ module Comptes
       end
     end
 
+    def solde
+      if request.post?
+        if @compte && ApplicationHelper::is_a_date?(params[:date])
+          @date = Date.parse params[:date]
+          @solde = ComptesHelper.format_amount @compte.solde(until: @date), true
+        end
+      end
+    end
+
     private
-    def comptes_params
-      params.require(:comptes_compte).permit(:nom, :solde_historique)
-    end
+      def comptes_params
+        params.require(:comptes_compte).permit(:nom, :solde_historique)
+      end
 
-    def format_params parameters
-      solde_historique = parameters[:solde_historique]
-      parameters[:solde_historique] = ComptesHelper.encode_amount solde_historique if ApplicationHelper.is_a_number? solde_historique
+      def format_params parameters
+        solde_historique = parameters[:solde_historique]
+        parameters[:solde_historique] = ComptesHelper.encode_amount solde_historique if ApplicationHelper.is_a_number? solde_historique
 
-      parameters
-    end
+        parameters
+      end
+
+      def get_compte
+        @compte = Compte.find_by_id params[:id]
+      end
   end
 
 end # module Comptes

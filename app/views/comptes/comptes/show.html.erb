@@ -11,7 +11,8 @@
 
 <p>
 	<%= link_to "Voir toutes les transactions", comptes_compte_transactions_path(@compte) %><br/>
-	<%= link_to "Ajouter des transactions", ajouter_comptes_compte_transactions_path(@compte) %>
+	<%= link_to "Ajouter des transactions", ajouter_comptes_compte_transactions_path(@compte) %><br/>
+	<%= link_to "Voir le solde interactif", solde_comptes_compte_path(@compte) %>
 </p>
 
 <% else %>
