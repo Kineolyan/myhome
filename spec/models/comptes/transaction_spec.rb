@@ -144,4 +144,13 @@ describe Comptes::Transaction do
 
   end
 
+  describe "#until" do
+    let(:compte) { FactoryGirl.create :comptes_compte }
+    let!(:transaction1) { FactoryGirl.create :comptes_transaction, compte: compte, somme: -500, jour: 3.months.ago }
+    let!(:transaction2) { FactoryGirl.create :comptes_transaction, compte: compte, somme: -300, jour: 2.months.ago }
+    let!(:transaction3) { FactoryGirl.create :comptes_transaction, compte: compte, somme: 250, jour: 1.month.ago }
+
+    specify { expect(Comptes::Transaction.until(2.months.ago + 1.day)).to eq [ transaction1, transaction2 ] }
+  end
+
 end
