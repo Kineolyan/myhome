@@ -7,6 +7,13 @@ FactoryGirl.define do
   factory :comptes_compte, class: "Comptes::Compte" do
     nom "Compte de test"
     solde_historique 1370
+
+    factory :comptes_compte_with_transactions do
+      after(:create) do |compte|
+        3.times { compte.transactions << FactoryGirl.create(:comptes_transaction, compte: compte) }
+        compte.save!
+      end
+    end
   end
 
   factory :comptes_transaction, class: "Comptes::Transaction" do

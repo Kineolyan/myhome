@@ -12,6 +12,8 @@ module Comptes
     validates :jour, presence: true
     validates :compte, presence: true
 
+    scope :until, ->(time) { where("jour < ?", time) }
+
     def type_name
       "Défaut"
     end

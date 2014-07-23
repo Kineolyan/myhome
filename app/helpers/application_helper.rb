@@ -14,6 +14,15 @@ module ApplicationHelper
     ! /^-?\d+(\.\d+)?$/.match(value.to_s).nil?
   end
 
+  def self.is_a_date? value
+    begin
+      Date.parse value
+      true
+    rescue ArgumentError
+      false
+    end
+  end
+
   # Create a Bootstrap glyphicon in a tag
   # Options can contains:
   #   :btn to create a button. Ex { btn: "danger" }

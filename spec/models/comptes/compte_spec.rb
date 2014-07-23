@@ -60,4 +60,21 @@ describe Comptes::Compte do
     # expect(database_compte.solde).to eq(@compte.solde)
   end
 
+  describe "#solde" do
+    let!(:compte_test) { FactoryGirl.create :comptes_compte, solde_historique: 1000 }
+    before do
+      FactoryGirl.create :comptes_transaction, compte: compte_test, somme: -500, jour: 3.months.ago # 500
+      FactoryGirl.create :comptes_transaction, compte: compte_test, somme: -300, jour: 2.months.ago # 200
+      FactoryGirl.create :comptes_transaction, compte: compte_test, somme: 250, jour: 1.month.ago # 450
+    end
+
+    it "donne le solde total" do
+      expect(compte_test.solde).to be_within(0.01).of(4.5)
+    end
+
+    it "donne le solde jusqu'a une date limite" do
+      expect(compte_test.solde(until: 2.months.ago)).to be_within(0.01).of(2)
+    end
+  end
+
 end

@@ -19,4 +19,26 @@ RSpec.describe Comptes::ComptesController, :type => :controller do
 
   end
 
+  describe "#solde" do
+    let(:compte) { FactoryGirl.create :comptes_compte}
+
+    describe "with invalid date" do
+      describe "as POST" do
+        describe "in html" do
+          before { post :solde, id: compte.id, date: "abcde" }
+          subject { response }
+
+          it { is_expected.to be_success }
+        end
+
+        describe "in Ajax" do
+          before { xhr :post, :solde, id: compte.id, date: "abcde" }
+          subject { response }
+
+          it { is_expected.to be_success }
+        end
+      end
+    end
+  end
+
 end

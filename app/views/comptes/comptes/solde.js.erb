@@ -1,0 +1,15 @@
+(function() {
+	<% if @date %>
+
+		$("<%= escape_javascript render 'solde', date: @date, solde: @solde %>").appendTo("#solde-values");
+
+	<% else %>
+
+		var alert = $("<p>");
+		alert.addClass("alert alert-danger alert-dismissible");
+		alert.html('<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>[<%= DateTime.now.strftime "%Hh%M:%S" %>] Impossible de calculer le solde');
+
+		alert.prependTo('form');
+
+	<% end %>
+})();
