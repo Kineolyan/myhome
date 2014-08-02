@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140625173508) do
+ActiveRecord::Schema.define(version: 20140802123835) do
 
   create_table "comptes_categories", force: true do |t|
     t.string   "nom"
@@ -52,6 +52,29 @@ ActiveRecord::Schema.define(version: 20140625173508) do
   create_table "date_marker_events", force: true do |t|
     t.string   "title"
     t.date     "day"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "livings", force: true do |t|
+    t.integer  "person_id"
+    t.integer  "location_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "livings", ["location_id"], name: "index_livings_on_location_id"
+  add_index "livings", ["person_id", "location_id"], name: "index_livings_on_person_id_and_location_id", unique: true
+  add_index "livings", ["person_id"], name: "index_livings_on_person_id"
+
+  create_table "locations", force: true do |t|
+    t.text     "address"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "people", force: true do |t|
+    t.text     "name"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
