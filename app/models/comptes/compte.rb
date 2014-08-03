@@ -21,7 +21,8 @@ module Comptes
         tansactions_monnaie = tansactions_monnaie.until options[:until]
       end
 
-      ComptesHelper.decode_amount(solde_historique + (all_transactions.sum(:somme) - tansactions_monnaie.sum(:somme)))
+      solde = ComptesHelper.decode_amount(solde_historique + (all_transactions.sum(:somme) - tansactions_monnaie.sum(:somme)))
+      options[:with_currency] ? ComptesHelper::format_amount(solde) : solde
     end
   end
 
