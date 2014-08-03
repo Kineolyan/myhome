@@ -44,6 +44,13 @@ describe Comptes::Transaction do
 
   end
 
+  describe "#somme_formattee" do
+    let(:transaction) { FactoryGirl.build :comptes_transaction }
+
+    specify { expect(transaction.somme_formattee).to eq "%.2f €" % [transaction.somme.to_f / 100]}
+    specify { expect(transaction.somme_formattee false).to eq "%.2f" % [transaction.somme.to_f / 100]}
+  end
+
   describe "effects on compte" do
     let!(:compte) { FactoryGirl.create :comptes_compte }
     let!(:initial_solde) { compte.solde }
