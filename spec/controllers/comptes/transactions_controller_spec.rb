@@ -4,48 +4,38 @@ RSpec.describe Comptes::TransactionsController, type: :controller do
 
   Types = Comptes::TransactionsController::Types
 
-  before(:all) do
-    DatabaseCleaner.clean
+  let!(:compte) { FactoryGirl.create :comptes_compte, solde_historique: 100 }
+  let(:transaction_data) { FactoryGirl.build :comptes_transaction, compte: compte, somme: 1200 } # => 12.00
 
-    @compte = Comptes::Compte.create(nom: 'Super compte', solde_historique: 100)
-  end
+  context "when POSTing transaction (JSON)" do
+    let(:transaction_params) { {
+      titre: transaction_data.titre,
+      somme: transaction_data.somme_formattee(false),
+      jour: transaction_data.jour,
+      compte_id: transaction_data.compte.id,
+      type: transaction_data.class.type_name
+    } }
 
-  before(:each) do
-    @operation_date = Date.new 2013, 11, 21
-    @transaction = { titre: "un titre", somme: 12.45, compte_id: @compte.id, type: Types.DEFAULT.to_i, jour: @operation_date }
-  end
+    def get_json_response options = {}
+      post_transaction "json"
+      json_response = JSON.parse(response.body, symbolize_names: true)
 
-  def get_json_response
-    @json_response = JSON.parse(response.body, symbolize_names: true)
-  end
-
-  def post_transaction format = "json"
-    post :create, format: format, comptes_transaction: @transaction
-  end
-
-  context "when POSTing a valid transaction" do
-
-    it "returns a JSON with the transaction description" do
-      post_transaction
-
-      get_json_response
       # display errors if any to help
-      if @json_response.has_key? :errors
-        @json_response[:errors].each { |field, message| puts "#{field} -> #{message}" }
+      if json_response.has_key?(:errors) && options[:show_errors]
+        json_response[:errors].each { |field, message| puts "#{field} -> #{message}" }
       end
-      expect(@json_response).not_to have_key :errors
 
-      expect(@json_response).to have_key(:transaction)
+      json_response
+    end
 
-      post_created = @json_response[:transaction]
-      expect(post_created).not_to be_nil
-      expect(post_created).to have_key(:id)
+    def post_transaction format = "json"
+      post :create, format: format, comptes_transaction: transaction_params
+    end
 
-      expect(post_created[:titre]).to eq(@transaction[:titre])
-      expect(post_created[:somme]).to eq(@transaction[:somme])
-      expect(post_created[:compte]).to eq(@compte.nom)
-      expect(post_created[:type]).to match /défaut/i
-      expect(post_created[:date]).to eq "#{@operation_date.day}/#{@operation_date.month}/#{@operation_date.year}"
+    RSpec.shared_examples "an invalid transaction" do |error_field|
+      it { is_expected.not_to have_key :transaction }
+      it { is_expected.to have_key :errors }
+      specify { expect(subject[:errors]).to have_key error_field }
     end
 
     it "creates a new transaction" do
@@ -54,115 +44,112 @@ RSpec.describe Comptes::TransactionsController, type: :controller do
       }.to change{ Comptes::Transaction.count }.by(1)
     end
 
-    it "creates a new transaction with all information" do
-      post_transaction
-
-      post_created = get_json_response()[:transaction]
-      expect(post_created).not_to be_nil
-      transaction = Comptes::Transaction.find post_created[:id]
-
-      expect(transaction.titre).to eq(@transaction[:titre])
-      expect(transaction.somme).to eq(@transaction[:somme] * 100)
-      expect(transaction.compte.id).to eq(@compte.id)
-      # TODO this may be change to a eq
-      expect(@operation_date === transaction.jour).to be true
-    end
-
     it "fait varier le solde du compte associé" do
-      solde_precedent = @compte.solde
       post_transaction
-      expect(@compte).to have_solde(solde_precedent + @transaction[:somme])
+      expect(compte).to have_solde(13)
     end
 
-    it "refuse une transaction sans titre" do
-      # enlève le nom de la transaction
-      @transaction[:titre] = ""
+    describe "response" do
+      before { @json_response = get_json_response }
 
-      post_transaction
-      get_json_response
+      subject { @json_response }
 
-      expect(@json_response).to have_key :errors
-      expect(@json_response[:errors]).to have_key :titre
+      it { is_expected.not_to have_key :errors }
+      it { is_expected.to have_key :transaction }
+
+      describe "transaction values" do
+        subject { @json_response[:transaction] }
+
+        specify { expect(subject).to have_key(:id) }
+        specify { expect(subject[:titre]).to eq transaction_params[:titre] }
+        specify { expect(subject[:somme]).to eq transaction_data.somme_formattee }
+        specify { expect(subject[:compte]).to eq compte.nom }
+        specify { expect(subject[:type]).to match /défaut/i }
+        specify { expect(subject[:jour]).to eq transaction_data.jour.strftime "%d/%m/%Y" }
+      end
+
+      describe "corresponding transaction" do
+        let(:transaction) { Comptes::Transaction.find @json_response[:transaction][:id] }
+        let(:transaction_json) { @json_response[:transaction] }
+
+        subject { transaction }
+
+        specify { expect(subject.titre).to eq transaction_params[:titre] }
+        specify { expect(subject.somme).to eq transaction_data.somme }
+        specify { expect(subject.compte.id).to eq transaction_params[:compte_id] }
+        # TODO this may be change to a eq
+        # specify { expect(subject.jour === transaction.jour).to be true }
+        specify { expect(subject.jour).to eq transaction_params[:jour] }
+      end
     end
 
-    it "refuse une transaction sans somme" do
-      # enlève la somme de la transaction
-      @transaction[:somme] = nil
+    describe "without titre" do
+      before do
+        transaction_params.delete :titre
+        @json_response = get_json_response
+      end
 
-      post_transaction
-      get_json_response
-
-      expect(@json_response).to have_key :errors
-      expect(@json_response[:errors]).to have_key :somme
+      subject { @json_response }
+      it_behaves_like "an invalid transaction", :titre
     end
 
-    it "refuse une transaction avec une somme non décimale" do
-      # enlève la somme de la transaction
-      @transaction[:somme] = "abcde"
+    describe "without somme" do
+      before do
+        transaction_params.delete :somme
+        @json_response = get_json_response
+      end
 
-      post_transaction
-      get_json_response
-
-      expect(@json_response).to have_key :errors
-      expect(@json_response[:errors]).to have_key :somme
+      subject { @json_response }
+      it_behaves_like "an invalid transaction", :somme
     end
 
-  end
+    describe "with alphabetic somme" do
+      before do
+        transaction_params[:somme] = 'abcde'
+        @json_response = get_json_response
+      end
 
-  context "on transaction types" do
-
-    it "crée une transaction par défault" do
-      @transaction[:type] = Types.DEFAULT.to_i
-
-      post_transaction
-      get_json_response
-
-      transaction = @json_response[:transaction]
-      expect(transaction[:type]).to match /défaut/i
+      subject { @json_response }
+      it_behaves_like "an invalid transaction", :somme
     end
 
-    it "crée une transaction en monnaie" do
-      @transaction[:type] = Types.MONNAIE.to_i
+    describe "transaction types" do
+      Types.each do |type|
+        describe "par #{type.name}" do
+          @type_name = Types.get_class(type).type_name
 
-      post_transaction
-      get_json_response
+          describe "on value" do
+            before do
+              transaction_params[:type] = type.value
+              @json_response = get_json_response
+            end
 
-      transaction = @json_response[:transaction]
-      expect(transaction[:type]).to match /monnaie/i
+            specify { expect(@json_response[:transaction][:type]).to match /#{@type_name}/i }
+          end
+
+          describe "on name" do
+            before do
+              transaction_params[:type] = type.name
+              @json_response = get_json_response
+            end
+
+            specify { expect(@json_response[:transaction][:type]).to match /#{@type_name}/i }
+          end
+        end
+      end
+
+      describe "de type inconnu" do
+        before do
+          transaction_params[:type] = -1
+          @json_response = get_json_response
+        end
+
+        specify { expect(Types.is_valid? transaction_params[:type]).to be false }
+        subject { @json_response }
+        it_behaves_like "an invalid transaction", :type
+      end
+
     end
-
-    it "crée une transaction par carte" do
-      @transaction[:type] = Types.CARTE.to_i
-
-      post_transaction
-      get_json_response
-
-      transaction = @json_response[:transaction]
-      expect(transaction[:type]).to match /carte/i
-    end
-
-    it "supporte les valeurs en texte" do
-      @transaction[:type] = Types.CARTE.to_i.to_s
-
-      post_transaction
-      get_json_response
-
-      transaction = @json_response[:transaction]
-      expect(transaction[:type]).to match /carte/i
-    end
-
-    it "renvoie une erreur si le type n'existe pas" do
-      faux_type = -1
-      expect(Types.is_valid? faux_type).to be false
-
-      @transaction[:type] = faux_type
-      post_transaction
-      get_json_response
-
-      expect(@json_response).to have_key :errors
-      # TODO check the returned message
-    end
-
   end
 
 end

@@ -8,12 +8,12 @@
 
 <p>
   Date : <%= @transaction.jour_formatte %><br/>
-  Type de paiement : <%= @transaction.type_name %><br/>
+  Type de paiement : <%= @transaction.class.type_name %><br/>
   Compte : <%= @transaction.compte.nom %>
 </p>
 
 <p>
-  Catégories: <%= @transaction.categories.collect{ |categorie| categorie.nom }.join ', ' %>
+  Catégories: <%= @transaction.categories.any? ? @transaction.categories.collect{ |categorie| categorie.nom }.join(', ') : "aucune" %>
 </p>
 
 <p>
