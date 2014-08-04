@@ -105,26 +105,26 @@ describe Comptes::Transaction do
       let(:transaction) { FactoryGirl.build :comptes_transaction }
       subject { transaction }
 
-      # pending "until an implementation is found" do
-      describe "through #new" do
-        let(:particular_transaction) { FactoryGirl.build :comptes_transaction, categorizations_attributes: [ { category_id: category_1.id } ] }
-        subject { particular_transaction }
+      pending "until an implementation is found" do
+        describe "through #new" do
+          let(:particular_transaction) { FactoryGirl.build :comptes_transaction, categorizations_attributes: [ { category_id: category_1.id } ] }
+          subject { particular_transaction }
 
-        it_behaves_like "a valid model"
+          it_behaves_like "a valid model"
+        end
+
+        describe "through #categories#<<" do
+          before { transaction.categories << category_1 }
+
+          it_behaves_like "a valid model"
+        end
+
+        describe "utilise #categorizations#build" do
+          before { transaction.categorizations.build category: category_1 }
+
+          it_behaves_like "a valid model"
+        end
       end
-
-      describe "through #categories#<<" do
-        before { transaction.categories << category_1 }
-
-        it_behaves_like "a valid model"
-      end
-
-      describe "utilise #categorizations#build" do
-        before { transaction.categorizations.build category: category_1 }
-
-        it_behaves_like "a valid model"
-      end
-      # end
     end
 
     describe "at update" do

@@ -13,7 +13,7 @@
 </p>
 
 <p>
-  Catégories: <%= @transaction.categories.collect{ |categorie| categorie.nom }.join ', ' %>
+  Catégories: <%= @transaction.categories.any? ? @transaction.categories.collect{ |categorie| categorie.nom }.join(', ') : "aucune" %>
 </p>
 
 <p>
