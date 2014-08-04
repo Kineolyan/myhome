@@ -64,28 +64,34 @@ module Comptes
       end
 
       has_errors |= !@transaction.save
-      unless has_errors
-        respond_to do |format|
-          format.html { redirect_to @transaction }
-          format.json do
-            render json: { transaction: {
-              id: @transaction.id,
-              titre: @transaction.titre,
-              somme: ComptesHelper.decode_amount(@transaction.somme),
-              compte: @transaction.compte.nom,
-              date: @transaction.jour_formatte,
-              type: @transaction.type_name,
-              categories: @transaction.categories.collect{ |categorie| categorie.nom }.join(', ')
-            }}
-          end
-          format.js {}
-        end
-      else
+      if has_errors
         respond_to do |format|
           format.html { render "new" }
           format.json { render json: { errors: @transaction.errors } }
           format.js {}
         end
+      end
+
+      # set the categories
+      @transaction.categories = categories
+      unless @transaction.save
+        flash[:error] = "Erreur dans l'assignation des catégories."
+      end
+
+      respond_to do |format|
+        format.html { redirect_to @transaction }
+        format.json do
+          render json: { transaction: {
+            id: @transaction.id,
+            titre: @transaction.titre,
+            somme: ComptesHelper.decode_amount(@transaction.somme),
+            compte: @transaction.compte.nom,
+            date: @transaction.jour_formatte,
+            type: @transaction.type_name,
+            categories: @transaction.categories.collect{ |categorie| categorie.nom }.join(', ')
+          }}
+        end
+        format.js {}
       end
     end
 
@@ -137,7 +143,7 @@ module Comptes
 
     private
     def transaction_params
-      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, { categories: [] }, { categorizations_attributes: [ :categorie_id ] })
+      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, { categories: [] })
     end
 
     # Formate les parametres de la transaction
