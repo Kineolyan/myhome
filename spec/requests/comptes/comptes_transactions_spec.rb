@@ -18,24 +18,57 @@ RSpec.describe "Transactions", type: :request do
 	end
 
 	describe "/comptes/:compte_id/transactions/ajouter" do
+		let(:transaction) { FactoryGirl.build :comptes_transaction, compte: compte, somme: 1234 }
+		before do
+			visit ajouter_comptes_compte_transactions_path compte
+			fill_form transaction
+		end
+
 		def submit_form
 			click_button "Ajouter l'opération"
 		end
 
+		specify {	expect { submit_form }.to change { Comptes::Transaction.count }.by 1 }
+
 		describe "without JavaScript" do
-			let(:transaction) { FactoryGirl.build :comptes_transaction, compte: compte, somme: 1234 }
-			before do
-				visit ajouter_comptes_compte_transactions_path compte
-				fill_form transaction
-			end
+			before { submit_form }
 
-			specify {	expect { submit_form }.to change { Comptes::Transaction.count }.by 1 }
+			it { is_expected.to have_content transaction.titre }
+			it { is_expected.to have_content "Catégories: #{category1.nom}" }
+		end
 
-			describe "create transaction" do
+		describe "with JavaScript" do
+			before { submit_form }
+
+			it { is_expected.to have_selector ".transaction:first-child", text: transaction.titre }
+		end
+
+		describe "Minus/Plus button" do
+			it { is_expected.to have_checked_field "comptes_transaction[negative]" }
+
+			describe "on submit" do
 				before { submit_form }
 
-				it { is_expected.to have_content transaction.titre }
-				it { is_expected.to have_content "Catégories: #{category1.nom}" }
+				it { is_expected.to have_content "-12.34 €" }
+			end
+
+			describe "on first click" do
+				before { check "comptes_transaction[negative]" }
+
+				specify { is_expected.to have_check "+" }
+				# it { is_expected.to be_selected }
+
+				describe "on submit" do
+					before { submit_form }
+
+					it { is_expected.to have_content "12.34 €" }
+				end
+
+				describe "on second click" do
+					before { uncheck "comptes_transaction[negative]" }
+
+					it { is_expected.to have_check "-" }
+				end
 			end
 		end
 	end
