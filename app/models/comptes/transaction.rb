@@ -14,7 +14,7 @@ module Comptes
 
     scope :until, ->(time) { where("jour < ?", time) }
 
-    def type_name
+    def self.type_name
       "Défaut"
     end
 

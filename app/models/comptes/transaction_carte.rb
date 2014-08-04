@@ -1,7 +1,7 @@
 module Comptes
 
   class TransactionCarte < Transaction
-    def type_name
+    def self.type_name
       "Carte"
     end
   end

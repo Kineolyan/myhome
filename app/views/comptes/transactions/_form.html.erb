@@ -38,7 +38,7 @@
     <div class="col-md-9">
       <%
       type_options = {}
-      type_options[:selected] = Comptes::TransactionsController::Types.from_class(@transaction).value if @transaction.type_name
+      type_options[:selected] = Comptes::TransactionsController::Types.from_class(@transaction).value if @transaction.class.type_name
       %>
       <%= form.collection_select(:type, @types, :value, :name, type_options, class: "form-control", required: "", readonly: !@transaction.new_record?) %>
     </div>
