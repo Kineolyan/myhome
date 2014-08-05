@@ -1,3 +1,25 @@
+## Givens
+
+Given(/^the string "(.*?)"$/) do |value|
+  @input_string = if value.empty?
+      ''
+    elsif value == "nil"
+      nil
+    else
+      value
+    end
+end
+
+Given(/^the number (-?\d+)$/) do |number|
+  @input_number = number.to_i
+end
+
+Given(/^the number (-?\d+\.\d+)$/) do |number|
+  @input_number = number.to_f
+end
+
+## Thens
+
 Then(/^I get the boolean (true|false)$/) do |result|
   boolean_result = case result
   	when "true"
@@ -12,9 +34,13 @@ Then(/^I get the boolean (true|false)$/) do |result|
 end
 
 Then(/^I get "(.*?)"$/) do |expected_value|
-  expect(@value).to eq expected_value
+  expect(@result).to eq expected_value
 end
 
-Then(/^I get the number (-?\d+(\.\d+)?)$/) do |expected_value, decimal_part|
-  expect(@value).to eq expected_value
+Then(/^I get the number (-?\d+)$/) do |expected_number|
+  expect(@result).to eq expected_number.to_i
+end
+
+Then(/^I get the number (-?\d+\.\d+?)$/) do |expected_number|
+  expect(@result).to eq expected_number.to_f
 end

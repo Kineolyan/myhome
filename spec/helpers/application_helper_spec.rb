@@ -19,20 +19,6 @@ describe ApplicationHelper do
     end
   end
 
-  describe "#is_a_date?" do
-    [ "10/03/2014" ].each do |date|
-      it "detects #{date}" do
-        expect(helper.is_a_date? date).to be true
-      end
-    end
-
-    [ "123456", "", "abcde" ].each do |wrong_date|
-      it "fails on #{wrong_date}" do
-        expect(helper.is_a_date? wrong_date).to be false
-      end
-    end
-  end
-
   describe "#page_title" do
     it "has default value" do
       expect(helper.page_title).to eq "My home"
