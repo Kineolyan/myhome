@@ -17,25 +17,68 @@ RSpec.describe "Transactions", type: :request do
 		submit_form
 	end
 
+	def get_created_transaction
+		Comptes::Transaction.order(created_at: :desc).first
+	end
+
 	describe "/comptes/:compte_id/transactions/ajouter" do
+		let(:transaction) { FactoryGirl.build :comptes_transaction, compte: compte, somme: 1234 }
+		before do
+			visit ajouter_comptes_compte_transactions_path compte
+			fill_form transaction
+		end
+
 		def submit_form
 			click_button "Ajouter l'opération"
 		end
 
+		specify {	expect { submit_form }.to change { Comptes::Transaction.count }.by 1 }
+
 		describe "without JavaScript" do
-			let(:transaction) { FactoryGirl.build :comptes_transaction, compte: compte, somme: 1234 }
-			before do
-				visit ajouter_comptes_compte_transactions_path compte
-				fill_form transaction
+			before { submit_form }
+
+			it { is_expected.to have_content transaction.titre }
+			it { is_expected.to have_content "Catégories: #{category1.nom}" }
+		end
+
+		pending "working selenium" do
+		describe "with JavaScript" do
+			before { submit_form }
+
+			it { is_expected.to have_selector ".transaction:first-child", text: transaction.titre }
+
+			describe "Plus/Minus somme button" do
+				describe "when checked" do
+					before { check "comptes_transaction[negative]" }
+
+					it { is_expected.to have_checked_field "-" }
+				end
+
+				describe "when not checked" do
+					before { uncheck "comptes_transaction[negative]" }
+
+					it { is_expected.to have_unchecked_field "+" }
+				end
 			end
+		end
+		end # pending
 
-			specify {	expect { submit_form }.to change { Comptes::Transaction.count }.by 1 }
+		describe "Plus/Minus somme button" do
+			it { is_expected.to have_checked_field "comptes_transaction[negative]" }
 
-			describe "create transaction" do
+			describe "on submit" do
 				before { submit_form }
 
-				it { is_expected.to have_content transaction.titre }
-				it { is_expected.to have_content "Catégories: #{category1.nom}" }
+				specify { expect(get_created_transaction.somme).to eq -1234 }
+			end
+
+			describe "when not checked" do
+				before do
+					uncheck "comptes_transaction[negative]"
+					submit_form
+				end
+
+				specify { expect(get_created_transaction.somme).to eq 1234 }
 			end
 		end
 	end
@@ -81,6 +124,30 @@ RSpec.describe "Transactions", type: :request do
 			end
 
 			it { is_expected.to have_content "Catégories: #{category2.nom}" }
+		end
+
+		describe "+/- button" do
+			describe "with positive transaction" do
+				before do
+					transaction = FactoryGirl.create :comptes_transaction, compte: compte, somme: 1234
+					visit edit_comptes_transaction_path transaction
+				end
+				subject { page.find("#transaction-form") }
+
+				it { is_expected.to have_unchecked_field "comptes_transaction[negative]" }
+				it { is_expected.to have_field "Somme", with: "12.34" }
+			end
+
+			describe "with negative transaction" do
+				before do
+					transaction = FactoryGirl.create :comptes_transaction, compte: compte, somme: -5678
+					visit edit_comptes_transaction_path transaction
+				end
+				subject { page.find("#transaction-form") }
+
+				it { is_expected.to have_checked_field "comptes_transaction[negative]" }
+				it { is_expected.to have_field "Somme", with: "56.78" }
+			end
 		end
 	end
 

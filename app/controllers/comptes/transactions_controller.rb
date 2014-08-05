@@ -134,14 +134,17 @@ module Comptes
 
     private
       def transaction_params
-        params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, { categories: [] })
+        params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, :negative, { categories: [] })
       end
 
       # Formate les parametres de la transaction
       # * convertit la somme en centimes
       def format_params parameters
         somme = parameters[:somme]
-        parameters[:somme] = ComptesHelper.encode_amount somme if ApplicationHelper::is_a_number? somme
+        negative_sign = parameters.delete(:negative).to_i || 0
+        if ApplicationHelper::is_a_number? somme
+          parameters[:somme] = ComptesHelper.encode_amount(somme) * (negative_sign == 1 ? -1 : 1)
+        end
 
         transaction_type = get_transaction_type(parameters.delete(:type))
         categories = get_categories(parameters.delete(:categories))

@@ -75,6 +75,17 @@ describe Comptes::Compte do
     it "donne le solde jusqu'a une date limite" do
       expect(compte_test.solde(until: 2.months.ago)).to be_within(0.01).of(2)
     end
+
+    it "formatte le solde" do
+      expect(compte_test.solde with_currency: true).to eq "4.50 €"
+    end
+  end
+
+  describe "#solde_formatte" do
+    before { compte.save! }
+
+    specify { expect(compte.solde_formatte).to eq "%.2f €" % [compte.solde]}
+    specify { expect(compte.solde_formatte false).to eq "%.2f" % [compte.solde]}
   end
 
 end

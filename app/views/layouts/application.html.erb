@@ -10,10 +10,10 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-3 col-xd-12">
+    <div id="menu" class="col-md-3 col-xd-12">
       <%= render "layouts/menu" %>
     </div>
-    <div class="col-md-9 col-xd-12">
+    <div id="content" class="col-md-9 col-xd-12">
       <h1 id="title"><%= yield :title %></h1>
 
       <%= render 'layouts/flashs' %>

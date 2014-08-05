@@ -29,12 +29,15 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 
 			it { is_expected.to have_content get_solde_entry compte, first_date }
 
+			pending "working selenium" do
 			describe "get multiple soldes" do
 				let(:second_date) { Date.new(2014, 1, 1) }
 				before { submit_date second_date }
 
+				it { is_expected.to have_content get_solde_entry compte, first_date }
 				it { is_expected.to have_content get_solde_entry compte, second_date }
 			end
+			end # pending
 		end
 	end
 
