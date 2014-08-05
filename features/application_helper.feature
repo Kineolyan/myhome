@@ -15,24 +15,8 @@ Feature: ApplicationHelper helper methods
       | 31  | 03    | 2013 |
       | 13  | 09    | 1988 |
 
-  Scenario Outline: I can format values with currency
-    Given a <amount> in euros
-    When I format the amount
-    Then I get "<formatted_amount>"
-
-    Scenarios: positive amounts
-      | amount | formatted_amount |
-      | 12.50  |          12.50 € |
-      |  100   |         100.00 € |
-      |   0    |           0.00 € |
-
-    Scenarios: negative amounts
-      | amount | formatted_amount |
-      | -12.50 |         -12.50 € |
-      | -100   |        -100.00 € |
-
   Scenario Outline: I can test if a string is a number
-    Given the value "<value>"
+    Given the string "<value>"
     When I test if value is a number
     Then I get the boolean <result>
 
@@ -47,6 +31,12 @@ Feature: ApplicationHelper helper methods
       | -2.50 | true   |
       | -0.50 | true   |
       | -1250 | true   |
+
+    Scenarios: special values
+      | value | result |
+      |   0   | true   |
+      |  nil  | false  |
+      |       | false  |
 
     Scenarios: not a number
       | value | result |

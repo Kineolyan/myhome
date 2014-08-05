@@ -26,8 +26,14 @@ Then(/^I get "(.*?)"$/) do |formatted_amount|
   expect(@formatted_amount).to eq(formatted_amount)
 end
 
-Given(/^the value "(.*?)"$/) do |value|
-  @value = value
+Given(/^the string "(.*?)"$/) do |value|
+  @value = if value.empty?
+      ''
+    elsif value == "nil"
+      nil
+    else
+      value
+    end
 end
 
 Given(/^the number (-?\d+(\.\d+)?) as value$/) do |number, decimal_part|
