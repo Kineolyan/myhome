@@ -30,26 +30,4 @@ RSpec.describe Comptes::ComptesHelper do
       expect(helper.decode_amount "-5437").to be_within(0.01).of -54.37
     end
   end
-
-  describe "#format_amount" do
-    it "a le bon nombre de décimales" do
-      expect(helper.format_amount 12.34).to eq "12.34 €"
-      expect(helper.format_amount 4.5).to eq "4.50 €"
-      expect(helper.format_amount 6).to eq "6.00 €"
-
-      expect(helper.format_amount -12.34).to eq "-12.34 €"
-      expect(helper.format_amount -4.5).to eq "-4.50 €"
-      expect(helper.format_amount -6).to eq "-6.00 €"
-
-
-      expect(helper.format_amount 0.789).to eq "0.79 €"
-      expect(helper.format_amount 0.781).to eq "0.78 €"
-      expect(helper.format_amount -0.789).to eq "-0.79 €"
-      expect(helper.format_amount -0.781).to eq "-0.78 €"
-    end
-
-    it "peut enlever le symbole monétaire" do
-      expect(helper.format_amount 12.34, false).to eq "12.34"
-    end
-  end
 end

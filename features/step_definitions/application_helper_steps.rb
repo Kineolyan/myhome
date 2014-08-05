@@ -14,18 +14,6 @@ Then(/^the date has correct information$/) do
   expect(@date.day).to eq(@day)
 end
 
-Given(/^a (-?\d+(\.\d+)?) in euros$/) do |amount, cents|
-  @amount = amount.to_f * 100
-end
-
-When(/^I format the amount$/) do
-  @formatted_amount = ApplicationHelper::format_amount @amount
-end
-
-Then(/^I get "(.*?)"$/) do |formatted_amount|
-  expect(@formatted_amount).to eq(formatted_amount)
-end
-
 Given(/^the string "(.*?)"$/) do |value|
   @value = if value.empty?
       ''
@@ -42,10 +30,4 @@ end
 
 When(/^I test if value is a number$/) do
   @result = ApplicationHelper::is_a_number? @value
-end
-
-Then(/^I get the boolean (true|false)$/) do |result|
-  boolean_result = result == "true"
-
-  expect(@result).to eq(boolean_result)
 end
