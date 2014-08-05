@@ -2,25 +2,13 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-@import "bootstrap";
-
-/*#sign-box {
+#sign-box {
+	label {
+		width: 10px;
+	}
 
 	input {
 		position: absolute;
 		left: -9000px;
 	}
-
-	input + label {
-		@extend .glyphicon;
-
-		&:not(:checked) {
-			@extend .glyphicon-minus;
-		}
-
-		&:checked {
-			@extend .glyphicon-plus;
-		}
-	}
 }
-*/

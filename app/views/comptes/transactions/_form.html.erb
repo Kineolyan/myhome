@@ -1,4 +1,4 @@
-<%= form_for @transaction.becomes(Comptes::Transaction), remote: remote, html: { class: "form-horizontal", role: "form" } do |form| %>
+<%= form_for @transaction.becomes(Comptes::Transaction), remote: remote, html: { id: "transaction-form", class: "form-horizontal", role: "form" } do |form| %>
   <%= render "shared/form_errors", model: @transaction %>
 
   <div class="form-group">
@@ -10,12 +10,22 @@
 
   <div class="form-group">
     <%= form.label :somme, class: "col-md-3 control-label" %>
-    <div class="col-md-9 input-group">
-      <span class="input-group-addon" id="sign-box">
-        <%= form.check_box :negative, checked: true %>
-        <%= form.label :negative, "-" %>
-      </span>
-      <%= form.number_field :somme, value: (@transaction.new_record? ? '' : @transaction.somme_formattee(false)), class: "form-control", step: 0.01, placeholder: "Montant de la transaction", required: "" %>
+    <div class="col-md-9">
+      <div class="input-group">
+        <% somme = if @transaction.somme
+              Comptes::ComptesHelper::decode_amount @transaction.somme
+            elsif params[:comptes_transaction] && params[:comptes_transaction][:somme]
+              params[:comptes_transaction][:somme]
+            else
+              0
+            end
+        %>
+        <span class="input-group-addon" id="sign-box">
+          <%= form.check_box :negative, checked: (somme <= 0) %>
+          <%= form.label :negative, (somme <= 0 ? "-" : '+') %>
+        </span>
+        <%= form.number_field :somme, value: somme.abs, class: "form-control", min: 0, step: 0.01, placeholder: "Montant de la transaction", required: "" %>
+      </div>
     </div>
   </div>
 

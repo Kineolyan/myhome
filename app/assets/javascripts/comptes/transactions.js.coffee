@@ -3,9 +3,9 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 
 (($) ->
-
-	sign = $("#sign-box label")
-	$("#sign-box input:checkbox").click (event) ->
-		sign.text this.checked ? "-" : "+"
-
-)(jQuery);
+	$(() ->
+		sign = $("#sign-box label")
+		$("#sign-box input:checkbox").change (event) ->
+			sign.text(if this.checked then "-" else "+")
+	)
+)(jQuery)
