@@ -2,7 +2,7 @@ $("#transaction-errors").empty();
 
 <% unless @transaction.errors.any? %>
 
-  $("<%= escape_javascript render @transaction %>").appendTo("#transactions-table tbody");
+  $("<%= escape_javascript render @transaction %>").prependTo("#transactions-table tbody");
 
   var transaction_form = $("#new_comptes_transaction");
   transaction_form.find("input[name*='titre']").val('').focus()

@@ -6,10 +6,15 @@ RSpec.describe "Transactions", type: :request do
 
 	def fill_form transaction
 		fill_in "Titre", with: transaction.titre
-		fill_in "Somme", with: (transaction.somme.to_f / 100).to_s
+		fill_in "Somme", with: (transaction.somme.abs.to_f / 100).to_s
 		fill_in "Date", with: transaction.jour
 		select Comptes::TransactionsController::Types.from_class(transaction).name, from: "Type de transaction"
 		select category1.nom, from: "Catégories"
+		if transaction.somme > 0
+			uncheck "comptes_transaction[negative]"
+		else
+			check "comptes_transaction[negative]"
+		end
 	end
 
 	def enter_transaction transaction
@@ -47,6 +52,16 @@ RSpec.describe "Transactions", type: :request do
 
 			it { is_expected.to have_selector ".transaction:first-child", text: transaction.titre }
 
+			describe "with a second operation" do
+				let(:transaction2) { FactoryGirl.build :comptes_transaction, compte: compte, titre: 'transaction2' }
+				before do
+					enter_transaction transaction2
+				end
+
+				it { is_expected.to have_selector ".transaction:first-child", text: transaction2.titre }
+				it { is_expected.to have_selector ".transaction:last-child", text: transaction.titre }
+			end
+
 			describe "Plus/Minus somme button" do
 				describe "when checked" do
 					before { check "comptes_transaction[negative]" }
@@ -64,10 +79,16 @@ RSpec.describe "Transactions", type: :request do
 		end # pending
 
 		describe "Plus/Minus somme button" do
-			it { is_expected.to have_checked_field "comptes_transaction[negative]" }
+			it "is - by default" do
+				visit ajouter_comptes_compte_transactions_path compte
+			 	expect(page).to have_checked_field "comptes_transaction[negative]"
+			end
 
-			describe "on submit" do
-				before { submit_form }
+			describe "when checked" do
+				before do
+					check "comptes_transaction[negative]"
+					submit_form
+				end
 
 				specify { expect(get_created_transaction.somme).to eq -1234 }
 			end
