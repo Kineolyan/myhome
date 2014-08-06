@@ -15,6 +15,8 @@ module ApplicationHelper
   end
 
   def self.is_a_date? value
+    return false if value.nil?
+
     begin
       Date.parse value
       true

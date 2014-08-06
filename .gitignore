@@ -16,3 +16,6 @@
 /tmp
 public/assets/
 vendor/bundle/
+
+# Editor files
+.DS_Store
