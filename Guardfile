@@ -1,7 +1,7 @@
 # A sample Guardfile
 # More info at https://github.com/guard/guard#readme
 
-guard 'spork', :rspec_env => { 'RAILS_ENV' => 'test' }, cucumber: true, test_unit: false do
+guard 'spork', :rspec_env => { 'RAILS_ENV' => 'test' }, cucumber: false, test_unit: false do
   watch('config/application.rb')
   watch('config/environment.rb')
   watch('config/environments/test.rb')
@@ -35,11 +35,11 @@ guard :rspec, cmd: 'bundle exec rspec', all_after_pass: true, all_on_start: true
   watch(%r{^spec/acceptance/steps/(.+)_steps\.rb$})   { |m| Dir[File.join("**/#{m[1]}.feature")][0] || 'spec/acceptance' }
 end
 
-guard :cucumber, cmd: 'bundle exec cucumber' do
-  watch(%r{^features/.+\.feature$})
-  watch(%r{^features/step_definitions/.+\.rb$})
-  watch(%r{^features/support/.+\.rb$})
+# guard :cucumber, cmd: 'bundle exec cucumber' do
+#   watch(%r{^features/.+\.feature$})
+#   watch(%r{^features/step_definitions/.+\.rb$})
+#   watch(%r{^features/support/.+\.rb$})
 
-  # Rails example
-  watch(%r{^app/(.+)\.rb$})                           { |m| "features/#{m[1]}.feature" }
-end
+#   # Rails example
+#   watch(%r{^app/(.+)\.rb$})                           { |m| "features/#{m[1]}.feature" }
+# end
