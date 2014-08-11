@@ -1,0 +1,30 @@
+$("#get-day-errors").empty();
+
+<% unless @dates.empty? %>
+
+	<% @dates.each do |target, date| %>
+	  $("<%= escape_javascript render %Q{get_day_date}, target: target, date: date %>").prependTo("#date-list");
+	<% end %>
+
+<% else %>
+
+	<%
+	# Wrap errors to use partials
+	error_model = class << Object.new
+		def any?
+			true
+		end
+
+		def errors
+			self
+		end
+
+		def full_messages
+			[ %Q{Error in the form} ]
+		end
+	end
+	%>
+
+  $('form').prepend("<%= escape_javascript render 'shared/form_errors', model: error_model, wrapper_id: 'get-day-errors' %>");
+
+<% end %>

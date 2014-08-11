@@ -2,7 +2,7 @@
 
 <h1><em><%= @event.title %></em> (le <%= ApplicationHelper::format_date @event.day %>)</h1>
 
-<%= form_for @event, url: { action: :get_day }, method: :post, remote: false, html: { id: 'get-day-form', class: "form-inline row", role: "form" } do |f| %>
+<%= form_for @event, url: { action: :get_day }, method: :post, remote: true, html: { id: 'get-day-form', class: "form-inline row", role: "form" } do |f| %>
 	  <div class="form-group col-md-8 col-md-offset-2">
 	    <div class="input-group">
 				<%= number_field_tag :number, "", class: "form-control", required: true, min: 0, step: 1, placeholder: "Nombre" %>
@@ -16,7 +16,7 @@
 
 <ul id="date-list">
 	<% @dates.each do |target, date| %>
-		<li><%= target %> le <%= ApplicationHelper::format_date date %></li>
+		<%= render "get_day_date", target: target, date: date %>
 	<% end %>
 </ul>
 
