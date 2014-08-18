@@ -31,7 +31,7 @@ RSpec.describe Comptes::TransactionsController, type: :controller do
       expect(@json_response).not_to have_key :errors
 
       post_created = @json_response[:transaction]
-      expect(post_created[:somme].to_s).to eq(@transaction[:somme])
+      expect(post_created[:somme]).to eq "#{@transaction[:somme]} €"
     end
 
   end

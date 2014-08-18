@@ -44,6 +44,13 @@ describe Comptes::Transaction do
 
   end
 
+  describe "#somme_formattee" do
+    let(:transaction) { FactoryGirl.build :comptes_transaction }
+
+    specify { expect(transaction.somme_formattee).to eq "%.2f €" % [transaction.somme.to_f / 100]}
+    specify { expect(transaction.somme_formattee false).to eq "%.2f" % [transaction.somme.to_f / 100]}
+  end
+
   describe "effects on compte" do
     let!(:compte) { FactoryGirl.create :comptes_compte }
     let!(:initial_solde) { compte.solde }
@@ -105,27 +112,23 @@ describe Comptes::Transaction do
       let(:transaction) { FactoryGirl.build :comptes_transaction }
       subject { transaction }
 
-      describe "through #new" do
-        let(:particular_transaction) { FactoryGirl.build :comptes_transaction, categorizations_attributes: [ { category_id: category_1.id } ] }
-        subject { particular_transaction }
+      pending "until an implementation is found" do
+        describe "through #new" do
+          let(:particular_transaction) { FactoryGirl.build :comptes_transaction, categorizations_attributes: [ { category_id: category_1.id } ] }
+          subject { particular_transaction }
 
-        pending "until an implementation is found" do
           it_behaves_like "a valid model"
         end
-      end
 
-      describe "through #categories#<<" do
-        before { transaction.categories << category_1 }
+        describe "through #categories#<<" do
+          before { transaction.categories << category_1 }
 
-        pending "until an implementation is found" do
           it_behaves_like "a valid model"
         end
-      end
 
-      describe "utilise #categorizations#build" do
-        before { transaction.categorizations.build category: category_1 }
+        describe "utilise #categorizations#build" do
+          before { transaction.categorizations.build category: category_1 }
 
-        pending "until an implementation is found" do
           it_behaves_like "a valid model"
         end
       end
@@ -142,6 +145,15 @@ describe Comptes::Transaction do
       specify { expect(transaction.categories).to include category_1 }
     end
 
+  end
+
+  describe "#until" do
+    let(:compte) { FactoryGirl.create :comptes_compte }
+    let!(:transaction1) { FactoryGirl.create :comptes_transaction, compte: compte, somme: -500, jour: 3.months.ago }
+    let!(:transaction2) { FactoryGirl.create :comptes_transaction, compte: compte, somme: -300, jour: 2.months.ago }
+    let!(:transaction3) { FactoryGirl.create :comptes_transaction, compte: compte, somme: 250, jour: 1.month.ago }
+
+    specify { expect(Comptes::Transaction.until(2.months.ago + 1.day)).to eq [ transaction1, transaction2 ] }
   end
 
 end

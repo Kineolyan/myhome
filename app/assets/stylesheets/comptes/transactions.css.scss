@@ -1,3 +1,14 @@
 // Place all the styles related to the comptes::transactions controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+#sign-box {
+	label {
+		width: 10px;
+	}
+
+	input {
+		position: absolute;
+		left: -9000px;
+	}
+}

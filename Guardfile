@@ -10,10 +10,10 @@ guard 'spork', :rspec_env => { 'RAILS_ENV' => 'test' }, cucumber: false, test_un
 
   watch('spec/spec_helper.rb') { :rspec }
 
-  # watch(%r{features/support/}) { :cucumber }
+  watch(%r{features/support/}) { :cucumber }
 end
 
-guard :rspec, cmd: 'bundle exec rspec', all_after_pass: false do
+guard :rspec, cmd: 'bundle exec rspec', all_after_pass: true, all_on_start: true, failed_mode: :class do
   watch(%r{^spec/.+_spec\.rb$})
   watch(%r{^lib/(.+)\.rb$})     { |m| "spec/lib/#{m[1]}_spec.rb" }
   watch('spec/spec_helper.rb')  { "spec" }
@@ -28,8 +28,18 @@ guard :rspec, cmd: 'bundle exec rspec', all_after_pass: false do
 
   # Capybara features specs
   watch(%r{^app/views/(.+)/.*\.(erb|haml|slim)$})     { |m| "spec/features/#{m[1]}_spec.rb" }
+  watch(%r{^app/views/(.+)/(.+)/.*\.(erb|haml|slim)$}) { |m| "spec/requests/#{m[1]}/#{m[1]}_#{m[2]}_spec.rb" }
 
   # Turnip features and steps
   watch(%r{^spec/acceptance/(.+)\.feature$})
   watch(%r{^spec/acceptance/steps/(.+)_steps\.rb$})   { |m| Dir[File.join("**/#{m[1]}.feature")][0] || 'spec/acceptance' }
 end
+
+# guard :cucumber, cmd: 'bundle exec cucumber' do
+#   watch(%r{^features/.+\.feature$})
+#   watch(%r{^features/step_definitions/.+\.rb$})
+#   watch(%r{^features/support/.+\.rb$})
+
+#   # Rails example
+#   watch(%r{^app/(.+)\.rb$})                           { |m| "features/#{m[1]}.feature" }
+# end

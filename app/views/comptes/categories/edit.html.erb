@@ -1,12 +1,12 @@
 <% if @comptes_category %>
-
-<h1>Edition de <%= @comptes_category.nom %></h1>
+<% provide :title, "Édition de #{@comptes_category.nom}" %>
 
 <%= render 'form' %>
 
-<%= link_to ApplicationHelper.glyphicon("eye-open", { text: 'Voir'}), edit_comptes_category_path(@comptes_category) %> |
+<%= link_to ApplicationHelper.glyphicon("eye-open", { text: 'Voir'}), comptes_category_path(@comptes_category) %> |
 
 <% else %>
+<% provide :title, "Categorie inexistante" %>
 
 <p>
   La catégorie demandéé (<%= params[:id] %>) n'existe pas.

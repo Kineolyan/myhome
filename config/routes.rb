@@ -16,13 +16,23 @@ Myhome::Application.routes.draw do
       resources :transactions, only: [ :index ] do
         get "ajouter", on: :collection
       end
+
+      member do
+        get :solde
+        post :solde
+      end
     end
 
     resources :categories
   end
 
   namespace :date_marker do
-    resources :events
+    resources :events do
+      member do
+        get :get_day
+        post :get_day
+      end
+    end
   end
 
   # Example of regular route:

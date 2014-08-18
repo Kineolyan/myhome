@@ -5,14 +5,19 @@ module Comptes
   class TransactionsController < ApplicationController
     Types = EnumClass.create_series [:default, :monnaie, :carte]
     class << Types
+      class Error < RangeError
+      end
+
       def get_class type
         case type
         when Types.MONNAIE
           Comptes::TransactionMonnaie
         when Types.CARTE
           Comptes::TransactionCarte
-        else
+        when Types.DEFAULT
           Comptes::Transaction
+        else
+          raise Error, "Unknown type #{type}"
         end
       end
 
@@ -25,14 +30,13 @@ module Comptes
         when Comptes::Transaction
           Types.DEFAULT
         else
-          nil
+          raise Error, "Unknown class #{transaction}"
         end
       end
     end
 
     before_action :get_allowed_resources, only: [:ajouter, :edit, :update]
-
-    @transaction_type = nil
+    before_action :get_formatted_parameters, only: [:create, :update]
 
     def index
       @transactions = Transaction.all
@@ -50,31 +54,29 @@ module Comptes
     # end
 
     def create
-      parameters = format_params(transaction_params)
-
-      categories = get_categories parameters.delete(:categories)
-
-      transaction_class = Types.get_class @transaction_type
-      @transaction = transaction_class.new parameters
-
-      has_errors = false
-      unless @transaction_type
+      if @transaction_type
+        transaction_class = Types.get_class @transaction_type
+        @transaction = transaction_class.new @parameters
+      else
+        @transaction = Comptes::Transaction.new
         @transaction.errors.add :type, "Type de transaction inconnu"
-        has_errors = true
       end
 
-      has_errors |= !@transaction.save
-      unless has_errors
+      if @transaction.errors.empty? && @transaction.save
+        # set the categories (workaround)
+        @transaction.categories = @categories
+        flash[:error] = "Erreur dans l'assignation des catégories." unless @transaction.save
+
         respond_to do |format|
           format.html { redirect_to @transaction }
           format.json do
             render json: { transaction: {
               id: @transaction.id,
               titre: @transaction.titre,
-              somme: ComptesHelper.decode_amount(@transaction.somme),
+              somme: @transaction.somme_formattee,
               compte: @transaction.compte.nom,
-              date: @transaction.jour_formatte,
-              type: @transaction.type_name,
+              jour: @transaction.jour_formatte,
+              type: @transaction.class.type_name,
               categories: @transaction.categories.collect{ |categorie| categorie.nom }.join(', ')
             }}
           end
@@ -83,7 +85,7 @@ module Comptes
       else
         respond_to do |format|
           format.html { render "new" }
-          format.json { render json: { errors: @transaction.errors } }
+          format.json { render json: { errors: @transaction.errors.messages } }
           format.js {}
         end
       end
@@ -100,16 +102,11 @@ module Comptes
     def update
       @transaction = Transaction.find_by_id params[:id]
 
-      unless @transaction
-        respond_to do |format|
-          format.html { render :edit }
-        end
+      if @transaction
+        @transaction.categories = @categories
       end
 
-      parameters = format_params transaction_params
-      @transaction.categories = get_categories parameters.delete(:categories)
-
-      if @transaction.update parameters
+      if @transaction && @transaction.update(@parameters)
         respond_to do |format|
           format.html { render :show }
         end
@@ -136,33 +133,45 @@ module Comptes
     end
 
     private
-    def transaction_params
-      params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, { categories: [] }, { categorizations_attributes: [ :categorie_id ] })
-    end
+      def transaction_params
+        params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, :negative, { categories: [] })
+      end
 
-    # Formate les parametres de la transaction
-    # * convertit la somme en centimes
-    def format_params parameters
-      somme = parameters[:somme]
-      parameters[:somme] = ComptesHelper.encode_amount somme if ApplicationHelper::is_a_number? somme
+      # Formate les parametres de la transaction
+      # * convertit la somme en centimes
+      def format_params parameters
+        somme = parameters[:somme]
+        negative_sign = parameters.delete(:negative).to_i || 0
+        if ApplicationHelper::is_a_number? somme
+          parameters[:somme] = ComptesHelper.encode_amount(somme) * (negative_sign == 1 ? -1 : 1)
+        end
 
-      transaction_type = parameters.delete(:type).to_i if parameters[:type]
-      @transaction_type = Types.value_of transaction_type if Types.is_valid? transaction_type
+        transaction_type = get_transaction_type(parameters.delete(:type))
+        categories = get_categories(parameters.delete(:categories))
 
-      parameters
-    end
+        return parameters, transaction_type, categories
+      end
 
-    def get_categories category_ids
-      category_ids ||= []
+      def get_formatted_parameters
+        @parameters, @transaction_type, @categories = format_params(transaction_params)
+      end
 
-      category_ids.collect{ |id| Category.find_by_id id }.delete_if(&:nil?)
-    end
+      def get_categories category_ids
+        category_ids ||= []
 
-    def get_allowed_resources
-      @categories = Category.order(nom: :asc)
-      @comptes = Compte.order(nom: :asc)
-      @types = Comptes::TransactionsController::Types
-    end
+        category_ids.collect{ |id| Category.find_by_id id }.delete_if(&:nil?)
+      end
+
+      def get_transaction_type type
+        transaction_type = type ? type.to_i : nil
+        Types.is_valid?(transaction_type) ? Types.value_of(transaction_type) : nil
+      end
+
+      def get_allowed_resources
+        @categories = Category.order(nom: :asc)
+        @comptes = Compte.order(nom: :asc)
+        @types = Comptes::TransactionsController::Types
+      end
   end
 
 end

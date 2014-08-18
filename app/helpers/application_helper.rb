@@ -4,6 +4,21 @@ module ApplicationHelper
     Date.new params[:year].to_i, params[:month].to_i, params[:day].to_i
   end
 
+  def self.is_a_date? value
+    return false if value.nil?
+
+    begin
+      Date.parse value
+      true
+    rescue ArgumentError
+      false
+    end
+  end
+
+  def self.format_date date
+    date.strftime '%d/%m/%Y'
+  end
+
   def self.is_a_number? value
     return false unless value
 
@@ -24,6 +39,11 @@ module ApplicationHelper
     additional_classes << " btn btn-#{options[:btn]}" if options.key? :btn
 
     "<i class=\"glyphicon glyphicon-#{name}#{additional_classes}\">#{options[:text]}</i>".html_safe
+  end
+
+  TITLE = "My home"
+  def self.page_title title = nil
+    title.nil? || title.empty? ? TITLE : "#{TITLE} | #{title}"
   end
 
 end

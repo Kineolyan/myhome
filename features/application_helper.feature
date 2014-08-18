@@ -15,25 +15,45 @@ Feature: ApplicationHelper helper methods
       | 31  | 03    | 2013 |
       | 13  | 09    | 1988 |
 
-  Scenario Outline: I can format values with currency
-    Given a <amount> in euros
-    When I format the amount
-    Then I get "<formatted_amount>"
+  Scenario Outline: I can format date to my preferred format
+    Given the date <date>
+    When I format a date
+    Then I get "<formatted_date>"
 
-    Scenarios: positive amounts
-      | amount | formatted_amount |
-      | 12.50  |          12.50 € |
-      |  100   |         100.00 € |
-      |   0    |           0.00 € |
+    Scenarios: simple dates
+      |    date    | formatted_date |
+      | 13/09/1988 |   13/09/1988   |
 
-    Scenarios: negative amounts
-      | amount | formatted_amount |
-      | -12.50 |         -12.50 € |
-      | -100   |        -100.00 € |
+  Scenario Outline: I can check if a string is a number
+    Given the string "<date>"
+    When I test if it is a valid date
+    Then I get the boolean <result>
+
+    Scenarios: valid dates
+      | date       | result |
+      | 10/03/2014 | true   |
+      | 28/02/2014 | true   |
+      | 10/12/2014 | true   |
+      | 18/12/2014 | true   |
+
+    Scenarios: unexisting dates
+      | date       | result |
+      | 10/13/2014 | false  |
+      | 30/02/2014 | false  |
+
+    Scenarios: invalid values
+      | date       | result |
+      | 1234566    | false  |
+      | abcde      | false  |
+
+    Scenarios: special values
+      | date       | result |
+      |            | false  |
+      | nil        | false  |
 
   Scenario Outline: I can test if a string is a number
-    Given the value "<value>"
-    When I test if value is a number
+    Given the string "<value>"
+    When I test if it (as a string) is a number
     Then I get the boolean <result>
 
     Scenarios: numbered values
@@ -48,6 +68,12 @@ Feature: ApplicationHelper helper methods
       | -0.50 | true   |
       | -1250 | true   |
 
+    Scenarios: special values
+      | value | result |
+      |   0   | true   |
+      |  nil  | false  |
+      |       | false  |
+
     Scenarios: not a number
       | value | result |
       | abcde | false  |
@@ -55,8 +81,8 @@ Feature: ApplicationHelper helper methods
       | 1.5.2 | false  |
 
   Scenario Outline: I can test if a variable is a number
-    Given the number <number> as value
-    When I test if value is a number
+    Given the number <number>
+    When I test if it (as a number) is a number
     Then I get the boolean <result>
 
     Scenarios: positive numbers

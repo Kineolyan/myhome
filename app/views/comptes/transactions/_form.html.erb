@@ -1,15 +1,5 @@
-<%= form_for @transaction.becomes(Comptes::Transaction), remote: remote, html: { class: "form-horizontal", role: "form" } do |form| %>
-  <div id="transaction-errors">
-    <% if @transaction.errors.any? %>
-      <h2><%= pluralize(@transaction.errors.count, "error") %> prohibited this transaction from being saved:</h2>
-
-      <ul>
-      <% @transaction.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
-      <% end %>
-      </ul>
-    <% end %>
-  </div>
+<%= form_for @transaction.becomes(Comptes::Transaction), remote: remote, html: { id: "transaction-form", class: "form-horizontal", role: "form" } do |form| %>
+  <%= render "shared/form_errors", model: @transaction %>
 
   <div class="form-group">
     <%= form.label :titre, class: "col-md-3 control-label" %>
@@ -21,7 +11,21 @@
   <div class="form-group">
     <%= form.label :somme, class: "col-md-3 control-label" %>
     <div class="col-md-9">
-      <%= form.number_field :somme, value: (@transaction.new_record? ? '' : @transaction.somme_formattee(false)), class: "form-control", step: 0.01, placeholder: "Montant de la transaction", required: "" %>
+      <div class="input-group">
+        <% somme = if @transaction.somme
+              Comptes::ComptesHelper::decode_amount @transaction.somme
+            elsif params[:comptes_transaction] && params[:comptes_transaction][:somme]
+              params[:comptes_transaction][:somme]
+            else
+              0
+            end
+        %>
+        <span class="input-group-addon" id="sign-box">
+          <%= form.check_box :negative, checked: (somme <= 0) %>
+          <%= form.label :negative, (somme <= 0 ? "-" : '+') %>
+        </span>
+        <%= form.number_field :somme, value: somme.abs, class: "form-control", min: 0, step: 0.01, placeholder: "Montant de la transaction", required: "" %>
+      </div>
     </div>
   </div>
 
@@ -48,7 +52,7 @@
     <div class="col-md-9">
       <%
       type_options = {}
-      type_options[:selected] = Comptes::TransactionsController::Types.from_class(@transaction).value if @transaction.type_name
+      type_options[:selected] = Comptes::TransactionsController::Types.from_class(@transaction).value if @transaction.class.type_name
       %>
       <%= form.collection_select(:type, @types, :value, :name, type_options, class: "form-control", required: "", readonly: !@transaction.new_record?) %>
     </div>

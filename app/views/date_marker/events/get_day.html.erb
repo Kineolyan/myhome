@@ -1,0 +1,33 @@
+<% if @event %>
+
+<h1><em><%= @event.title %></em> (le <%= ApplicationHelper::format_date @event.day %>)</h1>
+
+<h2>Situation actuelle</h2>
+<p>
+	<%= @event.number_of_days %> jours ~ <%= @event.number_of_months %> mois depuis l'événement.
+</p>
+
+<h2>Dates à retenir</h2>
+<%= form_for @event, url: { action: :get_day }, method: :post, remote: true, html: { id: 'get-day-form', class: "form-inline row", role: "form" } do |f| %>
+	  <div class="form-group">
+			<%= number_field_tag :number, "", class: "form-control", required: true, min: 0, step: 1, placeholder: "Nombre" %>
+			<%= select_tag :time_span, options_for_select([%W{jours days}, %W{mois months}]), class: "form-control", required: true %>
+	    <div class="input-group">
+	     	<div class="input-group-btn">
+					<%= submit_tag "Trouver la date", class: "btn btn-primary" %>
+				</div>
+	    </div>
+	  </div>
+<% end %>
+
+<ul id="date-list">
+	<% @dates.each do |target, date| %>
+		<%= render "get_day_date", target: target, date: date %>
+	<% end %>
+</ul>
+
+<% else %>
+
+<p>Aucun event à l'id <%= params[:id] %>.</p>
+
+<% end %>

@@ -11,12 +11,18 @@ module Comptes
       ComptesHelper::format_amount solde, with_currency
     end
 
-    def solde
-      total_transactions = Transaction.where(compte_id: id).sum(:somme)
+    def solde options = {}
+      all_transactions = transactions
       # Ne pas compter les paiements en monnaie
-      total_tansactions_monnaie = TransactionMonnaie.where(compte_id: id).sum(:somme)
+      tansactions_monnaie = transactions.where(type: TransactionMonnaie)
 
-      ComptesHelper.decode_amount(solde_historique + (total_transactions - total_tansactions_monnaie))
+      if options.key?(:until)
+        all_transactions = all_transactions.until options[:until]
+        tansactions_monnaie = tansactions_monnaie.until options[:until]
+      end
+
+      solde = ComptesHelper.decode_amount(solde_historique + (all_transactions.sum(:somme) - tansactions_monnaie.sum(:somme)))
+      options[:with_currency] ? ComptesHelper::format_amount(solde) : solde
     end
   end
 

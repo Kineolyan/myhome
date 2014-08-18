@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Myhome</title>
+  <title><%= ApplicationHelper::page_title yield :page_title %></title>
   <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
   <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
   <%= csrf_meta_tags %>
@@ -10,14 +10,19 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-3 col-xd-12">
+    <div id="menu" class="col-md-3 col-xd-12">
       <%= render "layouts/menu" %>
     </div>
-    <div class="col-md-9 col-xd-12">
+    <div id="content" class="col-md-9 col-xd-12">
+      <h1 id="title"><%= yield :title %></h1>
+
+      <%= render 'layouts/flashs' %>
+
       <%= yield %>
     </div>
   </div>
 </div>
 
+<%= debug(params) if Rails.env.development? %>
 </body>
 </html>
