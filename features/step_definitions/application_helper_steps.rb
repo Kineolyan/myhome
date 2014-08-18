@@ -12,6 +12,10 @@ When(/^I build a date$/) do
   @date = ApplicationHelper::make_date year: @year, month: @month, day: @day
 end
 
+When(/^I format a date$/) do
+  @result = ApplicationHelper::format_date @input_date
+end
+
 When(/^I test if it \(as a string\) is a number$/) do
   @result = ApplicationHelper::is_a_number? @input_string
 end

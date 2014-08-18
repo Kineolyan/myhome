@@ -15,6 +15,15 @@ Feature: ApplicationHelper helper methods
       | 31  | 03    | 2013 |
       | 13  | 09    | 1988 |
 
+  Scenario Outline: I can format date to my preferred format
+    Given the date <date>
+    When I format a date
+    Then I get "<formatted_date>"
+
+    Scenarios: simple dates
+      |    date    | formatted_date |
+      | 13/09/1988 |   13/09/1988   |
+
   Scenario Outline: I can check if a string is a number
     Given the string "<date>"
     When I test if it is a valid date

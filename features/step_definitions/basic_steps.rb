@@ -18,6 +18,10 @@ Given(/^the number (-?\d+\.\d+)$/) do |number|
   @input_number = number.to_f
 end
 
+Given(%r!^the date (\d{2})/(\d{2})/(\d{4})$!) do |day, month, year|
+  @input_date = Date.new year.to_i, month.to_i, day.to_i
+end
+
 ## Thens
 
 Then(/^I get the boolean (true|false)$/) do |result|

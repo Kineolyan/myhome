@@ -4,16 +4,6 @@ module ApplicationHelper
     Date.new params[:year].to_i, params[:month].to_i, params[:day].to_i
   end
 
-  def self.is_a_number? value
-    return false unless value
-
-    # the value is a number
-    return true if value.is_a? Numeric
-
-    # the value represents a number
-    ! /^-?\d+(\.\d+)?$/.match(value.to_s).nil?
-  end
-
   def self.is_a_date? value
     return false if value.nil?
 
@@ -23,6 +13,20 @@ module ApplicationHelper
     rescue ArgumentError
       false
     end
+  end
+
+  def self.format_date date
+    date.strftime '%d/%m/%Y'
+  end
+
+  def self.is_a_number? value
+    return false unless value
+
+    # the value is a number
+    return true if value.is_a? Numeric
+
+    # the value represents a number
+    ! /^-?\d+(\.\d+)?$/.match(value.to_s).nil?
   end
 
   # Create a Bootstrap glyphicon in a tag
