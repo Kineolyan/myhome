@@ -65,7 +65,7 @@
       categories_options = {}
       categories_options[:selected] = @transaction.categories.collect { |categorie| categorie.id }
       %>
-      <%= form.collection_select(:categories, @categories, :id, :nom, categories_options, class: "form-control", multiple: true) %>
+      <%= form.collection_select(:categories, @categories, :id, :nom, categories_options, class: "form-control", multiple: true, size: 10) %>
     </div>
   </div>
 
