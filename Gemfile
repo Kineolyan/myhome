@@ -50,7 +50,7 @@ group :test do
   gem 'pry'
 
   gem 'rspec-rails', '>= 3.0'
-  gem 'fuubar'
+  gem 'fuubar', ">= 2.0.0"
 
   gem 'factory_girl_rails'
 
