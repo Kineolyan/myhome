@@ -16,6 +16,23 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 		before { visit comptes_compte_path compte }
 
 		it { is_expected.to have_link "Voir le solde interactif", href: solde_comptes_compte_path(compte) }
+
+		describe "last transactions" do
+			before do
+				compte.transactions = Array.new(10) { |index| FactoryGirl.create :comptes_transaction, compte: compte, titre: "t#{index}", jour: (10 - index).days.ago }
+				compte.save!
+
+				visit comptes_compte_path compte
+			end
+
+			it { is_expected.to have_selector(".transaction", count: 5) }
+
+			describe "has operations from the latest to the oldest" do
+				5.times do |i|
+					specify { expect(subject.find(".transaction:nth-child(#{i + 1})")).to have_content "t#{10 - (i + 1)}" }
+				end
+			end
+		end
 	end
 
 	describe "/comptes/:compte_id/solde" do
