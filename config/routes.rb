@@ -11,6 +11,7 @@ Myhome::Application.routes.draw do
     end
     resources :transaction_monnaies, controller: "transactions"
     resources :transaction_cartes, controller: "transactions"
+    resources :transfers, controller: "transactions"
 
     resources :comptes do
       resources :transactions, only: [ :index ] do

@@ -27,6 +27,48 @@ RSpec.describe "Transactions", type: :request do
 		Comptes::Transaction.order(created_at: :desc).first
 	end
 
+	describe "/comptes/transactions" do
+		let!(:transaction) { FactoryGirl.create :comptes_transaction, compte: compte }
+		let!(:transaction_monnaie) { FactoryGirl.create :comptes_transaction_monnaie, compte: compte }
+		let!(:transaction_carte) { FactoryGirl.create :comptes_transaction_carte, compte: compte }
+		let!(:transaction_virement) { FactoryGirl.create :comptes_transfer, compte: compte }
+		before { visit comptes_transactions_path }
+
+		it { is_expected.to respond }
+	end
+
+	describe "/comptes/transactions/:transaction_id" do
+
+		describe "for classic transaction" do
+			let(:transaction) { FactoryGirl.create :comptes_transaction, compte: compte }
+			before { visit comptes_transaction_path transaction }
+
+			it { is_expected.to respond }
+		end
+
+		describe "for transaction by cash" do
+			let(:transaction) { FactoryGirl.create :comptes_transaction_monnaie, compte: compte }
+			before { visit comptes_transaction_path transaction }
+
+			it { is_expected.to respond }
+		end
+
+		describe "for transaction by card" do
+			let(:transaction) { FactoryGirl.create :comptes_transaction_carte, compte: compte }
+			before { visit comptes_transaction_path transaction }
+
+			it { is_expected.to respond }
+		end
+
+		describe "for transaction by transfer" do
+			let(:transaction) { FactoryGirl.create :comptes_transfer, compte: compte }
+			before { visit comptes_transaction_path transaction }
+
+			it { is_expected.to respond }
+		end
+
+	end
+
 	describe "/comptes/:compte_id/transactions/ajouter" do
 		let(:transaction) { FactoryGirl.build :comptes_transaction, compte: compte, somme: 1234, categories: [ category1 ] }
 		before do
@@ -191,6 +233,34 @@ RSpec.describe "Transactions", type: :request do
 				it { is_expected.to have_checked_field "comptes_transaction[negative]" }
 				it { is_expected.to have_field "Somme", with: "56.78" }
 			end
+		end
+
+		describe "for classic transaction" do
+			let(:transaction) { FactoryGirl.create :comptes_transaction, compte: compte }
+			before { visit edit_comptes_transaction_path transaction }
+
+			it { is_expected.to respond }
+		end
+
+		describe "for transaction by cash" do
+			let(:transaction) { FactoryGirl.create :comptes_transaction_monnaie, compte: compte }
+			before { visit edit_comptes_transaction_path transaction }
+
+			it { is_expected.to respond }
+		end
+
+		describe "for transaction by card" do
+			let(:transaction) { FactoryGirl.create :comptes_transaction_carte, compte: compte }
+			before { visit edit_comptes_transaction_path transaction }
+
+			it { is_expected.to respond }
+		end
+
+		describe "for transaction by transfer" do
+			let(:transaction) { FactoryGirl.create :comptes_transfer, compte: compte }
+			before { visit edit_comptes_transaction_path transaction }
+
+			it { is_expected.to respond }
 		end
 	end
 
