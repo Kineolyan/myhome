@@ -23,7 +23,7 @@ module Comptes
     end
 
     def show
-      @transactions = @compte.transactions.limit(5) if @compte
+      @transactions = @compte.transactions.order(jour: :desc, created_at: :desc).limit(5) if @compte
     end
 
     def edit

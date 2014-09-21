@@ -4,7 +4,7 @@ $("#transaction-errors").empty();
 
   $("<%= escape_javascript render @transaction %>").prependTo("#transactions-table tbody");
 
-  var transaction_form = $("#new_comptes_transaction");
+  var transaction_form = $("#transaction-form");
   transaction_form.find("input[name*='titre']").val('').focus()
   transaction_form.find("input[name*='somme']").val('')
 

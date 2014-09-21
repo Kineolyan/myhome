@@ -4,17 +4,18 @@ RSpec.describe "Transactions", type: :request do
 
 	subject { page }
 
+	def somme_sign
+		find("#transaction-form").find("label[for='comptes_transaction_negative']")
+	end
+
 	def fill_form transaction
 		fill_in "Titre", with: transaction.titre
 		fill_in "Somme", with: (transaction.somme.abs.to_f / 100).to_s
 		fill_in "Date", with: transaction.jour
 		select Comptes::TransactionsController::Types.from_class(transaction).name, from: "Type de transaction"
-		select category1.nom, from: "Catégories"
-		if transaction.somme > 0
-			uncheck "comptes_transaction[negative]"
-		else
-			check "comptes_transaction[negative]"
-		end
+		transaction.categories.each { |category| select category.nom, from: "Catégories" }
+
+		somme_sign.click if transaction.somme > 0
 	end
 
 	def enter_transaction transaction
@@ -27,7 +28,7 @@ RSpec.describe "Transactions", type: :request do
 	end
 
 	describe "/comptes/:compte_id/transactions/ajouter" do
-		let(:transaction) { FactoryGirl.build :comptes_transaction, compte: compte, somme: 1234 }
+		let(:transaction) { FactoryGirl.build :comptes_transaction, compte: compte, somme: 1234, categories: [ category1 ] }
 		before do
 			visit ajouter_comptes_compte_transactions_path compte
 			fill_form transaction
@@ -39,51 +40,14 @@ RSpec.describe "Transactions", type: :request do
 
 		specify {	expect { submit_form }.to change { Comptes::Transaction.count }.by 1 }
 
-		describe "without JavaScript" do
+		describe "on submission" do
 			before { submit_form }
 
 			it { is_expected.to have_content transaction.titre }
 			it { is_expected.to have_content "Catégories: #{category1.nom}" }
 		end
 
-		pending "working selenium" do
-		describe "with JavaScript" do
-			before { submit_form }
-
-			it { is_expected.to have_selector ".transaction:first-child", text: transaction.titre }
-
-			describe "with a second operation" do
-				let(:transaction2) { FactoryGirl.build :comptes_transaction, compte: compte, titre: 'transaction2' }
-				before do
-					enter_transaction transaction2
-				end
-
-				it { is_expected.to have_selector ".transaction:first-child", text: transaction2.titre }
-				it { is_expected.to have_selector ".transaction:last-child", text: transaction.titre }
-			end
-
-			describe "Plus/Minus somme button" do
-				describe "when checked" do
-					before { check "comptes_transaction[negative]" }
-
-					it { is_expected.to have_checked_field "-" }
-				end
-
-				describe "when not checked" do
-					before { uncheck "comptes_transaction[negative]" }
-
-					it { is_expected.to have_unchecked_field "+" }
-				end
-			end
-		end
-		end # pending
-
 		describe "Plus/Minus somme button" do
-			it "is - by default" do
-				visit ajouter_comptes_compte_transactions_path compte
-			 	expect(page).to have_checked_field "comptes_transaction[negative]"
-			end
-
 			describe "when checked" do
 				before do
 					check "comptes_transaction[negative]"
@@ -100,6 +64,64 @@ RSpec.describe "Transactions", type: :request do
 				end
 
 				specify { expect(get_created_transaction.somme).to eq 1234 }
+			end
+		end
+	end
+
+	describe "/comptes/:compte_id/transactions/ajouter with js", :js => true, to_run: true do
+		let(:transaction) { FactoryGirl.build :comptes_transaction, compte: compte, somme: 1234 }
+		before do
+			visit ajouter_comptes_compte_transactions_path compte
+			fill_form transaction
+		end
+
+		def submit_form
+			click_button "Ajouter l'opération"
+		end
+
+		pending "failing with ajax" do
+		describe "after a submission" do
+			before { submit_form }
+			subject { find("#transaction-form") }
+
+			specify { expect(subject.find_field("Titre")).to have_value "" }
+			specify { expect(subject.find_field("Somme")).to have_value "" }
+		end
+
+		describe "with an operation" do
+			before { submit_form }
+			subject { find("#transactions-table").find("tbody") }
+
+			specify { expect(subject.find(".transaction").first).to have_content transaction.titre }
+
+			describe "with a second operation" do
+				let(:transaction2) { FactoryGirl.build :comptes_transaction, compte: compte, titre: 'transaction2' }
+				before do
+					enter_transaction transaction2
+				end
+
+				it { is_expected.to have_selector ".transaction:first-child", text: transaction2.titre }
+				it { is_expected.to have_selector ".transaction:last-child", text: transaction.titre }
+			end
+		end
+		end # pending
+
+		describe "Plus/Minus somme manipulation" do
+			before { visit ajouter_comptes_compte_transactions_path compte }
+			subject { somme_sign }
+
+			it { is_expected.to have_content "-" }
+
+			describe "when clicking on -" do
+				before { somme_sign.click }
+
+				it { is_expected.to have_content "+" }
+
+				describe "when clicking on +" do
+					before { somme_sign.click }
+
+					it { is_expected.to have_content "-" }
+				end
 			end
 		end
 	end
