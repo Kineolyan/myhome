@@ -55,4 +55,10 @@ namespace :server do
     end
   end
 
+  desc "Restarts the server (as daemon)"
+  task :restart => %W{
+    server:stop
+    server:daemon
+  }
+
 end
