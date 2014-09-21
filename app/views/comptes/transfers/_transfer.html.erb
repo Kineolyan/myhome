@@ -1,7 +1,11 @@
     <tr>
       <td><%= transfer.jour %></td>
       <td><%= transfer.titre %></td>
-      <td><%= transfer.somme_formattee %></td>
+      <td>
+        <span class="badge alert-<%= transfer.somme >= 0 ? "success" : "danger" %>">
+          <%= transfer.somme_formattee %>
+        </span>
+      </td>
       <td><%= transfer.compte.nom %></td>
       <td><%= transfer.class.type_name %></td>
       <td>
