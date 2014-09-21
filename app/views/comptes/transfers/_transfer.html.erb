@@ -1,0 +1,12 @@
+    <tr>
+      <td><%= transfer.jour %></td>
+      <td><%= transfer.titre %></td>
+      <td><%= transfer.somme_formattee %></td>
+      <td><%= transfer.compte.nom %></td>
+      <td><%= transfer.class.type_name %></td>
+      <td>
+        <%= link_to raw('<i class="glyphicon glyphicon-eye-open"></i>'), comptes_transaction_path(transfer), class: "btn btn-info" %>
+        <%= link_to raw('<i class="glyphicon glyphicon-pencil"></i>'), edit_comptes_transaction_path(transfer), class: "btn btn-info" %>
+        <%= link_to raw('<i class="glyphicon glyphicon-trash"></i>'), comptes_transaction_path(transfer), method: :delete, data: { confirm: "Sûr de vouloir supprimer la transaction ?" }, class: "btn btn-danger" %>
+      </td>
+    </tr>

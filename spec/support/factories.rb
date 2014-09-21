@@ -30,6 +30,20 @@ FactoryGirl.define do
     association :compte, factory: :comptes_compte
   end
 
+  factory :comptes_transaction_carte, class: "Comptes::TransactionCarte" do
+    titre 'Cadeau'
+    somme 1500
+    jour Date.new(2014, 1, 1)
+    association :compte, factory: :comptes_compte
+  end
+
+  factory :comptes_transfer, class: "Comptes::Transfer" do
+    titre 'Cadeau'
+    somme 1500
+    jour Date.new(2014, 1, 1)
+    association :compte, factory: :comptes_compte
+  end
+
   factory :comptes_category, class: "Comptes::Category" do
     nom "test Category"
   end

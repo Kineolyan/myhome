@@ -3,7 +3,7 @@ require "enum_class"
 module Comptes
 
   class TransactionsController < ApplicationController
-    Types = EnumClass.create_series [:default, :monnaie, :carte]
+    Types = EnumClass.create_series [:default, :monnaie, :carte, :virement]
     class << Types
       class Error < RangeError
       end
@@ -14,6 +14,8 @@ module Comptes
           Comptes::TransactionMonnaie
         when Types.CARTE
           Comptes::TransactionCarte
+        when Types.VIREMENT
+          Comptes::Transfer
         when Types.DEFAULT
           Comptes::Transaction
         else
@@ -27,6 +29,8 @@ module Comptes
           Types.CARTE
         when Comptes::TransactionMonnaie
           Types.MONNAIE
+        when Comptes::Transfer
+          Types.VIREMENT
         when Comptes::Transaction
           Types.DEFAULT
         else
