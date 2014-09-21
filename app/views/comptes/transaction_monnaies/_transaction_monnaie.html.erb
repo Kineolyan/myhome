@@ -1,4 +1,4 @@
-    <tr>
+    <tr class="transaction monnaie" id="transaction-<%= transaction_monnaie.id %>">
       <td><%= transaction_monnaie.jour %></td>
       <td><%= transaction_monnaie.titre %></td>
       <td>
@@ -11,6 +11,6 @@
       <td>
         <%= link_to raw('<i class="glyphicon glyphicon-eye-open"></i>'), comptes_transaction_path(transaction_monnaie), class: "btn btn-info" %>
         <%= link_to raw('<i class="glyphicon glyphicon-pencil"></i>'), edit_comptes_transaction_path(transaction_monnaie), class: "btn btn-info" %>
-        <%= link_to raw('<i class="glyphicon glyphicon-trash"></i>'), comptes_transaction_path(transaction_monnaie), method: :delete, data: { confirm: "Sûr de vouloir supprimer la transaction ?" }, class: "btn btn-danger" %>
+        <%= link_to raw('<i class="glyphicon glyphicon-trash"></i>'), comptes_transaction_path(transaction_monnaie), method: :delete, remote: true, data: { confirm: "Sûr de vouloir supprimer la transaction ?" }, class: "btn btn-danger" %>
       </td>
     </tr>

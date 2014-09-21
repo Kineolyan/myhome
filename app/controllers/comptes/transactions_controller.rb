@@ -123,9 +123,11 @@ module Comptes
 
     def destroy
       @transaction = Comptes::Transaction.find_by_id(params[:id])
+      @success = false
       if @transaction
         if @transaction.destroy
           flash[:notice] = "Transaction supprimée avec succés"
+          @success = true
         else
           flash[:error] = "Impossible de supprimer la transaction"
         end
@@ -133,7 +135,10 @@ module Comptes
         flash[:error] = "Transaction invalide. Aucune suppression."
       end
 
-      redirect_to comptes_transactions_path
+      respond_to do |format|
+        format.html { redirect_to comptes_transactions_path }
+        format.js {}
+      end
     end
 
     private
