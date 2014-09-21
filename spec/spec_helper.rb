@@ -80,6 +80,7 @@ def configure_rspec
     # instead of true.
     config.use_transactional_fixtures = true
 
+
     # If true, the base class of anonymous controllers will be inferred
     # automatically. This will be the default behavior in future versions of
     # rspec-rails.
@@ -95,10 +96,17 @@ def configure_active_record
   if defined?(ActiveRecord::Base)
     begin
       require 'database_cleaner'
+
       DatabaseCleaner.strategy = :truncation
     rescue LoadError => ignore_if_database_cleaner_not_present
     end
   end
+end
+
+def configure_capybara
+  require 'capybara/poltergeist'
+
+  Capybara.javascript_driver = :poltergeist
 end
 
 #uncomment the following line to use spork with the debugger
@@ -113,6 +121,7 @@ Spork.prefork do
 
   configure_rspec
   configure_active_record
+  configure_capybara
 end
 
 Spork.each_run do
