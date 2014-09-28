@@ -3,7 +3,7 @@
 
 <%= render 'form' %>
 
-<%= link_to ApplicationHelper.glyphicon("eye-open", { text: 'Voir'}), comptes_category_path(@comptes_category) %> |
+<%= link_to HtmlHelper::Bootstrap.glyphicon("eye-open", { text: 'Voir'}), comptes_category_path(@comptes_category) %> |
 
 <% else %>
 <% provide :title, "Categorie inexistante" %>
@@ -14,4 +14,4 @@
 
 <% end %>
 
-<%= link_to ApplicationHelper.glyphicon("arrow-left", { text: 'Back'}), comptes_categories_path %>
+<%= link_to HtmlHelper::Bootstrap.glyphicon("arrow-left", { text: 'Back'}), comptes_categories_path %>

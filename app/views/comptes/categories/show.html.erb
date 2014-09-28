@@ -5,7 +5,7 @@
   Nom : <strong><%= @comptes_category.nom %></strong>
 </p>
 
-<%= link_to ApplicationHelper.glyphicon(:pencil, { text: 'Edit'}), edit_comptes_category_path(@comptes_category) %> |
+<%= link_to HtmlHelper::Bootstrap.glyphicon(:pencil, { text: 'Edit'}), edit_comptes_category_path(@comptes_category) %> |
 
 <% else %>
 <% provide :title, "Catégorie inexistante" %>
@@ -16,4 +16,4 @@
 
 <% end %>
 
-<%= link_to ApplicationHelper.glyphicon("arrow-left", { text: 'Back'}), comptes_categories_path %>
+<%= link_to HtmlHelper::Bootstrap.glyphicon("arrow-left", { text: 'Back'}), comptes_categories_path %>
