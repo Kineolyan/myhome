@@ -2,9 +2,7 @@
       <td><%= transaction.jour %></td>
       <td><%= transaction.titre %></td>
       <td>
-        <span class="badge alert-<%= transaction.somme >= 0 ? "success" : "danger" %>">
-          <%= transaction.somme_formattee %>
-        </span>
+        <%= HtmlHelper::Bootstrap::value_badge transaction.somme, transaction.somme_formattee %>
       </td>
       <td><%= transaction.compte.nom %></td>
       <td><%= transaction.class.type_name %></td>

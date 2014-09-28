@@ -1,7 +1,7 @@
 module Comptes
 
   class ComptesController < ApplicationController
-    before_action :get_compte, [:show, :edit, :udpate, :solde]
+    before_action :get_compte, [:show, :edit, :udpate, :solde, :summary]
 
     def index
       @comptes = Compte.all
@@ -60,6 +60,29 @@ module Comptes
           @date = Date.parse params[:date]
           @solde = ComptesHelper.format_amount @compte.solde(until: @date), true
         end
+      end
+    end
+
+    def summary
+      return unless @compte
+
+      now = Date.today
+
+      @previous_months = []
+      (now.month - 1).downto(1).each do |month|
+        month_beginning = Date.new now.year, month
+        month_ending = month_beginning >> 1
+
+        solde = @compte.solde(until: month_ending)
+        debit = @compte.transactions.since(month_beginning).until(month_ending).where("somme < 0").sum(:somme)
+        credit = @compte.transactions.since(month_beginning).until(month_ending).where("somme > 0").sum(:somme)
+
+        @previous_months << {
+          date: month_beginning,
+          solde: ComptesHelper.decode_amount(solde),
+          debit: ComptesHelper.decode_amount(-debit),
+          credit: ComptesHelper.decode_amount(credit)
+        }
       end
     end
 

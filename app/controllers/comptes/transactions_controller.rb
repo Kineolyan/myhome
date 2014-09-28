@@ -39,19 +39,20 @@ module Comptes
       end
     end
 
+    before_action :get_transaction, only: [:show, :edit, :update]
+    before_action :get_context, only: [:index, :summary, :ajouter]
     before_action :get_allowed_resources, only: [:ajouter, :edit, :update]
     before_action :get_formatted_parameters, only: [:create, :update]
 
     def index
       @transactions = Transaction.all
-      if params.key? :compte_id
-        @transactions.where!(compte_id: params[:compte_id])
-      end
+      @transactions.where!(compte_id: @compte.id) if @compte
       @transactions = @transactions.paginate(page: params[:page], per_page: 20).order(jour: :desc, updated_at: :desc)
     end
 
     def ajouter
-      @transaction = Transaction.new compte: Comptes::Compte.find_by_id(params[:compte_id])
+      @transaction = Transaction.new
+      @transaction.compte = @compte if @compte
     end
 
     # def new
@@ -96,16 +97,12 @@ module Comptes
     end
 
     def edit
-      @transaction = Transaction.find_by_id params[:id]
     end
 
     def show
-      @transaction = Transaction.find_by_id params[:id]
     end
 
     def update
-      @transaction = Transaction.find_by_id params[:id]
-
       if @transaction
         @transaction.categories = @categories
       end
@@ -142,6 +139,14 @@ module Comptes
     end
 
     private
+      def get_transaction
+        @transaction = Transaction.find_by_id params[:id]
+      end
+
+      def get_context
+        @compte = Compte.find_by_id params[:compte_id]
+      end
+
       def transaction_params
         params.require(:comptes_transaction).permit(:titre, :somme, :jour, :compte_id, :type, :negative, { categories: [] })
       end
