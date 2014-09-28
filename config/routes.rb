@@ -6,18 +6,21 @@ Myhome::Application.routes.draw do
   namespace :comptes do
     get "/" => "transactions#index"
 
-    resources :transactions do
-      get "ajouter", on: :collection
+    concern :with_transactions do |options|
+      resources :transactions, options do
+        collection do
+          get "ajouter"
+          get "summary"
+        end
+      end
     end
+
+    concerns :with_transactions
     resources :transaction_monnaies, controller: "transactions"
     resources :transaction_cartes, controller: "transactions"
     resources :transfers, controller: "transactions"
 
-    resources :comptes do
-      resources :transactions, only: [ :index ] do
-        get "ajouter", on: :collection
-      end
-
+    resources :comptes, concerns: [ :with_transactions ] do
       member do
         get :solde
         post :solde
@@ -59,13 +62,6 @@ Myhome::Application.routes.draw do
   #     resources :comments, :sales
   #     resource :seller
   #   end
-
-  # Example resource route with concerns:
-  #   concern :toggleable do
-  #     post 'toggle'
-  #   end
-  #   resources :posts, concerns: :toggleable
-  #   resources :photos, concerns: :toggleable
 
   # Example resource route within a namespace:
   #   namespace :admin do
