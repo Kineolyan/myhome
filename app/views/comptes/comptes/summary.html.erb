@@ -1,0 +1,37 @@
+<h1>Évolution de la situation</h1>
+
+<!-- Mois en cours -->
+<div>
+	Compte <b><%= @compte.nom %></b> : <%= Comptes::ComptesHelper.format_amount @compte.solde %>
+</div>
+
+<!-- Depuis le début de l'année -->
+<table class="table table-responsive">
+	<thead>
+		<tr>
+			<th>Mois</th>
+			<th>Solde en fin de mois</th>
+			<th>Total</th>
+			<th>Crédit / Débit</th>
+		</tr>
+	</thead>
+	<tbody>
+		<%
+			previous_month = nil
+			@previous_months.each do |month|
+				total_expenses = month[:credit] - month[:debit]
+		%>
+		<tr class="previous-month">
+			<td><%= month[:date].strftime("%B") %></td>
+			<td><%= Comptes::ComptesHelper.format_amount month[:solde] %></td>
+			<td><%= HtmlHelper::Bootstrap::value_badge(total_expenses, Comptes::ComptesHelper.format_amount( total_expenses)) %></td>
+			<td><%= Comptes::ComptesHelper.format_amount month[:credit] %> / <%= Comptes::ComptesHelper.format_amount -month[:debit] %></td>
+		</tr>
+		<%
+			previous_month = month
+			end
+		%>
+	</tbody>
+</table>
+
+<!-- Années précédentes -->

@@ -10,7 +10,6 @@ Myhome::Application.routes.draw do
       resources :transactions, options do
         collection do
           get "ajouter"
-          get "summary"
         end
       end
     end
@@ -24,6 +23,7 @@ Myhome::Application.routes.draw do
       member do
         get :solde
         post :solde
+        get "summary"
       end
     end
 

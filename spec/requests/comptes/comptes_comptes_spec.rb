@@ -58,4 +58,12 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 		end
 	end
 
+	describe "/comptes/:compte_id/summary" do
+		let(:compte) { FactoryGirl.create :comptes_compte_with_transactions }
+
+		before { visit solde_comptes_compte_path compte }
+
+		it { is_expected.to respond }
+	end
+
 end
