@@ -9,11 +9,9 @@ guard 'spork', :rspec_env => { 'RAILS_ENV' => 'test' }, cucumber: false, test_un
   watch('Gemfile.lock')
 
   watch('spec/spec_helper.rb') { :rspec }
-
-  watch(%r{features/support/}) { :cucumber }
 end
 
-guard :rspec, cmd: 'bundle exec rspec', all_after_pass: true, all_on_start: true, failed_mode: :class do
+guard :rspec, cmd: 'bundle exec rspec', all_on_start: true, failed_mode: :class do
   watch(%r{^spec/.+_spec\.rb$})
   watch(%r{^lib/(.+)\.rb$})     { |m| "spec/lib/#{m[1]}_spec.rb" }
   watch('spec/spec_helper.rb')  { "spec" }
@@ -35,11 +33,8 @@ guard :rspec, cmd: 'bundle exec rspec', all_after_pass: true, all_on_start: true
   watch(%r{^spec/acceptance/steps/(.+)_steps\.rb$})   { |m| Dir[File.join("**/#{m[1]}.feature")][0] || 'spec/acceptance' }
 end
 
-# guard :cucumber, cmd: 'bundle exec cucumber' do
-#   watch(%r{^features/.+\.feature$})
-#   watch(%r{^features/step_definitions/.+\.rb$})
-#   watch(%r{^features/support/.+\.rb$})
-
-#   # Rails example
-#   watch(%r{^app/(.+)\.rb$})                           { |m| "features/#{m[1]}.feature" }
-# end
+guard 'cucumber' do
+  watch(%r{^features/.+\.feature$})
+  watch(%r{^features/support/.+$})          { 'features' }
+  watch(%r{^features/step_definitions/(.+)_steps\.rb$}) { |m| Dir[File.join("**/#{m[1]}.feature")][0] || 'features' }
+end
