@@ -153,7 +153,28 @@ describe Comptes::Transaction do
     let!(:transaction2) { FactoryGirl.create :comptes_transaction, compte: compte, somme: -300, jour: 2.months.ago }
     let!(:transaction3) { FactoryGirl.create :comptes_transaction, compte: compte, somme: 250, jour: 1.month.ago }
 
-    specify { expect(Comptes::Transaction.until(2.months.ago + 1.day)).to eq [ transaction1, transaction2 ] }
+    specify { expect(Comptes::Transaction.until(2.months.ago + 5.day)).to eq [ transaction1, transaction2 ] }
+    specify { expect(Comptes::Transaction.until(2.months.ago)).to eq [ transaction1, transaction2 ] }
+  end
+
+  describe "#since" do
+    let(:compte) { FactoryGirl.create :comptes_compte }
+    let!(:transaction1) { FactoryGirl.create :comptes_transaction, compte: compte, somme: -500, jour: 3.months.ago }
+    let!(:transaction2) { FactoryGirl.create :comptes_transaction, compte: compte, somme: -300, jour: 2.months.ago }
+    let!(:transaction3) { FactoryGirl.create :comptes_transaction, compte: compte, somme: 250, jour: 1.month.ago }
+
+    specify { expect(Comptes::Transaction.since(2.months.ago - 5.day)).to eq [ transaction2, transaction3 ] }
+    specify { expect(Comptes::Transaction.since(2.months.ago)).to eq [ transaction3 ] }
+  end
+
+  describe "#of_account" do
+    let(:compte1) { FactoryGirl.create :comptes_compte, nom: "Compte 1" }
+    let(:compte2) { FactoryGirl.create :comptes_compte, nom: "Compte 2" }
+    let!(:transaction1) { FactoryGirl.create :comptes_transaction, compte: compte1, somme: -500, jour: 3.months.ago }
+    let!(:transaction2) { FactoryGirl.create :comptes_transaction, compte: compte2, somme: -300, jour: 2.months.ago }
+
+    specify { expect(Comptes::Transaction.all).to eq [ transaction1, transaction2 ] }
+    specify { expect(Comptes::Transaction.of_account(compte1)).to eq [ transaction1 ] }
   end
 
 end

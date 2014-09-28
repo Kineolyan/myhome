@@ -1,12 +1,16 @@
-    <tr>
+    <tr class="transaction carte" id="transaction-<%= transaction_carte.id %>">
       <td><%= transaction_carte.jour %></td>
       <td><%= transaction_carte.titre %></td>
-      <td><%= transaction_carte.somme_formattee %></td>
+      <td>
+        <span class="badge alert-<%= transaction_carte.somme >= 0 ? "success" : "danger" %>">
+          <%= transaction_carte.somme_formattee %>
+        </span>
+      </td>
       <td><%= transaction_carte.compte.nom %></td>
       <td><%= transaction_carte.class.type_name %></td>
       <td>
         <%= link_to raw('<i class="glyphicon glyphicon-eye-open"></i>'), comptes_transaction_path(transaction_carte), class: "btn btn-info" %>
         <%= link_to raw('<i class="glyphicon glyphicon-pencil"></i>'), edit_comptes_transaction_path(transaction_carte), class: "btn btn-info" %>
-        <%= link_to raw('<i class="glyphicon glyphicon-trash"></i>'), comptes_transaction_path(transaction_carte), method: :delete, data: { confirm: "Sûr de vouloir supprimer la transaction ?" }, class: "btn btn-danger" %>
+        <%= link_to raw('<i class="glyphicon glyphicon-trash"></i>'), comptes_transaction_path(transaction_carte), method: :delete, remote: true, data: { confirm: "Sûr de vouloir supprimer la transaction ?" }, class: "btn btn-danger" %>
       </td>
     </tr>

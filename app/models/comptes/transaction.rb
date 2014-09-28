@@ -13,6 +13,8 @@ module Comptes
     validates :compte, presence: true
 
     scope :until, ->(time) { where("jour < ?", time) }
+    scope :since, ->(time) { where("jour > ?", time) }
+    scope :of_account, ->(compte) { where(compte_id: compte.id) if compte }
 
     def self.type_name
       "Défaut"

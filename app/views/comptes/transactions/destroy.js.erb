@@ -1,0 +1,9 @@
+<% if @success %>
+
+	$('#transaction-<%= @transaction.id %>').remove();
+
+<% else %>
+
+	console.log('Failed to delete transaction <%= @transaction.titre %> (<%= @transaction.id %>)');
+
+<% end %>
