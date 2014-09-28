@@ -54,9 +54,10 @@ group :test do
 
   gem 'factory_girl_rails'
 
-  gem 'guard-rspec'
   gem 'spork-rails', github: 'railstutorial/spork-rails'
   gem 'guard-spork'
+  gem 'guard-rspec'
+  gem 'guard-cucumber'
 
   gem 'capybara', '2.4.1'
   gem 'poltergeist'
