@@ -13,11 +13,52 @@
  *= require_tree .
  */
 
-body {
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
+ @import "bootstrap/variables";
+ @import "bootstrap/mixins";
 
 .radio-label {
   display: inline;
+}
+
+body {
+  padding: 10px;
+
+	@media(min-width: $screen-xs-min) {
+	  .row {
+			display: table;
+			width: 100%;
+
+			#menu, #content {
+				display: table-cell;
+				padding-left: 10px;
+				padding-right: 10px;
+			}
+
+	  	#menu {
+	  		width: 175px;
+	  	}
+
+	  	#content {
+	  		width: auto;
+	  	}
+	  }
+	}
+
+	@media(max-width: $screen-xs-min) {
+		.row {
+			#menu {
+				@include make-xs-column(12);
+			}
+
+			#content {
+				@include make-xs-column(12);
+			}
+		}
+	}
+}
+
+#title {
+	font-size: 40px;
+	font-variant: small-caps;
+	text-align: center;
 }
