@@ -41,9 +41,15 @@ group :doc do
   gem 'sdoc', require: false
 end
 
+gem "guard", ">= 2.2.2", group: [ :development, :test]
+
 group :development do
   gem "better_errors"
   gem 'binding_of_caller'
+
+  gem 'guard-livereload'
+  gem 'rack-livereload'
+  gem 'rb-fsevent'
 end
 
 group :test do
