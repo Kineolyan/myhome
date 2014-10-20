@@ -16,44 +16,108 @@
  @import "bootstrap/variables";
  @import "bootstrap/mixins";
 
+@mixin make-glyph($content) {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  position: relative;
+  top: 1px;
+
+  &:before {
+		content: $content;
+  }
+}
+
 .radio-label {
   display: inline;
 }
 
+html {
+	height: 100%;
+}
+
+/* Encapsulate under body to get the first row */
 body {
-  padding: 10px;
+	min-height: 100%;
 
 	@media(min-width: $screen-xs-min) {
-	  .row {
-			display: table;
-			width: 100%;
+		display: table;
+		width: 100%;
 
-			#menu, #content {
-				display: table-cell;
-				padding-left: 10px;
-				padding-right: 10px;
-			}
+		#menu, #content {
+			display: table-cell;
+			padding-bottom: 10px;
+			padding-top: 10px;
+		}
 
-	  	#menu {
-	  		width: 175px;
-	  	}
+  	#menu {
+			padding-left: 20px;
+			padding-right: 10px;
+  		width: 200px;
+  	}
 
-	  	#content {
-	  		width: auto;
-	  	}
+  	#content {
+			padding-left: 10px;
+			padding-right: 0px;
+  		width: auto;
 	  }
 	}
 
 	@media(max-width: $screen-xs-min) {
-		.row {
-			#menu {
-				@include make-xs-column(12);
-			}
-
-			#content {
-				@include make-xs-column(12);
-			}
+		#menu, #content {
+			padding: 10px;
 		}
+
+		#menu {
+			@include make-xs-column(12);
+		}
+
+		#content {
+			@include make-xs-column(12);
+		}
+	}
+}
+
+#menu {
+	background-color: #fcfcfc;
+	border-right: 1px solid #ddd;
+	box-shadow: 2px 0 5px #ececec;
+
+	a {
+		$menu-link-color: #777;
+		color: $menu-link-color;
+
+		&:hover {
+			color: darken($menu-link-color, 40%);
+			text-decoration: none;
+		}
+	}
+
+	.section-title {
+		color: #222;
+
+		&, &:hover, &:visited, &:active, &:focus {
+			text-decoration: none;
+		}
+	}
+
+	ul {
+		list-style: none;
+		padding-left: 0;
+
+		li > a, li > .section-title {
+			padding: 10px 5px 8px;
+			display: block;
+		}
+	}
+
+	& > ul > li {
+		border-top: 1px solid #fff;
+		border-bottom: 1px solid #dbdbdb;
 	}
 }
 

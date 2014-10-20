@@ -1,19 +1,19 @@
-<div class="nav-col">
-  <%= link_to "MyHome", root_path %>
-  <ul class="nav">
-    <li><%= link_to "Espace comptes", comptes_path %>
-      <ul>
-        <li><%= link_to "Comptes", comptes_comptes_path %></li>
-        <li><%= link_to "Transactions", comptes_transactions_path %></li>
-        <li><%= link_to "Catégories", comptes_categories_path %></li>
-      </ul>
-    </li>
-  </ul>
-  <ul class="nav">
-    <li><%= link_to "Date Marks", date_marker_events_path %>
-  </ul>
-
-  <hr/>
-
+<ul class="nav-col">
+  <li>
+    <%= link_to raw("#{ HtmlHelper::Bootstrap::glyphicon('tasks') } MyHome"), root_path, class: "section-title" %>
+  </li>
+  <li>
+    <%= link_to raw("#{ HtmlHelper::Bootstrap::glyphicon('tasks') } Espace comptes"), comptes_path, class: "section-title" %>
+    <ul>
+      <li><%= link_to "Comptes", comptes_comptes_path %></li>
+      <li><%= link_to "Transactions", comptes_transactions_path %></li>
+      <li><%= link_to "Catégories", comptes_categories_path %></li>
+    </ul>
+  </li>
+  <li>
+    <%= link_to raw("#{ HtmlHelper::Bootstrap::glyphicon('tasks') } Date Marks"), date_marker_events_path, class: "section-title" %>
+  </li>
+</ul>
+<ul class="nav-col">
   <%= render 'section_menu' %>
-</div>
+</ul>

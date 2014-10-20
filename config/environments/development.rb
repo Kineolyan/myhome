@@ -26,4 +26,10 @@ Myhome::Application.configure do
   # This option may cause significant delays in view rendering with a large
   # number of complex assets.
   config.assets.debug = true
+
+  # Add Rack::LiveReload to the bottom of the middleware stack with the default options.
+  config.middleware.use(Rack::LiveReload,
+      min_delay: 500,   # default 1000
+      max_delay: 10_000 # default 60_000
+    )
 end

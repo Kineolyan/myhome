@@ -6,9 +6,7 @@
   <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
   <%= csrf_meta_tags %>
 </head>
-<body>
-
-<div class="row">
+<body class="row">
   <div id="menu">
     <%= render "layouts/menu" %>
   </div>
@@ -18,9 +16,8 @@
     <%= render 'layouts/flashs' %>
 
     <%= yield %>
-  </div>
-</div>
 
-<%= debug(params) if Rails.env.development? %>
+    <%= debug(params) if Rails.env.development? %>
+  </div>
 </body>
 </html>
