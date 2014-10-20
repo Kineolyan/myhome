@@ -19,3 +19,7 @@ vendor/bundle/
 
 # Editor files
 .DS_Store
+
+# Editor files
+*.sublime-project
+*.sublime-workspace
