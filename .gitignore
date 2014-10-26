@@ -23,3 +23,5 @@ vendor/bundle/
 # Editor files
 *.sublime-project
 *.sublime-workspace
+.idea/
+myhome.iml
