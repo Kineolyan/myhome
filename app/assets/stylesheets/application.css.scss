@@ -61,8 +61,8 @@ body {
   	}
 
   	#content {
-			padding-left: 10px;
-			padding-right: 0px;
+			padding-left: 20px;
+			padding-right: 10px;
   		width: auto;
 	  }
 	}
@@ -87,37 +87,62 @@ body {
 	border-right: 1px solid #ddd;
 	box-shadow: 2px 0 5px #ececec;
 
-	a {
-		$menu-link-color: #777;
-		color: $menu-link-color;
-
-		&:hover {
-			color: darken($menu-link-color, 40%);
-			text-decoration: none;
-		}
-	}
-
-	.section-title {
-		color: #222;
-
-		&, &:hover, &:visited, &:active, &:focus {
-			text-decoration: none;
-		}
-	}
-
 	ul {
 		list-style: none;
 		padding-left: 0;
-
-		li > a, li > .section-title {
-			padding: 10px 5px 8px;
-			display: block;
-		}
 	}
 
-	& > ul > li {
-		border-top: 1px solid #fff;
-		border-bottom: 1px solid #dbdbdb;
+	li > a, li > .section-title {
+		padding: 10px 5px 8px;
+		display: block;
+	}
+
+	.nav-col {
+		@include box-shadow(0px 3px 3px -3px #222);
+		margin-bottom: 0px;
+		margin-top: 0px;
+
+		&:last-of-type {
+			@include box-shadow(0px 0px 0px 0px #222);
+		}
+
+		& > li {
+			border-top: 1px solid #fff;
+			border-bottom: 1px solid #dbdbdb;
+
+			&:first-of-type {
+				border-top: none;
+			}
+
+			&:last-of-type {
+				border-bottom: none;
+			}
+		}
+
+		a {
+			$menu-link-color: #777;
+			color: $menu-link-color;
+
+			&:hover {
+				color: darken($menu-link-color, 40%);
+				text-decoration: none;
+			}
+		}
+
+		.section-title {
+			color: #222;
+		}
+
+		a.section-title {
+			&, &:hover, &:visited, &:active, &:focus {
+				text-decoration: none;
+				@include transition(padding-left 100ms ease-out);
+			}
+
+			&:hover {
+				padding-left: 10px;
+			}
+		}
 	}
 }
 
