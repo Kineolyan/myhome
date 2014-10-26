@@ -57,11 +57,33 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 	end
 
 	describe "/comptes/:compte_id/summary" do
-		let(:compte) { FactoryGirl.create :comptes_compte_with_transactions }
+		let(:compte) { FactoryGirl.create :comptes_compte, solde_historique: 100_00 }
+		let(:today) { Date.today }
 
-		before { visit solde_comptes_compte_path compte }
+		before do
+			previous_month = Date.new(today.year, today.month, 15) << 1
+			3.times { |i| FactoryGirl.create :comptes_transaction, compte: compte, somme: (1500 * (i % 2 - 1)), jour: (previous_month << i) }
+
+			visit summary_comptes_compte_path compte
+		end
 
 		it { is_expected.to respond }
+
+		describe "table of evolution" do
+			def it_has_row_with index, month, solde, total, evolution
+				row = subject.find("tbody tr:nth-child(#{index})")
+
+				specify { expect(row.find("td:nth-child(0)")).to be month.month }
+				specify { expect(row.find("td:nth-child(1)")).to be solde }
+				specify { expect(row.find("td:nth-child(2)")).to be total }
+				specify { expect(row.find("td:nth-child(3)")).to be evolution }
+			end
+
+			subject { page.find('#evolution-table') }
+
+			it { is_expected.to have_css "tbody tr", count: 12 }
+			# it_has_row_with 0,
+		end
 	end
 
 end

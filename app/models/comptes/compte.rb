@@ -11,6 +11,12 @@ module Comptes
       ComptesHelper::format_amount solde, with_currency
     end
 
+    # Get the solde of the accound
+    # Params
+    # options: options to use
+    #   - :until maximal date to compute the solde (default: no limit)
+    #   - :with_currency format the solde with the currency (default: false)
+    # Returns the decoded solde
     def solde options = {}
       all_transactions = transactions
       # Ne pas compter les paiements en monnaie
