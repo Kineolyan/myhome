@@ -1,6 +1,8 @@
 <% if @compte %>
 
-<h1>Compte : <%= @compte.nom %> <small><%= link_to raw('<i class="glyphicon glyphicon-pencil"></i>'), edit_comptes_compte_path(@compte) %></small></h1>
+<% content_for :title do %>
+	Compte : <%= @compte.nom %> <small><%= link_to raw('<i class="glyphicon glyphicon-pencil"></i>'), edit_comptes_compte_path(@compte) %></small>
+<% end %>
 
 <p class="lead">
   Solde : <span class="label label-info"><%= @compte.solde_formatte %></span>
@@ -8,12 +10,6 @@
 
 <h2>Les dernières transactions</h2>
 <%= render partial: 'comptes/transactions/transactions', object: @transactions %>
-
-<p>
-	<%= link_to "Voir toutes les transactions", comptes_compte_transactions_path(@compte) %><br/>
-	<%= link_to "Ajouter des transactions", ajouter_comptes_compte_transactions_path(@compte) %><br/>
-	<%= link_to "Voir le solde interactif", solde_comptes_compte_path(@compte) %>
-</p>
 
 <% else %>
 <p class="alert alert-danger">

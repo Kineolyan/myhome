@@ -6,23 +6,18 @@
   <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
   <%= csrf_meta_tags %>
 </head>
-<body>
-
-<div class="container">
-  <div class="row">
-    <div id="menu" class="col-md-3 col-xd-12">
-      <%= render "layouts/menu" %>
-    </div>
-    <div id="content" class="col-md-9 col-xd-12">
-      <h1 id="title"><%= yield :title %></h1>
-
-      <%= render 'layouts/flashs' %>
-
-      <%= yield %>
-    </div>
+<body class="row">
+  <div id="menu">
+    <%= render "layouts/menu" %>
   </div>
-</div>
+  <div id="content">
+    <div id="title"><%= yield :title %></div>
 
-<%= debug(params) if Rails.env.development? %>
+    <%= render 'layouts/flashs' %>
+
+    <%= yield %>
+
+    <%= debug(params) if Rails.env.development? %>
+  </div>
 </body>
 </html>

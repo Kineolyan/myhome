@@ -13,11 +13,156 @@
  *= require_tree .
  */
 
-body {
-  padding-top: 10px;
-  padding-bottom: 10px;
+ @import "bootstrap/variables";
+ @import "bootstrap/mixins";
+
+@mixin make-glyph($content) {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  position: relative;
+  top: 1px;
+
+  &:before {
+		content: $content;
+  }
 }
 
 .radio-label {
   display: inline;
+}
+
+html {
+	height: 100%;
+}
+
+/* Encapsulate under body to get the first row */
+body {
+	min-height: 100%;
+
+	@media(min-width: $screen-xs-min) {
+		display: table;
+		width: 100%;
+
+		#menu, #content {
+			display: table-cell;
+			padding-bottom: 10px;
+			padding-top: 10px;
+		}
+
+  	#menu {
+			padding-left: 20px;
+			padding-right: 10px;
+  		width: 200px;
+  	}
+
+  	#content {
+			padding-left: 20px;
+			padding-right: 10px;
+  		width: auto;
+	  }
+	}
+
+	@media(max-width: $screen-xs-min) {
+		#menu, #content {
+			padding: 10px;
+		}
+
+		#menu {
+			@include make-xs-column(12);
+		}
+
+		#content {
+			@include make-xs-column(12);
+		}
+	}
+}
+
+#menu {
+	background-color: #fcfcfc;
+	border-right: 1px solid #ddd;
+	box-shadow: 2px 0 5px #ececec;
+
+	ul {
+		list-style: none;
+		padding-left: 0;
+	}
+
+	li > a, li > .section-title {
+		padding: 10px 5px 8px;
+		display: block;
+	}
+
+	.nav-col {
+		@include box-shadow(0px 3px 3px -3px #222);
+		margin-bottom: 0px;
+		margin-top: 0px;
+
+		&:last-of-type {
+			@include box-shadow(0px 0px 0px 0px #222);
+		}
+
+		& > li {
+			border-top: 1px solid #fff;
+			border-bottom: 1px solid #dbdbdb;
+
+			&:first-of-type {
+				border-top: none;
+			}
+
+			&:last-of-type {
+				border-bottom: none;
+			}
+		}
+
+		a {
+			$menu-link-color: #777;
+			color: $menu-link-color;
+
+			&:hover {
+				color: darken($menu-link-color, 40%);
+				text-decoration: none;
+			}
+		}
+
+		.section-title {
+			color: #222;
+		}
+
+		a.section-title {
+			&, &:hover, &:visited, &:active, &:focus {
+				text-decoration: none;
+				@include transition(padding-left 100ms ease-out);
+			}
+
+			&:hover {
+				padding-left: 10px;
+			}
+		}
+	}
+}
+
+#title {
+	font-size: 40px;
+	font-variant: small-caps;
+	text-align: center;
+}
+
+.flex-row {
+	list-style: none;
+  -webkit-flex-flow: row wrap;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+
+  &:before {
+  	content: "";
+  	display: none;
+  }
 }
