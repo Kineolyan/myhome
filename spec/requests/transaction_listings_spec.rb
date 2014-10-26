@@ -24,7 +24,6 @@ RSpec.describe "Transaction Listings", :type => :request do
 			before { visit comptes_compte_path compte }
 
 			it { is_expected.to have_selector "#transactions-table .transaction", count: 5 }
-			it { is_expected.to have_link "Voir toutes les transactions", href: comptes_compte_transactions_path(compte)  }
 		end
 	end
 

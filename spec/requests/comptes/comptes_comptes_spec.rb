@@ -15,8 +15,6 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 		let(:compte) { FactoryGirl.create :comptes_compte_with_transactions }
 		before { visit comptes_compte_path compte }
 
-		it { is_expected.to have_link "Voir le solde interactif", href: solde_comptes_compte_path(compte) }
-
 		describe "last transactions" do
 			before do
 				compte.transactions = Array.new(10) { |index| FactoryGirl.create :comptes_transaction, compte: compte, titre: "t#{index}", jour: (10 - index).days.ago }
