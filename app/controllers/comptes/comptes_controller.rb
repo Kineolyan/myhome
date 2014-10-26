@@ -89,6 +89,9 @@ module Comptes
       end
     end
 
+    def statistics
+    end
+
     private
       def comptes_params
         params.require(:comptes_compte).permit(:nom, :solde_historique)

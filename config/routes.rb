@@ -23,7 +23,8 @@ Myhome::Application.routes.draw do
       member do
         get :solde
         post :solde
-        get "summary"
+        get :summary
+        get :statistics
       end
     end
 

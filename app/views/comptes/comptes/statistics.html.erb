@@ -1,0 +1,26 @@
+<% if @compte %>
+<% provide :title, "Statistiques du compte" %>
+
+<div class="row">
+	<%= form_for @compte, url: { action: :statistics }, method: :post, remote: false, html: { class: "form-inline row", role: "form" } do |f| %>
+	  <div class="form-group col-sm-8 col-sm-offset-2">
+	    <div class="input-group">
+	    	<div class="input-group-addon">
+					Mois
+				</div>
+
+				<%= month_field_tag :month, "", class: "form-control", required: true, value: Date.today, max: Date.today %>
+
+	     	<div class="input-group-btn">
+					<%= submit_tag "Voir le solde", class: "btn" %>
+				</div>
+	    </div>
+	  </div>
+	<% end %>
+</div>
+
+<% else %>
+
+<p>Le compte <%= params[:id] %> n'existe pas.</p>
+
+<% end %>
