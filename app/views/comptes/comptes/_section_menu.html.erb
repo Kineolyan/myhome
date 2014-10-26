@@ -1,10 +1,20 @@
-<span class="section-title">Comptes</span>
-<ul>
-  <li><%= link_to "Liste", comptes_comptes_path %></li>
-  <li><%= link_to "Creer un compte", new_comptes_compte_path %></li>
+<li>
+	<span class="section-title"><%= HtmlHelper::Bootstrap::glyphicon('tasks') %> Comptes</span>
+	<ul>
+		<li><%= link_to "Liste", comptes_comptes_path %></li>
+		<li><%= link_to "Creer un compte", new_comptes_compte_path %></li>
+	</ul>
+</li>
 
-  <% if @compte %>
-  <li><%= link_to "Résumé", summary_comptes_compte_path(@compte) %></li>
-  <li><%= link_to "Solde interactif", solde_comptes_compte_path(@compte) %></li>
-  <% end %>
-</ul>
+<% if @compte %>
+<li>
+	<span class="section-title"><%= HtmlHelper::Bootstrap::glyphicon('tasks') %> [ <%= @compte.nom %> ]</span>
+	<ul>
+	  <li><%= link_to "Détails", comptes_compte_path(@compte) %></li>
+	  <li><%= link_to "Résumé", summary_comptes_compte_path(@compte) %></li>
+	  <li><%= link_to "Solde interactif", solde_comptes_compte_path(@compte) %></li>
+	  <li><%= link_to "Transactions", comptes_compte_transactions_path(@compte) %></li>
+	  <li><%= link_to "Nouvelles transaction", ajouter_comptes_compte_transactions_path(@compte) %></li>
+	</ul>
+</li>
+<% end %>
