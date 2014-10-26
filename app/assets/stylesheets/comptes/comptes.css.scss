@@ -3,6 +3,71 @@
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
 @import "bootstrap/_variables";
+@import "bootstrap/mixins";
+
+.small-box .icon {
+  position: absolute;
+  top: auto;
+  bottom: 5px;
+  right: 5px;
+  z-index: 0;
+  font-size: 90px;
+  color: rgba(0, 0, 0, 0.15);
+}
+
+.compte {
+	$compte-color: #eaeaea;
+	$compte-bg-color: #00a65a;
+
+  position: relative;
+  display: block;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  color: $compte-color;
+  margin-bottom: 15px;
+
+	.inner {
+		background-color: $compte-bg-color;
+		border: 1px solid $btn-success-border;
+		@include transition(background-color, 500ms, ease-out);
+
+	  &:hover {
+	  	background-color: lighten($compte-bg-color, 5%);
+	  }
+
+	  p {
+	  	padding: 5px 10px;
+		  font-size: 35px;
+		  font-weight: bold;
+	  }
+
+	  a, a:hover, a:visited, a:focus {
+	  	color: $compte-color;
+	  }
+
+		.solde {
+			color: $btn-success-color;
+			font-size: 20px;
+			padding: 5px;
+			@include box-shadow(-2px 2px 10px 0px #333);
+			font-family: "Lucida Console";
+		}
+
+		.footer {
+		  position: relative;
+		  text-align: center;
+		  color: #fff;
+		  color: rgba(255, 255, 255, 0.8);
+		  display: block;
+		  z-index: 10;
+		  background: rgba(0, 0, 0, 0.1);
+		  text-decoration: none;
+			padding: 3px 10px;
+			text-align: right;
+		}
+	}
+}
 
 #solde-values {
 	list-style-type: none;

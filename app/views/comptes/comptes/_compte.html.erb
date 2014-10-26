@@ -1,3 +1,15 @@
-<div>
-  <%= link_to compte.nom, compte %> (<%= compte.solde_formatte %>) <%= link_to raw('<i class="glyphicon glyphicon-pencil"></i>'), edit_comptes_compte_path(compte) %>
+<div class="compte col-md-3 col-sm-6 col-xs-12">
+	<div class="inner">
+		<a href="<%= comptes_compte_path(compte) %>">
+			<div class="solde pull-right">
+				<%= compte.solde_formatte %>
+			</div>
+			<p>
+				<%= compte.nom %>
+			</p>
+		</a>
+	  <div class="footer">
+	  	<%= link_to raw('<i class="glyphicon glyphicon-pencil"></i>'), edit_comptes_compte_path(compte) %>
+	  </div>
+	</div>
 </div>
