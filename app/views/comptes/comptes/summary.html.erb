@@ -12,25 +12,20 @@
 			<th>Mois</th>
 			<th>Solde en fin de mois</th>
 			<th>Total</th>
-			<th>Crédit / Débit</th>
+			<th>Crédit</th>
+			<th>Crédit</th>
 		</tr>
 	</thead>
 	<tbody>
-		<%
-			previous_month = nil
-			@previous_months.each do |month|
-				total_expenses = month[:credit] - month[:debit]
-		%>
+		<% @previous_months.each do |month| %>
 		<tr class="previous-month">
 			<td><%= month[:date].strftime("%B") %></td>
 			<td><%= Comptes::ComptesHelper.format_amount month[:solde] %></td>
-			<td><%= HtmlHelper::Bootstrap::value_badge(total_expenses, Comptes::ComptesHelper.format_amount( total_expenses)) %></td>
-			<td><%= Comptes::ComptesHelper.format_amount month[:credit] %> / <%= Comptes::ComptesHelper.format_amount -month[:debit] %></td>
+			<td><%= HtmlHelper::Bootstrap::value_badge(month[:expense], Comptes::ComptesHelper.format_amount(month[:expense])) %></td>
+			<td><%= Comptes::ComptesHelper.format_amount month[:credit] %></td>
+			<td><%= Comptes::ComptesHelper.format_amount month[:debit] %></td>
 		</tr>
-		<%
-			previous_month = month
-			end
-		%>
+		<% end %>
 	</tbody>
 </table>
 

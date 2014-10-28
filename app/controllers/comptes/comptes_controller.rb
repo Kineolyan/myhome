@@ -67,22 +67,25 @@ module Comptes
       return unless @compte
 
       now = Date.today
+      current_month = Date.new now.year, now.month
 
       @previous_months = []
-      (now.month - 1).downto(1).each do |month|
-        month_beginning = Date.new now.year, month
+      12.times do |i|
+        month_beginning = current_month << i
         month_ending = month_beginning >> 1
 
-        solde = @compte.solde(until: month_ending)
-        debit = @compte.transactions.since(month_beginning).until(month_ending).where("somme < 0").sum(:somme)
+        solde = @compte.solde(until: month_ending, with_currency: false)
+        debit = @compte.transactions.since(month_beginning).until(month_ending).where("somme < 0").sum(:somme).abs
         credit = @compte.transactions.since(month_beginning).until(month_ending).where("somme > 0").sum(:somme)
 
-        @previous_months << {
+        month_data = {
           date: month_beginning,
-          solde: ComptesHelper.decode_amount(solde),
+          solde: solde,
           debit: ComptesHelper.decode_amount(-debit),
-          credit: ComptesHelper.decode_amount(credit)
+          credit: ComptesHelper.decode_amount(credit),
+          expense: ComptesHelper.decode_amount(credit - debit)
         }
+        @previous_months << month_data
       end
     end
 

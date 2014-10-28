@@ -62,7 +62,7 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 
 		before do
 			previous_month = Date.new(today.year, today.month, 15) << 1
-			3.times { |i| FactoryGirl.create :comptes_transaction, compte: compte, somme: (1500 * (i % 2 - 1)), jour: (previous_month << i) }
+			3.times { |i| FactoryGirl.create :comptes_transaction, compte: compte, somme: (1500 * (i % 2 == 0 ? -1 : 1)), jour: (previous_month << i) }
 
 			visit summary_comptes_compte_path compte
 		end
@@ -70,19 +70,35 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 		it { is_expected.to respond }
 
 		describe "table of evolution" do
-			def it_has_row_with index, month, solde, total, evolution
-				row = subject.find("tbody tr:nth-child(#{index})")
-
-				specify { expect(row.find("td:nth-child(0)")).to be month.month }
-				specify { expect(row.find("td:nth-child(1)")).to be solde }
-				specify { expect(row.find("td:nth-child(2)")).to be total }
-				specify { expect(row.find("td:nth-child(3)")).to be evolution }
+			shared_examples "a row with" do |date, solde, total, credit, debit|
+				specify { expect((subject.find :xpath, "./td[1]").text).to eq date.strftime("%B") }
+				specify { expect((subject.find :xpath, "./td[2]").text).to eq solde }
+				specify { expect((subject.find :xpath, "./td[3]").text).to eq total }
+				specify { expect((subject.find :xpath, "./td[4]").text).to eq credit }
+				specify { expect((subject.find :xpath, "./td[5]").text).to eq debit }
 			end
 
 			subject { page.find('#evolution-table') }
 
 			it { is_expected.to have_css "tbody tr", count: 12 }
-			# it_has_row_with 0,
+
+			describe "second row" do
+				subject { page.find(:xpath, "//table[@id='evolution-table']/tbody/tr[2]") }
+
+				it_behaves_like "a row with", (Date.today << 1), "85.00 €", "-15.00 €", "0.00 €", "-15.00 €"
+			end
+
+			describe "third row" do
+				subject { page.find(:xpath, "//table[@id='evolution-table']/tbody/tr[3]") }
+
+				it_behaves_like "a row with", (Date.today << 2), "100.00 €", "15.00 €", "15.00 €", "0.00 €"
+			end
+
+			describe "fourth row" do
+				subject { page.find(:xpath, "//table[@id='evolution-table']/tbody/tr[4]") }
+
+				it_behaves_like "a row with", (Date.today << 3), "85.00 €", "-15.00 €", "0.00 €", "-15.00 €"
+			end
 		end
 	end
 
