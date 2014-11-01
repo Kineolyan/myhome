@@ -61,8 +61,13 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 		let(:today) { Date.today }
 
 		before do
-			previous_month = Date.new(today.year, today.month, 15) << 1
-			3.times { |i| FactoryGirl.create :comptes_transaction, compte: compte, somme: (1500 * (i % 2 == 0 ? -1 : 1)), jour: (previous_month << i) }
+			previous_middle_month = Date.new(today.year, today.month, 15) << 1
+			previous_beginning_month = Date.new(today.year, today.month) << 1
+
+			3.times { |i| FactoryGirl.create :comptes_transaction, compte: compte, somme: (1500 * (i % 2 == 0 ? -1 : 1)), jour: (previous_middle_month << i) }
+			FactoryGirl.create :comptes_transaction, compte: compte, somme: -4200, jour: (previous_beginning_month - 1.day)
+			FactoryGirl.create :comptes_transaction, compte: compte, somme: 1700, jour: previous_beginning_month
+			FactoryGirl.create :comptes_transaction_monnaie, compte: compte, somme: -1000, jour: previous_middle_month
 
 			visit summary_comptes_compte_path compte
 		end
@@ -85,13 +90,13 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 			describe "second row" do
 				subject { page.find(:xpath, "//table[@id='evolution-table']/tbody/tr[2]") }
 
-				it_behaves_like "a row with", (Date.today << 1), "85.00 €", "-15.00 €", "0.00 €", "-15.00 €"
+				it_behaves_like "a row with", (Date.today << 1), "60.00 €", "2.00 €", "17.00 €", "-15.00 €"
 			end
 
 			describe "third row" do
 				subject { page.find(:xpath, "//table[@id='evolution-table']/tbody/tr[3]") }
 
-				it_behaves_like "a row with", (Date.today << 2), "100.00 €", "15.00 €", "15.00 €", "0.00 €"
+				it_behaves_like "a row with", (Date.today << 2), "58.00 €", "-27.00 €", "15.00 €", "-42.00 €"
 			end
 
 			describe "fourth row" do

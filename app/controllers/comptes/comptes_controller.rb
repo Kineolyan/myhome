@@ -72,11 +72,11 @@ module Comptes
       @previous_months = []
       12.times do |i|
         month_beginning = current_month << i
-        month_ending = month_beginning >> 1
+        next_month = month_beginning >> 1
 
-        solde = @compte.solde(until: month_ending, with_currency: false)
-        debit = @compte.transactions.since(month_beginning).until(month_ending).where("somme < 0").sum(:somme).abs
-        credit = @compte.transactions.since(month_beginning).until(month_ending).where("somme > 0").sum(:somme)
+        solde = @compte.solde(before: next_month, with_currency: false)
+        debit = get_changing_trades(@compte, month_beginning, next_month){ |transactions| transactions.where("somme < 0") }.abs
+        credit = get_changing_trades(@compte, month_beginning, next_month){ |transactions| transactions.where("somme > 0") }
 
         month_data = {
           date: month_beginning,
@@ -103,6 +103,20 @@ module Comptes
 
       def get_compte
         @compte = Compte.find_by_id params[:id]
+      end
+
+      # Get the trades that affect the solde of the account
+      # Params
+      #   account account to consider
+      #   from initial datetime (included)
+      #   to ending datetime ()
+      # Returns the appropriate transactions
+      def get_changing_trades account, from, to, &conditions
+        all_trades = account.transactions.since(from).before(to)
+        total = conditions.call(all_trades).sum(:somme)
+        total_monnaie = conditions.call(all_trades.where(type: TransactionMonnaie)).sum(:somme)
+
+        total - total_monnaie
       end
   end
 
