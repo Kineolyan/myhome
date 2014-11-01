@@ -12,8 +12,10 @@ module Comptes
     validates :jour, presence: true
     validates :compte, presence: true
 
-    scope :until, ->(time) { where("jour < ?", time) }
-    scope :since, ->(time) { where("jour > ?", time) }
+    scope :after, ->(time) { where("jour > ?", time.to_date) }
+    scope :since, ->(time) { where("jour >= ?", time.to_date) }
+    scope :until, ->(time) { where("jour <= ?", time.to_date) }
+    scope :before, ->(time) { where("jour < ?", time.to_date) }
     scope :of_account, ->(compte) { where(compte_id: compte.id) if compte }
 
     def self.type_name
