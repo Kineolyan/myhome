@@ -19,7 +19,7 @@
 	<tbody>
 		<% @previous_months.each do |month| %>
 		<tr class="previous-month">
-			<td><%= month[:date].strftime("%B") %></td>
+			<td><%= month[:date].strftime("%B %Y") %></td>
 			<td><%= Comptes::ComptesHelper.format_amount month[:solde] %></td>
 			<td><%= HtmlHelper::Bootstrap::value_badge(month[:expense], Comptes::ComptesHelper.format_amount(month[:expense])) %></td>
 			<td><%= Comptes::ComptesHelper.format_amount month[:credit] %></td>

@@ -76,7 +76,7 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 
 		describe "table of evolution" do
 			shared_examples "a row with" do |date, solde, total, credit, debit|
-				specify { expect((subject.find :xpath, "./td[1]").text).to eq date.strftime("%B") }
+				specify { expect((subject.find :xpath, "./td[1]").text).to eq date.strftime("%B %Y") }
 				specify { expect((subject.find :xpath, "./td[2]").text).to eq solde }
 				specify { expect((subject.find :xpath, "./td[3]").text).to eq total }
 				specify { expect((subject.find :xpath, "./td[4]").text).to eq credit }
