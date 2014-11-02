@@ -9,7 +9,7 @@
 					Mois
 				</div>
 
-				<%= month_field_tag :month, "", class: "form-control", required: true, value: Date.today, max: Date.today %>
+				<%= month_field_tag :month, "", class: "form-control", required: true, value: Date.today, max: Date.today, placeholder: "yyyy-mm" %>
 
 	     	<div class="input-group-btn">
 					<%= submit_tag "Voir le solde", class: "btn" %>
@@ -17,6 +17,10 @@
 	    </div>
 	  </div>
 	<% end %>
+</div>
+
+<div class="row">
+	<svg id="categories-graphs"></svg>
 </div>
 
 <% else %>

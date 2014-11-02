@@ -1,7 +1,7 @@
 module Comptes
 
   class ComptesController < ApplicationController
-    before_action :get_compte, [:show, :edit, :udpate, :solde, :summary]
+    before_action :get_compte, [:show, :edit, :udpate, :solde, :summary, :statistics]
 
     def index
       @comptes = Compte.all
@@ -90,6 +90,20 @@ module Comptes
     end
 
     def statistics
+      if request.post?
+        @expenses = {}
+        date_format = "%Y-%m"
+        if @compte && ApplicationHelper::is_a_date?(params[:month], date_format)
+          month = Date.strptime params[:month], date_format
+          next_month = month >> 1
+
+          Category.find_each { |category| @expenses[category.nom] = category.transactions.of_account(@compte).since(month).before(next_month).sum(:somme) }
+        end
+
+        respond_to do |format|
+          format.json { render json: @expenses }
+        end
+      end
     end
 
     private

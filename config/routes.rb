@@ -25,6 +25,7 @@ Myhome::Application.routes.draw do
         post :solde
         get :summary
         get :statistics
+        post :statistics
       end
     end
 

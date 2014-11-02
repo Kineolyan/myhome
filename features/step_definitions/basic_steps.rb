@@ -26,15 +26,26 @@ end
 
 Then(/^I get the boolean (true|false)$/) do |result|
   boolean_result = case result
-  	when "true"
-  		true
-  	when "false"
-  		false
-  	else
-  		raise ArgumentError, "accepting true or false, '#{result}' given"
-  	end
+    when "true"
+      true
+    when "false"
+      false
+    else
+      raise ArgumentError, "accepting true or false, '#{result}' given"
+    end
 
   expect(@result).to eq boolean_result
+end
+
+Then(/^validity is (true|false)$/) do |result|
+  boolean_result = case result
+    when "true"
+      expect(@result).to be_truthy
+    when "false"
+      expect(@result).to be_falsey
+    else
+      raise ArgumentError, "accepting true or false, '#{result}' given"
+    end
 end
 
 Then(/^I get "(.*?)"$/) do |expected_value|
