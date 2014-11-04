@@ -97,7 +97,7 @@ module Comptes
           month = Date.strptime params[:month], date_format
           next_month = month >> 1
 
-          Category.find_each { |category| @expenses[category.nom] = category.transactions.of_account(@compte).since(month).before(next_month).sum(:somme) }
+          Category.find_each { |category| @expenses[category.nom] = ComptesHelper.decode_amount category.transactions.of_account(@compte).since(month).before(next_month).sum(:somme) }
         end
 
         respond_to do |format|

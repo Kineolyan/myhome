@@ -2,14 +2,15 @@
 <% provide :title, "Statistiques du compte" %>
 
 <div class="row">
-	<%= form_for @compte, url: { action: :statistics }, method: :post, remote: false, html: { class: "form-inline row", role: "form" } do |f| %>
+	<%= form_for @compte, url: { action: :statistics }, method: :post, remote: false, html: { id: "statistics-form", class: "form-inline row", role: "form" } do |f| %>
+		<%= hidden_field_tag :id, @compte.id %>
 	  <div class="form-group col-sm-8 col-sm-offset-2">
 	    <div class="input-group">
 	    	<div class="input-group-addon">
 					Mois
 				</div>
 
-				<%= month_field_tag :month, "", class: "form-control", required: true, value: Date.today, max: Date.today, placeholder: "yyyy-mm" %>
+				<%= month_field_tag :month, Date.today, class: "form-control", required: true, max: Date.today, placeholder: "yyyy-mm" %>
 
 	     	<div class="input-group-btn">
 					<%= submit_tag "Voir le solde", class: "btn" %>

@@ -73,8 +73,8 @@ RSpec.describe Comptes::ComptesController, type: :controller do
             expect(subject.keys).to match_array Comptes::Category.all.collect { |c| c.nom }
           end
 
-          it { is_expected.to include(categories.first.nom => 1000) }
-          it { is_expected.to include(categories.last.nom => -1300) }
+          it { is_expected.to include(categories.first.nom => 10.0) }
+          it { is_expected.to include(categories.last.nom => -13.0) }
 
           it "have 0 for all categories" do
             Comptes::Category.all.each do |category|
