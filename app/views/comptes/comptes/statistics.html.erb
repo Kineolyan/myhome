@@ -1,27 +1,32 @@
 <% if @compte %>
 <% provide :title, "Statistiques du compte" %>
 
-<div class="row">
-	<%= form_for @compte, url: { action: :statistics }, method: :post, remote: false, html: { id: "statistics-form", class: "form-inline row", role: "form" } do |f| %>
-		<%= hidden_field_tag :id, @compte.id %>
-	  <div class="form-group col-sm-8 col-sm-offset-2">
-	    <div class="input-group">
-	    	<div class="input-group-addon">
-					Mois
-				</div>
-
-				<%= month_field_tag :month, Date.today, class: "form-control", required: true, max: Date.today, placeholder: "yyyy-mm" %>
-
-	     	<div class="input-group-btn">
-					<%= submit_tag "Voir le solde", class: "btn" %>
-				</div>
-	    </div>
-	  </div>
+<div id="month-calendar" class="row col-sm-offset-1 col-sm-10">
+	<% now = Date.today %>
+	<% eldest_transaction = Comptes::Transaction.order(jour: :asc).first.jour %>
+	<% eldest_month = Date.new eldest_transaction.year, eldest_transaction.month %>
+	<% (now.year - 1..now.year).each do |year| %>
+		<div class="row">
+			<div class="col-xs-12 year">Année <%= year %></div>
+		</div>
+		<div class="row">
+		<% (1..12).each do |month| %>
+			<% date = Date.new year, month %>
+			<div class="col-xs-1 btn btn-default month <%= 'disabled' if date > now || date < eldest_month %>" data-month="<%= date.strftime("%Y-%m") %>" data-account="<%= @compte.id %>">
+				<%= date.strftime "%b" %>
+			</div>
+		<% end %>
+		</div>
 	<% end %>
 </div>
 
 <div class="row">
-	<svg id="categories-graphs"></svg>
+	<div class="col-sm-6">
+		<svg id="expenses-graphs"></svg>
+	</div>
+	<div class="col-sm-6">
+		<svg id="revenues-graphs"></svg>
+	</div>
 </div>
 
 <% else %>

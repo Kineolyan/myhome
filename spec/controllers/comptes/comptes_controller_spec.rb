@@ -46,19 +46,20 @@ RSpec.describe Comptes::ComptesController, type: :controller do
     let(:categories) { Array.new(3) { |i| FactoryGirl.create :comptes_category, nom: "Category-#{i + 1}" } }
 
     before(:each) do
-      t1 = FactoryGirl.create :comptes_transaction, compte: compte, somme: 1000, jour: Date.today
-      t1.categories << categories.first
-      t1.save!
+      first_category = categories.first
+      first_category.transactions << FactoryGirl.create(:comptes_transaction, compte: compte, somme: 1000, jour: Date.today)
+      first_category.save!
 
-      t2 = FactoryGirl.create :comptes_transaction, compte: compte, somme: -1300, jour: Date.today
-      t2.categories << categories.last
-      t2.save!
+      last_category = categories.last
+      last_category.transactions << FactoryGirl.create(:comptes_transaction, compte: compte, somme: -1300, jour: Date.today)
+      last_category.transactions << FactoryGirl.create(:comptes_transaction, compte: compte, somme: 1700, jour: Date.today)
+      last_category.save!
     end
 
     describe "JSON request" do
       def post_request parameters = {}
         parameters[:format] = :json
-        JSON.parse post(:statistics, parameters).body
+        JSON.parse(post(:statistics, parameters).body, symbolize_names: false)
       end
 
       def month_for date
@@ -67,46 +68,52 @@ RSpec.describe Comptes::ComptesController, type: :controller do
 
       describe "with account" do
         describe "on period with transactions" do
-          subject { post_request id: compte.id, month: month_for(Date.today) }
+          let (:statistics) { post_request id: compte.id, month: month_for(Date.today) }
+          subject { statistics }
 
-          it "has all categories" do
-            expect(subject.keys).to match_array Comptes::Category.all.collect { |c| c.nom }
+          [ "credit", "debit"].each do |key|
+            it { is_expected.to have_key key }
           end
 
-          it { is_expected.to include(categories.first.nom => 10.0) }
-          it { is_expected.to include(categories.last.nom => -13.0) }
+          describe "credit statistics" do
+            subject { statistics["credit"] }
 
-          it "have 0 for all categories" do
-            Comptes::Category.all.each do |category|
-              next if categories.include? category
+            it { is_expected.to include(categories.first.nom => 10.0) }
+            it { is_expected.to include(categories.last.nom => 17.0) }
 
-              expect(expenses).to include(category.nom => 0)
+            it "only has 2 categories" do
+              expect(subject.size).to be 2
             end
           end
-          it { is_expected.to have_key categories.first.nom }
+
+          describe "debit statistics" do
+            subject { statistics["debit"] }
+
+            it { is_expected.to include(categories.last.nom => 13.0) }
+
+            it "only has 1 categories" do
+              expect(subject.size).to be 1
+            end
+          end
         end
 
         describe "out of transactions" do
-          let(:expenses) { post_request id: compte.id, month: month_for(3.months.ago) }
+          subject { post_request id: compte.id, month: month_for(3.months.ago) }
 
-          it "has all categories" do
-            expect(expenses.keys).to match_array Comptes::Category.all.collect { |c| c.nom }
+          it "has empty hash of credit" do
+            expect(subject["credit"]).to be_empty
           end
 
-          it "have 0 for all categories" do
-            Comptes::Category.all.each do |category|
-              expect(expenses).to include(category.nom => 0)
-            end
+          it "has empty hash of debit" do
+            expect(subject["debit"]).to be_empty
           end
         end
       end
 
       describe "without account" do
-        let(:expenses) { post_request id: -1, month: month_for(Date.today) }
+        subject { post_request id: -1, month: month_for(Date.today) }
 
-        it "returns empty hash" do
-          expect(expenses).to be_empty
-        end
+        it { is_expected.to be_empty }
       end
     end
   end
