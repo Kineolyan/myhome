@@ -201,4 +201,20 @@ describe Comptes::Transaction do
     specify { expect(Comptes::Transaction.of_account(compte1)).to eq [ transaction1 ] }
   end
 
+  describe "#expenses" do
+    let(:compte) { FactoryGirl.create :comptes_compte }
+    let!(:debit) { FactoryGirl.create :comptes_transaction, compte: compte, somme: -100 }
+    let!(:credit) { FactoryGirl.create :comptes_transaction, compte: compte, somme: 100 }
+
+    specify { expect(compte.transactions.expenses).to eq [ debit ] }
+  end
+
+  describe "#revenues" do
+    let(:compte) { FactoryGirl.create :comptes_compte }
+    let!(:debit) { FactoryGirl.create :comptes_transaction, compte: compte, somme: -100 }
+    let!(:credit) { FactoryGirl.create :comptes_transaction, compte: compte, somme: 100 }
+
+    specify { expect(compte.transactions.revenues).to eq [ credit ] }
+  end
+
 end
