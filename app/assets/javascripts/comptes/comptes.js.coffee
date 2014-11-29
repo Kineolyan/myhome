@@ -3,20 +3,19 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 
 (($) ->
-	margin = {top: 20, right: 20, bottom: 30, left: 40}
+	margin = {top: 5, right: 5, bottom: 30, left: 50}
 	width = 480 - margin.left - margin.right
 	height = 400 - margin.top - margin.bottom
 	color = d3.scale.category20()
 
 	class CategoryGraphs
 		constructor: (selector, @name) ->
-			@graph = d3.select(selector)
+			@svg = d3.select(selector)
 			@stats = {}
 			@categories = {}
 
 		initialize: ->
-			@graph
-				.attr("width", width + margin.left + margin.right)
+			@graph = @svg.attr("width", width + margin.left + margin.right)
 				.attr("height", height + margin.top + margin.bottom)
 				.append("g")
 					.attr("transform", "translate(#{margin.left}, #{margin.top})")
@@ -80,7 +79,8 @@
 			stacks = d3.layout.stack()(layers)
 
 			# Redefinition of scales domains
-			@x_scale.domain d3.range @get_months().length
+			console.log @get_months()
+			@x_scale.domain @get_months()
 
 			yStackMax = d3.max(stacks, (stack) -> d3.max(stack, (d) -> d.y0 + d.y ) )
 			@y_scale.domain([0, yStackMax])
