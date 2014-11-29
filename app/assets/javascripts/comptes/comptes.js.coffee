@@ -23,7 +23,7 @@
 			@x_scale = d3.scale.ordinal().rangeRoundBands([0, @width], .1)
 			@x_axis = d3.svg.axis()
 				.scale(@x_scale)
-		    .tickSize(1)
+		    .tickSize(5)
 		    .tickPadding(6)
 				.orient("bottom")
 
@@ -31,6 +31,7 @@
 			@y_axis = d3.svg.axis()
 				.scale(@y_scale)
 				.orient("left")
+		    .tickSize(5)
 				.tickFormat(d3.format ".2s")
 
 			@x_axis_element = @graph.append('g')
@@ -48,26 +49,22 @@
 					.style("text-anchor", "end")
 					.text(@name)
 
-			d3.select(window).on 'resize', =>
-				@width = @compute_width()
-				@render()
-
 			this
 
 		compute_width: ->
 			parseInt(@svg.style 'width') - margin.left - margin.right
 
-		get_categories: ->
-			Object.keys(@categories).sort()
+		get_categories: (filter_categories) ->
+			d3.keys(@categories).sort()
 
 		get_months: ->
-			Object.keys(@stats).sort()
+			d3.keys(@stats).sort()
 
 		add_data: (month, data) ->
 			@stats[month] = data
 
 			for category, sum of data
-				@categories[category] = true
+				@categories[category] = true if !(category of @categories)
 
 			@render()
 
@@ -82,7 +79,7 @@
 			return if categories.length == 0
 
 			layers = for category in categories
-				( { x: month, y: @stats[month][category] || 0 } for month, i in @get_months() )
+				( { x: month, y: (if @categories[category] then @stats[month][category] else 0) || 0 } for month, i in @get_months() )
 			stacks = d3.layout.stack()(layers)
 
 			# Redefinition of scales domains
@@ -115,8 +112,12 @@
 			legend = @graph.selectAll(".legend")
 				.data(categories)
 				.enter().append("g")
-					.attr("class", "legend")
+					.attr("class", (category) => if @categories[category] then 'legend legend-selected' else 'legend legend-hidden')
 					.attr("transform", (d, i) -> "translate(0," + i * 20 + ")")
+					.on('click', (category) =>
+						@categories[category] = !@categories[category]
+						@render()
+					)
 
 			legend.append("rect")
 				.attr("x", @width - 18)
@@ -132,6 +133,10 @@
 				.text((d) -> d)
 
 			undefined
+
+		resize: ->
+			@width = @compute_width()
+			@render()
 
 	on_load = () ->
 		return if $('#revenues-graphs').length == 0
@@ -159,6 +164,10 @@
 				error: (data) ->
 					alert "Failed to get stats for account #{account} at #{month}"
 			}
+
+		d3.select(window).on 'resize', ->
+			revenues.resize()
+			expenses.resize()
 
 	# Handle both new page and turbolink change
 	$(document).ready on_load

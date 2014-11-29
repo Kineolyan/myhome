@@ -112,4 +112,17 @@
 	  shape-rendering: crispEdges;
 	  stroke: #000;
 	}
+
+	.legend {
+		&.legend-hidden {
+			rect {
+				opacity: 0.1;
+			}
+
+			text {
+				fill: #555;
+				font-style: italic;
+			}
+		}
+	}
 }
