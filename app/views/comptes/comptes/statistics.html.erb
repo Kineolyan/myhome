@@ -1,0 +1,36 @@
+<% if @compte %>
+<% provide :title, "Statistiques du compte" %>
+
+<div id="month-calendar" class="row col-sm-offset-1 col-sm-10">
+	<% now = Date.today %>
+	<% eldest_transaction = Comptes::Transaction.order(jour: :asc).first.jour %>
+	<% eldest_month = Date.new eldest_transaction.year, eldest_transaction.month %>
+	<% (now.year - 1..now.year).each do |year| %>
+		<div class="row">
+			<div class="col-xs-12 year">Année <%= year %></div>
+		</div>
+		<div class="row">
+		<% (1..12).each do |month| %>
+			<% date = Date.new year, month %>
+			<div class="col-xs-1 btn btn-default month <%= 'disabled' if date > now || date < eldest_month %>" data-month="<%= date.strftime("%Y-%m") %>" data-account="<%= @compte.id %>">
+				<%= date.strftime "%b" %>
+			</div>
+		<% end %>
+		</div>
+	<% end %>
+</div>
+
+<div class="row">
+	<div class="col-md-6">
+		<svg id="expenses-graphs" class="statistic-chart"></svg>
+	</div>
+	<div class="col-md-6">
+		<svg id="revenues-graphs" class="statistic-chart"></svg>
+	</div>
+</div>
+
+<% else %>
+
+<p>Le compte <%= params[:id] %> n'existe pas.</p>
+
+<% end %>

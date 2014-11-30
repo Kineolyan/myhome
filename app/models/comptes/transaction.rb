@@ -17,6 +17,8 @@ module Comptes
     scope :until, ->(time) { where("jour <= ?", time.to_date) }
     scope :before, ->(time) { where("jour < ?", time.to_date) }
     scope :of_account, ->(compte) { where(compte_id: compte.id) if compte }
+    scope :expenses, -> { where("somme < 0") }
+    scope :revenues, -> { where("somme > 0") }
 
     def self.type_name
       "Défaut"

@@ -1,6 +1,5 @@
 <% if @compte %>
-
-<h1>Édition du compte <strong><%= @compte.nom %></strong></h1>
+<% provide :title, raw("Édition du compte <strong>#{ @compte.nom }</strong>" %>
 
 <%= render "form" %>
 

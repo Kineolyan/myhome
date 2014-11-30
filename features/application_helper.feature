@@ -27,7 +27,7 @@ Feature: ApplicationHelper helper methods
   Scenario Outline: I can check if a string is a number
     Given the string "<date>"
     When I test if it is a valid date
-    Then I get the boolean <result>
+    Then validity is <result>
 
     Scenarios: valid dates
       | date       | result |

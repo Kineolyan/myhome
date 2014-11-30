@@ -91,3 +91,38 @@
 	}
 
 }
+
+#month-calendar {
+	margin-bottom: 15px;
+
+	.year {
+		font-weight: bold;
+		text-align: center;
+	}
+
+	.month {
+		text-align: center;
+	}
+}
+
+.statistic-chart {
+	.axis path,
+	.axis line {
+	  fill: none;
+	  shape-rendering: crispEdges;
+	  stroke: #000;
+	}
+
+	.legend {
+		&.legend-hidden {
+			rect {
+				opacity: 0.1;
+			}
+
+			text {
+				fill: #555;
+				font-style: italic;
+			}
+		}
+	}
+}
