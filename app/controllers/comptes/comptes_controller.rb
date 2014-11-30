@@ -1,7 +1,7 @@
 module Comptes
 
   class ComptesController < ApplicationController
-    before_action :get_compte, [:show, :edit, :udpate, :solde, :summary]
+    before_action :get_compte, [:show, :edit, :udpate, :solde, :summary, :statistics]
 
     def index
       @comptes = Compte.all
@@ -75,8 +75,8 @@ module Comptes
         next_month = month_beginning >> 1
 
         solde = @compte.solde(before: next_month, with_currency: false)
-        debit = get_changing_trades(@compte, month_beginning, next_month){ |transactions| transactions.where("somme < 0") }.abs
-        credit = get_changing_trades(@compte, month_beginning, next_month){ |transactions| transactions.where("somme > 0") }
+        debit = get_changing_trades(@compte.transactions.expenses, month_beginning, next_month).abs
+        credit = get_changing_trades(@compte.transactions.revenues, month_beginning, next_month)
 
         month_data = {
           date: month_beginning,
@@ -86,6 +86,34 @@ module Comptes
           expense: ComptesHelper.decode_amount(credit - debit)
         }
         @previous_months << month_data
+      end
+    end
+
+    def statistics
+      if request.post?
+        date_format = "%Y-%m"
+        if @compte && ApplicationHelper::is_a_date?(params[:month], date_format)
+          @statistics = { credit: {}, debit: {} }
+
+          month = Date.strptime params[:month], date_format
+          next_month = month >> 1
+
+          Category.find_each do |category|
+            transactions = category.transactions.of_account(@compte).since(month).before(next_month)
+
+            debit = transactions.expenses.sum(:somme).abs
+            credit = transactions.revenues.sum(:somme)
+
+            @statistics[:credit][category.nom] = ComptesHelper::decode_amount(credit) if credit > 0
+            @statistics[:debit][category.nom] = ComptesHelper::decode_amount(debit) if debit > 0
+          end
+        else
+          @statistics = {}
+        end
+
+        respond_to do |format|
+          format.json { render json: @statistics }
+        end
       end
     end
 
@@ -111,10 +139,10 @@ module Comptes
       #   from initial datetime (included)
       #   to ending datetime ()
       # Returns the appropriate transactions
-      def get_changing_trades account, from, to, &conditions
-        all_trades = account.transactions.since(from).before(to)
-        total = conditions.call(all_trades).sum(:somme)
-        total_monnaie = conditions.call(all_trades.where(type: TransactionMonnaie)).sum(:somme)
+      def get_changing_trades transactions, from, to, &conditions
+        all_trades = transactions.since(from).before(to)
+        total = all_trades.sum(:somme)
+        total_monnaie = all_trades.where(type: TransactionMonnaie).sum(:somme)
 
         total - total_monnaie
       end

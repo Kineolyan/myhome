@@ -4,12 +4,11 @@ module ApplicationHelper
     Date.new params[:year].to_i, params[:month].to_i, params[:day].to_i
   end
 
-  def self.is_a_date? value
+  def self.is_a_date? value, format = nil
     return false if value.nil?
 
     begin
-      Date.parse value
-      true
+      format ? Date.strptime(value, format) : Date.parse(value)
     rescue ArgumentError
       false
     end
