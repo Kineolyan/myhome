@@ -87,6 +87,16 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 
 			it { is_expected.to have_css "tbody tr", count: 12 }
 
+			describe "table header" do
+				subject { page.find(:xpath, "//table[@id='evolution-table']/thead/tr") }
+
+				specify { expect((subject.find :xpath, "./th[1]").text).to eq "Mois" }
+				specify { expect((subject.find :xpath, "./th[2]").text).to eq "Solde en fin de mois" }
+				specify { expect((subject.find :xpath, "./th[3]").text).to eq "Total" }
+				specify { expect((subject.find :xpath, "./th[4]").text).to eq "Crédit" }
+				specify { expect((subject.find :xpath, "./th[5]").text).to eq "Débit" }
+			end
+
 			describe "second row" do
 				subject { page.find(:xpath, "//table[@id='evolution-table']/tbody/tr[2]") }
 
