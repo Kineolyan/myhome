@@ -11,7 +11,7 @@ module Comptes
       ComptesHelper::format_amount solde, with_currency
     end
 
-    # Get the solde of the accound
+    # Get the solde of the account
     # Params
     # options: options to use
     #   - :until use .until to compute the solde (default: no limit)
@@ -35,6 +35,14 @@ module Comptes
 
       solde = ComptesHelper.decode_amount(solde_historique + (all_transactions.sum(:somme) - tansactions_monnaie.sum(:somme)))
       options[:with_currency] ? ComptesHelper::format_amount(solde) : solde
+    end
+
+    def validate
+      update! validation_date: Time.now, validation_solde: ComptesHelper.encode_amount(solde)
+    end
+
+    def unvalidated_transactions
+      transactions.where("created_at >= :validation_date OR updated_at >= :validation_date", validation_date: validation_date)
     end
   end
 
