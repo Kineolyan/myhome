@@ -1,5 +1,16 @@
 module ApplicationHelper
 
+  # Creates a link to some location, storing the current location.
+  # Use ApplicationController#redirect_back to return to this location
+  def link_away(body, url, html_options = {})
+    if url.is_a? Hash
+      link_to(body, { return_uri: url_for(only_path: true) }.update(url_options.symbolize_keys), html_options)
+    else
+      url = url_for url unless url.is_a? String
+      link_to body, "#{url}#{url.include?("?") ? "&" : "?"}return_uri=#{url_for(only_path: true)}", html_options
+    end
+  end
+
   def self.make_date(params)
     Date.new params[:year].to_i, params[:month].to_i, params[:day].to_i
   end

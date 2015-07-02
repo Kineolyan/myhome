@@ -73,7 +73,7 @@ module Comptes
         flash[:error] = "Erreur dans l'assignation des catégories." unless @transaction.save
 
         respond_to do |format|
-          format.html { redirect_to @transaction }
+          format.html { redirect_back @transaction }
           format.json do
             render json: { transaction: {
               id: @transaction.id,
@@ -109,7 +109,7 @@ module Comptes
 
       if @transaction && @transaction.update(@parameters)
         respond_to do |format|
-          format.html { render :show }
+          format.html { redirect_back @transaction }
         end
       else
         respond_to do |format|
@@ -133,7 +133,7 @@ module Comptes
       end
 
       respond_to do |format|
-        format.html { redirect_to comptes_transactions_path }
+        format.html { redirect_back comptes_transactions_path }
         format.js {}
       end
     end
