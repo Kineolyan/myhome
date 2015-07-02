@@ -42,7 +42,11 @@ module Comptes
     end
 
     def unvalidated_transactions
-      transactions.where("created_at >= :validation_date OR updated_at >= :validation_date", validation_date: validation_date)
+      if validation_date
+        transactions.where("created_at >= :validation_date OR updated_at >= :validation_date", validation_date: validation_date)
+      else
+        transactions
+      end
     end
   end
 
