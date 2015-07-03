@@ -1,0 +1,39 @@
+<% if @compte %>
+
+<% content_for :title do %>
+	Diff : <%= @compte.nom %>
+<% end %>
+
+<%
+	if @compte.validation_date
+  	validated_solde = Comptes::ComptesHelper::decode_amount @compte.validation_solde
+  	diff = @compte.solde - validated_solde
+%>
+<p>
+  Solde validé : <span class="label label-info"><%= Comptes::ComptesHelper::format_amount validated_solde %></span><br/>
+  Validé le <b><%= @compte.validation_date.strftime "%d/%m/%Y à %Hh%M" %></b>
+</p>
+<% end %>
+
+<% unless @unvalidated_transactions.empty? %>
+<p>
+	Solde actuel : <span class="label label-info"><%= @compte.solde_formatte %></span>
+	<%= HtmlHelper::Bootstrap::value_badge diff, Comptes::ComptesHelper::format_amount(diff) if diff %>
+	<%= link_to raw(%{<i class="glyphicon glyphicon-ok"></i>}), validate_comptes_compte_path(@compte), method: :post, class: "btn btn-success validate-solde" %>
+</p>
+<% end %>
+
+<h2>Transactions depuis la validation</h2>
+<% unless @unvalidated_transactions.empty? %>
+	<%= will_paginate @unvalidated_transactions %>
+	<%= render partial: 'comptes/transactions/transactions', object: @unvalidated_transactions %>
+	<%= will_paginate @unvalidated_transactions %>
+<% else %>
+	<p>Aucune transaction depuis la dernière validation.</p>
+<% end %>
+
+<% else %>
+<p class="alert alert-danger">
+  Ce compte (<%= params[:id] %>) n'existe pas.
+</p>
+<% end %>

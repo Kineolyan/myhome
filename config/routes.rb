@@ -26,6 +26,8 @@ Myhome::Application.routes.draw do
         get :summary
         get :statistics
         post :statistics
+        get :validate
+        post :validate
       end
     end
 

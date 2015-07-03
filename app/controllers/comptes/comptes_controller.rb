@@ -1,7 +1,7 @@
 module Comptes
 
   class ComptesController < ApplicationController
-    before_action :get_compte, [:show, :edit, :udpate, :solde, :summary, :statistics]
+    before_action :get_compte, [:show, :edit, :udpate, :solde, :summary, :statistics, :validate]
 
     def index
       @comptes = Compte.all
@@ -113,6 +113,30 @@ module Comptes
 
         respond_to do |format|
           format.json { render json: @statistics }
+        end
+      end
+    end
+
+    def validate
+      if request.post?
+        if @compte
+          if @compte.validate
+            respond_to do |format|
+              format.html { redirect_to @compte }
+              format.js {}
+            end
+          else
+            respond_to do |format|
+              format.html { render }
+              format.js {}
+            end
+          end
+        else
+          raise ActiveRecord::RecordNotFound
+        end
+      else
+        if @compte
+          @unvalidated_transactions = @compte.unvalidated_transactions.paginate(page: params[:page], per_page: 20).order(jour: :desc, updated_at: :desc)
         end
       end
     end

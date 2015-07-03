@@ -11,6 +11,11 @@ describe Comptes::Compte do
 
   it { is_expected.to be_valid }
 
+  it 'has no validation' do
+    expect(compte.validation_date).to be_nil
+    expect(compte.validation_solde).to be_nil
+  end
+
   describe "without nom" do
     before(:each) { compte.nom = nil }
 
@@ -44,22 +49,6 @@ describe Comptes::Compte do
     end
   end
 
-  it "peut changer de solde" do
-    # p Comptes::Compte.all
-
-    # ajout = 1250
-    # expect {
-    #   @compte.solde += ajout
-    #   expect(@compte).to be_valid
-    #   expect(@compte.save).to be_true
-    # }.to change{ @compte.solde }.by(ajout)
-
-    # p Comptes::Compte.all
-
-    # database_compte = Comptes::Compte.find(@compte.id)
-    # expect(database_compte.solde).to eq(@compte.solde)
-  end
-
   describe "#solde" do
     let!(:compte_test) { FactoryGirl.create :comptes_compte, solde_historique: 1000 }
     before do
@@ -86,6 +75,60 @@ describe Comptes::Compte do
 
     specify { expect(compte.solde_formatte).to eq "%.2f €" % [compte.solde]}
     specify { expect(compte.solde_formatte false).to eq "%.2f" % [compte.solde]}
+  end
+
+  describe "#validate" do
+    before do
+      compte.save!
+      compte.validate
+    end
+
+    it 'records the datetime of the validation' do
+      expect(compte.validation_date).to be_within(10).of(Time.now)
+    end
+
+    it 'records the solde at validation time' do
+      expect(Comptes::ComptesHelper.decode_amount compte.validation_solde).to eq compte.solde
+    end
+
+    it 'supports various validations' do
+      FactoryGirl.create :comptes_transaction, compte: compte, somme: 500, jour: 3.months.ago
+      expect {
+        compte.validate
+      }.to change { compte.validation_solde }.by 500
+
+      expect(compte.validation_date).to be_within(10).of(Time.now)
+    end
+  end
+
+  describe "#unvalidated_transactions" do
+    before do
+      compte.save!
+      compte.validate
+    end
+
+    it 'detects basic transactions' do
+      transaction = FactoryGirl.create :comptes_transaction, compte: compte, somme: -500, jour: 3.months.ago
+      expect(compte.unvalidated_transactions).to eq [ transaction ]
+    end
+
+    it 'detects monnaie transactions' do
+      transaction = FactoryGirl.create :comptes_transaction_monnaie, compte: compte, somme: 200, jour: Date.today
+      expect(compte.unvalidated_transactions).to eq [ transaction ]
+    end
+
+    it 'detects future transactions' do
+      transaction = FactoryGirl.create :comptes_transaction, compte: compte, somme: -500, jour: (Date.today >> 1)
+      expect(compte.unvalidated_transactions).to eq [ transaction ]
+    end
+
+    it 'detects updated transactions' do
+      updated_transaction = FactoryGirl.create :comptes_transaction, compte: compte, somme: -500, jour: 3.months.ago
+      compte.validate
+
+      updated_transaction.update! somme: 1000
+      expect(compte.unvalidated_transactions).to eq [ updated_transaction ]
+    end
   end
 
 end
