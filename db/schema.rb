@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140625173508) do
+ActiveRecord::Schema.define(version: 20150622181658) do
 
   create_table "comptes_categories", force: true do |t|
     t.string   "nom"
@@ -34,6 +34,8 @@ ActiveRecord::Schema.define(version: 20140625173508) do
     t.integer  "solde_historique"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.datetime "validation_date"
+    t.integer  "validation_solde"
   end
 
   create_table "comptes_transactions", force: true do |t|
