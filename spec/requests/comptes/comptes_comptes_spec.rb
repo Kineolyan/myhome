@@ -117,4 +117,90 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 		end
 	end
 
+	describe "/comptes/:compte_id/validate" do
+		let(:compte) { FactoryGirl.create :comptes_compte, solde_historique: 100_00 }
+
+		before do
+			3.times { |i| FactoryGirl.create :comptes_transaction, compte: compte, somme: 10_00, jour: (Date.today - i) }
+
+			visit validate_comptes_compte_path compte
+		end
+
+		it { is_expected.to respond }
+
+		describe "without previous validation" do
+			it "does not mention anything about validation" do
+				expect(subject).not_to have_content "Solde validé"
+				expect(subject).not_to have_content "Validé le"
+			end
+		end
+
+		describe "with previous validation" do
+			before do
+				compte.validate
+				visit validate_comptes_compte_path compte
+			end
+
+			it "gives solde at validation" do
+				expect(subject).to have_content "Solde validé : 130.00 €"
+			end
+
+			it "gives validation date" do
+				expect(subject).to have_content "Validé le #{Date.today.strftime("%d/%m/%Y")} à" # cannot set time
+			end
+		end
+
+		describe "with unvalidated transactions" do
+			before do
+				compte.validate
+				2.times { FactoryGirl.create :comptes_transaction, compte: compte, somme: 20_00, jour: Date.today }
+
+				visit validate_comptes_compte_path compte
+			end
+
+			it "displays the validated solde" do
+				expect(subject).to have_content "Solde validé : 130.00 €"
+			end
+
+			it "displays the current solde" do
+				expect(subject).to have_content "Solde actuel : 170.00 €"
+			end
+
+			it "displays the difference between validated and current soldes" do
+				expect(subject).to have_content "40.00 €"
+			end
+
+			it "displays the list of unvalidated transactions" do
+				expect(subject).to have_selector "tr.transaction", count: 2
+			end
+		end
+
+		describe "without unvalidated transactions" do
+			before do
+				compte.validate
+				visit validate_comptes_compte_path compte
+			end
+
+			it "does not display the current solde" do
+				expect(subject).not_to have_content "Solde actuel"
+			end
+
+			it "does not display any transactions" do
+				expect(subject).not_to have_selector "tr.transaction"
+				expect(subject).to have_content "Aucune transaction depuis la dernière validation"
+			end
+		end
+
+		describe "after validation" do
+			before { page.click_link "", href: validate_comptes_compte_path(compte) }
+
+			it "redirects to the page of the account" do
+				expect(page.current_path).to eq comptes_compte_path compte
+			end
+
+			it "has validated the account" do
+				expect(Comptes::Compte::find(compte.id).validation_date).not_to be_nil
+			end
+		end
+	end
 end
