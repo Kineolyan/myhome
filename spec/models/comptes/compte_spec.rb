@@ -14,6 +14,7 @@ describe Comptes::Compte do
   it 'has no validation' do
     expect(compte.validation_date).to be_nil
     expect(compte.validation_solde).to be_nil
+    expect(compte.validated_date).to be_nil
   end
 
   describe "without nom" do
@@ -68,6 +69,10 @@ describe Comptes::Compte do
     it "formatte le solde" do
       expect(compte_test.solde with_currency: true).to eq "4.50 €"
     end
+
+    it "gets the raw solde" do
+      expect(compte_test.solde raw: true).to eq 450
+    end
   end
 
   describe "#solde_formatte" do
@@ -83,8 +88,12 @@ describe Comptes::Compte do
       compte.validate
     end
 
-    it 'records the datetime of the validation' do
+    it 'records the current date as validation time' do
       expect(compte.validation_date).to be_within(10).of(Time.now)
+    end
+
+    it 'records the current date as validation point' do
+      expect(compte.validated_date).to be_within(10).of(Time.now)
     end
 
     it 'records the solde at validation time' do
@@ -98,6 +107,26 @@ describe Comptes::Compte do
       }.to change { compte.validation_solde }.by 500
 
       expect(compte.validation_date).to be_within(10).of(Time.now)
+    end
+
+    describe "with validation date as parameter" do
+      before do
+        FactoryGirl.create :comptes_transaction, compte: compte, somme: 5_00, jour: 3.months.ago
+        FactoryGirl.create :comptes_transaction, compte: compte, somme: 10_00, jour: 1.months.ago
+        compte.validate 2.months.ago
+      end
+
+      it "records the given date as validation point" do
+        expect(compte.validated_date).to be_within(10).of 2.months.ago
+      end
+
+      it 'records the current date as validation time' do
+        expect(compte.validation_date).to be_within(10).of(Time.now)
+      end
+
+      it "records the solde at the given date" do
+        expect(compte.validation_solde).to eq 18_70
+      end
     end
   end
 
@@ -128,6 +157,18 @@ describe Comptes::Compte do
 
       updated_transaction.update! somme: 1000
       expect(compte.unvalidated_transactions).to eq [ updated_transaction ]
+    end
+
+    describe "with validation date != validated date" do
+      let(:recent_transaction) { FactoryGirl.create :comptes_transaction, compte: compte, somme: 10_00, jour: 1.months.ago }
+      before do
+        FactoryGirl.create :comptes_transaction, compte: compte, somme: 5_00, jour: 3.months.ago
+        compte.validate 2.months.ago
+      end
+
+      it "records the solde at the given date" do
+        expect(compte.unvalidated_transactions).to eq [ recent_transaction ]
+      end
     end
   end
 

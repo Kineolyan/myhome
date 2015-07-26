@@ -118,4 +118,40 @@ RSpec.describe Comptes::ComptesController, type: :controller do
     end
   end
 
+  describe "#validate" do
+    let(:compte) { FactoryGirl.create :comptes_compte }
+    before(:each) do
+      FactoryGirl.create(:comptes_transaction, compte: compte, somme: 1000, jour: Date.new(2015, 6, 26))
+    end
+    subject { Comptes::Compte.find compte.id }
+
+    describe "with a given date" do
+      before(:each) do
+        post :validate, id: compte.id, date: "2015-7-16"
+      end
+
+      it "sets the validation point to the given date" do
+        expect(subject.validated_date).to eq Date.new(2015, 7, 16)
+      end
+
+      it "sets the validation date to the current time" do
+        expect(subject.validation_date).to be_within(10).of Time.now
+      end
+    end
+
+    describe "without date" do
+      before(:each) do
+        post :validate, id: compte.id
+      end
+
+      it "sets the validation point to the current time" do
+        expect(subject.validated_date).to be_within(10).of Time.now
+      end
+
+      it "sets the validation date to the current time" do
+        expect(subject.validation_date).to be_within(10).of Time.now
+      end
+    end
+  end
+
 end

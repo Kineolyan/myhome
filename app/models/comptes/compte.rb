@@ -33,12 +33,18 @@ module Comptes
         tansactions_monnaie = tansactions_monnaie.before options[:before]
       end
 
-      solde = ComptesHelper.decode_amount(solde_historique + (all_transactions.sum(:somme) - tansactions_monnaie.sum(:somme)))
+      solde = solde_historique + all_transactions.sum(:somme) - tansactions_monnaie.sum(:somme)
+      return solde if options[:raw]
+
+      solde = ComptesHelper.decode_amount solde
       options[:with_currency] ? ComptesHelper::format_amount(solde) : solde
     end
 
-    def validate
-      update! validation_date: Time.now, validation_solde: ComptesHelper.encode_amount(solde)
+    def validate date = nil
+      validated_solde = date ? solde(until: date) : solde
+      now = Time.now
+      date ||= now
+      update! validation_date: now, validated_date: date, validation_solde: ComptesHelper.encode_amount(validated_solde)
     end
 
     def unvalidated_transactions
