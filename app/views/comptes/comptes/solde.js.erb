@@ -1,7 +1,7 @@
 (function() {
 	<% if @date %>
 
-		$("<%= escape_javascript render 'solde', date: @date, solde: @solde %>").appendTo("#solde-values");
+		$("<%= escape_javascript render 'solde', date: @date, solde: @solde, compte: @compte %>").appendTo("#solde-values");
 
 	<% else %>
 
