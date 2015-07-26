@@ -1,1 +1,13 @@
-<li>Au <%= @date.strftime "%d/%m/%Y" %>: <span class="badge"><%= @solde %></span></li>
+<li>
+	<% if @compte.validated_date %>
+		<% if @date > @compte.validated_date %>
+			<%= link_to validate_comptes_compte_path(@compte, date: @date),  method: :post, class: "btn btn-primary validate-solde" do %>
+				<%= HtmlHelper::Bootstrap::glyphicon :ok %>
+			<% end %>
+		<% elsif @date == @compte.validated_date %>
+			<span class="text-success"><%= HtmlHelper::Bootstrap::glyphicon :ok %></span>
+		<% end %>
+	<% end %>
+
+	Au <%= @date.strftime "%d/%m/%Y" %>: <span class="badge"><%= @solde %></span>
+</li>
