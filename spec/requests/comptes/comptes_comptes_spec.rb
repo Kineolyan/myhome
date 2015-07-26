@@ -142,11 +142,11 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 			end
 
 			it "gives solde at validation" do
-				expect(subject).to have_content "Solde validé : 130.00 €"
+				expect(subject).to have_content /Solde validé au #{Date.today.strftime("%d/%m/%Y")} à \d{2}h\d{2}: 130.00 €/
 			end
 
 			it "gives validation date" do
-				expect(subject).to have_content "Validé le #{Date.today.strftime("%d/%m/%Y")} à" # cannot set time
+				expect(subject).to have_content /Validé le #{Date.today.strftime("%d/%m/%Y")} à \d{2}h\d{2}/ # cannot set time
 			end
 		end
 
@@ -159,7 +159,7 @@ RSpec.describe "Comptes::ComptesController", :type => :request do
 			end
 
 			it "displays the validated solde" do
-				expect(subject).to have_content "Solde validé : 130.00 €"
+				expect(subject).to have_content /Solde validé .*: 130.00 €/
 			end
 
 			it "displays the current solde" do

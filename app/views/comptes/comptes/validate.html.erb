@@ -10,7 +10,8 @@
   	diff = @compte.solde - validated_solde
 %>
 <p>
-  Solde validé : <span class="label label-info"><%= Comptes::ComptesHelper::format_amount validated_solde %></span><br/>
+  Solde validé au <b><%= @compte.validated_date.strftime "%d/%m/%Y à %Hh%M" %></b>:
+  <span class="label label-info"><%= Comptes::ComptesHelper::format_amount validated_solde %></span><br/>
   Validé le <b><%= @compte.validation_date.strftime "%d/%m/%Y à %Hh%M" %></b>
 </p>
 <% end %>

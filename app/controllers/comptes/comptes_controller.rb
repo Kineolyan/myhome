@@ -120,7 +120,8 @@ module Comptes
     def validate
       if request.post?
         if @compte
-          if @compte.validate
+          @date = ApplicationHelper::is_a_date?(params[:date]) ? Date.parse(params[:date]) : nil
+          if @compte.validate @date
             respond_to do |format|
               format.html { redirect_to @compte }
               format.js {}
