@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+  xmlns:x="urn:schemas-microsoft-com:office:excel"
+  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+  xmlns:html="http://www.w3.org/TR/REC-html40">
+  <Worksheet ss:Name="Transactions">
+    <Table>
+      <Row>
+        <Cell><Data ss:Type="String">ID</Data></Cell>
+        <Cell><Data ss:Type="String">Titre</Data></Cell>
+        <Cell><Data ss:Type="String">Montant</Data></Cell>
+        <Cell><Data ss:Type="String">Date</Data></Cell>
+        <Cell><Data ss:Type="String">Compte</Data></Cell>
+        <Cell><Data ss:Type="String">Categorie</Data></Cell>
+      </Row>
+    <% @transactions.each do |transaction| %>
+      <Row>
+        <Cell><Data ss:Type="Number"><%= transaction.id %></Data></Cell>
+        <Cell><Data ss:Type="String"><%= transaction.titre %></Data></Cell>
+        <Cell><Data ss:Type="String"><%= transaction.somme %></Data></Cell>
+        <Cell><Data ss:Type="String"><%= transaction.jour_formatte %></Data></Cell>
+        <Cell><Data ss:Type="String"><%= transaction.compte.nom %></Data></Cell>
+        <Cell><Data ss:Type="String"><%= transaction.categories.empty? ? '' : transaction.categories.first.nom %></Data></Cell>
+      </Row>
+    <% end %>
+    </Table>
+  </Worksheet>
+</Workbook>

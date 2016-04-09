@@ -11,6 +11,16 @@
 <h2>Les dernières transactions</h2>
 <%= render partial: 'comptes/transactions/transactions', object: @transactions %>
 
+<h2>Outils</h2>
+<div>
+	<div class="btn btn-default">
+		<%= link_to "Transactions en CSV", comptes_compte_transactions_path(@compte, format: 'csv') %>
+	</div>
+	<div class="btn btn-default">
+		<%= link_to "Transactions pour Excel", comptes_compte_transactions_path(@compte, format: 'xls') %>
+	</div>
+</div>
+
 <% else %>
 <p class="alert alert-danger">
   Ce compte (<%= params[:id] %>) n'existe pas.

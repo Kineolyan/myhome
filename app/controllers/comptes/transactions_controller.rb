@@ -47,7 +47,14 @@ module Comptes
     def index
       @transactions = Transaction.all
       @transactions.where!(compte_id: @compte.id) if @compte
-      @transactions = @transactions.paginate(page: params[:page], per_page: 20).order(jour: :desc, updated_at: :desc)
+      respond_to do |format|
+        format.html do
+          @transactions = @transactions.paginate(page: params[:page], per_page: 20).order(jour: :desc, updated_at: :desc)
+          render
+        end
+        format.csv { send_data @transactions.to_csv }
+        format.xls
+      end
     end
 
     def ajouter

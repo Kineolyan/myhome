@@ -31,6 +31,22 @@ module Comptes
     def somme_formattee with_currency = true
       ComptesHelper::format_amount ComptesHelper.decode_amount(somme), with_currency
     end
+
+    def self.to_csv options = {}
+      CSV.generate(options) do |csv|
+        csv << %w{ID Titre Montant Date Compte Categorie}
+        all.each do |transaction|
+          csv << [
+            transaction.id,
+            transaction.titre,
+            transaction.somme,
+            transaction.jour_formatte,
+            transaction.compte.nom,
+            transaction.categories.empty? ? '' : transaction.categories.first.nom
+          ]
+        end
+      end
+    end
   end
 
 end
