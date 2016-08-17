@@ -9,6 +9,8 @@ import AccountEditor from './comptes/AccountEditor';
 import AccountList from './comptes/AccountList';
 import CategoryList from './categories/CategoryList';
 import CategoryEditor from './categories/CategoryEditor';
+import TransactionList from './transactions/TransactionList';
+import TransactionEditor from './transactions/TransactionEditor';
 
 class Messages extends Component {
   constructor(props) {
@@ -116,6 +118,12 @@ class App extends Component {
                 );
             }}/>
             <CategoryList />
+          </div>
+          <div className="block">
+            <TransactionEditor />
+          </div>
+          <div className="block">
+            <TransactionList />
           </div>
         </div>
       </div>

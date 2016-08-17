@@ -29,6 +29,7 @@
   justify-content: space-around;
   align-items: stretch;
   flex-wrap: wrap;
+  text-align: left;
 }
 
 .grid .block {
@@ -38,4 +39,5 @@
   border-width: 1px;
   border-color: #cecece;
   margin: 5px;
+  padding: 5px 10px;
 }

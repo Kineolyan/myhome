@@ -15,7 +15,8 @@ const horizons = (function() {
   return {
      messages: horizon('messages'),
      accounts: horizon('accounts'),
-     categories: horizon('categories')
+     categories: horizon('categories'),
+     transactions: horizon('transactions')
    };
 })();
 
