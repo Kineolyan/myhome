@@ -4,6 +4,8 @@ import _ from 'lodash';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 
+import {auditItem} from '../core/auditActions';
+
 class CategoryEditor extends React.Component {
   constructor(props) {
     super(props);
@@ -35,8 +37,31 @@ class CategoryEditor extends React.Component {
     this.setState({edited: category});
   }
 
+  getEditedCategory() {
+    const category = _.clone(this.state.edited);
+    return auditItem(category);
+  }
+
+  saveCategory(category) {
+    return new Promise((resolve, reject) => {
+      if (category.id === undefined) {
+        this.feed.store(category)
+          .subscribe(resolve, reject);
+      } else {
+        reject(new Error('Unsupported update'));
+      }
+    });
+  }
+
+  resetCategory() {
+    this.setState({category: {}});
+  }
+
   submit() {
-    this.props.onSubmit(this.state.edited);
+    const category = this.getEditedCategory();
+    this.saveCategory(category).then(() => {
+        this.resetCategory();
+    });
   }
 
   render() {

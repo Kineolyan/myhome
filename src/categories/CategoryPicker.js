@@ -13,9 +13,10 @@ class CategoryPicker extends ElementPicker {
     super.componentWillMount();
 
     this.feed
-      .order('name', 'ascending')
-      .watch().subscribe(
-        categories => this.setState({values: categories}),
+      // .order('name')
+      .watch()
+      .subscribe(
+        categories => this.setState({values: _.sortBy(categories, ['name'])}),
         err => console.error('Can\'t retrieve categories', err)
       );
   }

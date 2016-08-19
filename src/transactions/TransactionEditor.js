@@ -6,8 +6,10 @@ import RaisedButton from 'material-ui/RaisedButton';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
+import Dialog from 'material-ui/Dialog';
 
 import CategoryPicker from '../categories/CategoryPicker';
+import CategoryEditor from '../categories/CategoryEditor';
 import AccountPicker from '../comptes/AccountPicker';
 import {auditItem} from '../core/auditActions';
 
@@ -30,12 +32,6 @@ const DEFAULT_TRANSACTION = {
   type: Type.CARTE
 };
 
-// function setFirstIfUndefined(obj, key, values) {
-//   if (obj[key] === undefined) {
-//     obj[key] = values[0].id;
-//   }
-// }
-
 class TransactionEditor extends React.Component {
   constructor(props) {
     super(props);
@@ -43,7 +39,8 @@ class TransactionEditor extends React.Component {
     this.state = {
       categories: [],
       accounts: [],
-      transaction: _.clone(DEFAULT_TRANSACTION)
+      transaction: _.clone(DEFAULT_TRANSACTION),
+      openCategoryForm: false
     };
   }
 
@@ -55,7 +52,9 @@ class TransactionEditor extends React.Component {
       setType: this.setChoice.bind(this, 'type'),
       setCategory: this.setValue.bind(this, 'category'),
       setDate: this.setInput.bind(this, 'date'),
-      submit: this.submit.bind(this)
+      submit: this.submit.bind(this),
+      addCategory: this.toggleCategoryForm.bind(this, true),
+      closeCategoryForm: this.toggleCategoryForm.bind(this, false)
     };
   }
 
@@ -94,10 +93,6 @@ class TransactionEditor extends React.Component {
   getEditedTransaction() {
     const transaction = _.clone(this.state.transaction); // Shallow clone is enough
 
-    // setFirstIfUndefined(transaction, 'account', this.state.accounts);
-    // setFirstIfUndefined(transaction, 'type', PAYMENT_TYPES);
-    // setFirstIfUndefined(transaction, 'category', this.state.categories);
-
     if (transaction.date !== undefined) {
       transaction.date = transaction.date.getTime();
     }
@@ -131,6 +126,10 @@ class TransactionEditor extends React.Component {
       .then(() => this.resetTransaction());
   }
 
+  toggleCategoryForm(open) {
+    this.setState({openCategoryForm: open});
+  }
+
   renderChoices(values, valueFn, cbk, hintText) {
     return <SelectField
         value={valueFn(this.state) || valueFn(this.props) || null}
@@ -146,12 +145,6 @@ class TransactionEditor extends React.Component {
     return <AccountPicker
       value={this.getValue('account')}
       onSelect={this.cbks.setAccount} />;
-    // return this.renderChoices(
-    //   this.state.accounts,
-    //   store => store.transaction.account,
-    //   this.cbks.setAccount,
-    //   'Compte'
-    // );
   }
 
   renderType() {
@@ -167,16 +160,15 @@ class TransactionEditor extends React.Component {
     return <CategoryPicker
       value={this.getValue('category')}
       onSelect={this.cbks.setCategory} />;
-    // return this.renderChoices(
-    //   this.state.categories,
-    //   store => store.transaction.category,
-    //   this.cbks.setCategory,
-    //   'Catégorie de la transaction'
-    // );
   }
 
   render() {
     return <div>
+      <Dialog title="Ajouter une catégorie"
+        modal={false} open={this.state.openCategoryForm}
+        onRequestClose={this.cbks.closeCategoryForm}>
+        <CategoryEditor onSubmit={_.noop} />
+      </Dialog>
       <div>
         <TextField hintText="Objet de la transaction"
           defaultValue={this.props.transaction.object}
@@ -204,6 +196,8 @@ class TransactionEditor extends React.Component {
       </div>
       <div>
         {this.renderCategories()}
+        <RaisedButton label="+" primary={true}
+          onClick={this.cbks.addCategory}/>
       </div>
       <RaisedButton label="Sauver" primary={true}
         onClick={this.cbks.submit} />

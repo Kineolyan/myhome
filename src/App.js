@@ -107,16 +107,7 @@ class App extends Component {
             <AccountList />
           </div>
           <div className="block">
-            <CategoryEditor onSubmit={category => {
-              console.log('new category', category);
-              auditItem(category);
-
-              this.context.horizons.categories
-                .store(category).subscribe(
-                  result => console.log('Saved category', result),
-                  error => console.log('[Failure] category', error)
-                );
-            }}/>
+            <CategoryEditor />
             <CategoryList />
           </div>
           <div className="block">
