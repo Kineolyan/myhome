@@ -47,8 +47,7 @@ class TransactionHistory extends React.Component {
         .defaultIfEmpty()
         .mergeMap(_.identity)
         .filter(transaction => expr.test(transaction.object))
-        .toArray()
-        ;
+        .toArray();
 
       this.setState({selection});
       console.log(`Selection changed to ${this.state.account} for ${expr}`);

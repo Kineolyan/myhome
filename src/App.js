@@ -5,6 +5,7 @@ import './App.css';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 
+import {auditItem} from './core/auditActions';
 import AccountEditor from './comptes/AccountEditor';
 import AccountList from './comptes/AccountList';
 import CategoryList from './categories/CategoryList';
@@ -93,9 +94,8 @@ class App extends Component {
           <div className="block">
             <AccountEditor onSubmit={account => {
               console.log('new account', account);
-              const now = Date.now();
-              account.createdAt = now;
-              account.updateAt = now;
+              auditItem(account);
+
               this.context.horizons.accounts
                 .store(account).subscribe(
                   result => console.log('Saved account', result),
@@ -109,9 +109,8 @@ class App extends Component {
           <div className="block">
             <CategoryEditor onSubmit={category => {
               console.log('new category', category);
-              const now = Date.now();
-              category.createdAt = now;
-              category.updateAt = now;
+              auditItem(category);
+
               this.context.horizons.categories
                 .store(category).subscribe(
                   result => console.log('Saved category', result),

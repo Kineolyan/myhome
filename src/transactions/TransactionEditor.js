@@ -9,6 +9,7 @@ import DatePicker from 'material-ui/DatePicker';
 
 import CategoryPicker from '../categories/CategoryPicker';
 import AccountPicker from '../comptes/AccountPicker';
+import {auditItem} from '../core/auditActions';
 
 const Type = {
   CARTE: 'carte',
@@ -104,7 +105,7 @@ class TransactionEditor extends React.Component {
       transaction.amount = parseFloat(transaction.amount);
     }
 
-    return transaction;
+    return auditItem(transaction);
   }
 
   saveTransaction(transaction) {
