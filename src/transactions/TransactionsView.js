@@ -2,25 +2,38 @@ import React from 'react';
 import _ from 'lodash';
 
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
+import Dialog from 'material-ui/Dialog';
+import FlatButton from 'material-ui/FlatButton';
+
+import TransactionView from './TransactionView';
 
 class TransactionsView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      transactions: []
+      transactions: null,
+      detailledTransaction: null
     };
   }
 
   componentWillMount() {
     this.props.feed.subscribe(
-      transactions => {
-        console.log('received', transactions);
-        this.setState({transactions});
-      },
-      err => console.error('[Failure] retrieving transactions', err),
-      () => console.log('Transactions loaded')
+      transactions => this.setState({transactions}),
+      err => console.error('[Failure] retrieving transactions', err)
     );
-    console.log('view mounted');
+
+    this.cbks = {
+      showTransaction: this.showTransaction.bind(this),
+      hideTransaction: this.hideTransaction.bind(this)
+    };
+  }
+
+  showTransaction(rowId) {
+    this.setState({detailledTransaction: this.state.transactions[rowId]});
+  }
+
+  hideTransaction() {
+    this.setState({detailledTransaction: null});
   }
 
   render() {
@@ -28,31 +41,49 @@ class TransactionsView extends React.Component {
       return <p>No transactions</p>;
     }
 
-    return <Table>
-      <TableHeader displaySelectAll={false}>
-        <TableRow>
-          <TableHeaderColumn>Objet</TableHeaderColumn>
-          <TableHeaderColumn>Montant</TableHeaderColumn>
-          <TableHeaderColumn>Date</TableHeaderColumn>
-        </TableRow>
-      </TableHeader>
-      <TableBody
-          displayRowCheckbox={false}
-          showRowHover={true}
-          stripedRows={true}>
-        {this.state.transactions.map(transaction => {
-          return (
-            <TableRow key={transaction.id}>
-              <TableRowColumn>{transaction.object}</TableRowColumn>
-              <TableRowColumn>{transaction.amount} €</TableRowColumn>
-              <TableRowColumn>
-                {new Date(transaction.date).toLocaleDateString()}
-              </TableRowColumn>
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>;
+    let details;
+    if (this.state.detailledTransaction !== null) {
+      const actions = [
+        <FlatButton label="Fermer" primary={true}
+          onTouchTap={this.cbks.hideTransaction} />
+      ];
+
+      details = <Dialog title="Transaction"
+          modal={false} open={true}
+          actions={actions}
+          onRequestClose={this.cbks.hideTransaction}>
+        <TransactionView transaction={this.state.detailledTransaction} />
+      </Dialog>;
+    }
+
+    return <div>
+      {details}
+      <Table onCellClick={this.cbks.showTransaction}>
+        <TableHeader displaySelectAll={false}>
+          <TableRow>
+            <TableHeaderColumn>Objet</TableHeaderColumn>
+            <TableHeaderColumn>Montant</TableHeaderColumn>
+            <TableHeaderColumn>Date</TableHeaderColumn>
+          </TableRow>
+        </TableHeader>
+        <TableBody
+            displayRowCheckbox={false}
+            showRowHover={true}
+            stripedRows={true}>
+          {this.state.transactions.map(transaction => {
+            return (
+              <TableRow key={transaction.id}>
+                <TableRowColumn>{transaction.object}</TableRowColumn>
+                <TableRowColumn>{transaction.amount} €</TableRowColumn>
+                <TableRowColumn>
+                  {new Date(transaction.date).toLocaleDateString()}
+                </TableRowColumn>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>;
   }
 }
 

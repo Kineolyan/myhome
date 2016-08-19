@@ -25,12 +25,15 @@ const PAYMENT_TYPES = [
 ];
 
 const TODAY = new Date();
+const DEFAULT_TRANSACTION = {
+  type: Type.CARTE
+};
 
-function setFirstIfUndefined(obj, key, values) {
-  if (obj[key] === undefined) {
-    obj[key] = values[0].id;
-  }
-}
+// function setFirstIfUndefined(obj, key, values) {
+//   if (obj[key] === undefined) {
+//     obj[key] = values[0].id;
+//   }
+// }
 
 class TransactionEditor extends React.Component {
   constructor(props) {
@@ -39,7 +42,7 @@ class TransactionEditor extends React.Component {
     this.state = {
       categories: [],
       accounts: [],
-      transaction: {}
+      transaction: _.clone(DEFAULT_TRANSACTION)
     };
   }
 
@@ -90,9 +93,9 @@ class TransactionEditor extends React.Component {
   getEditedTransaction() {
     const transaction = _.clone(this.state.transaction); // Shallow clone is enough
 
-    setFirstIfUndefined(transaction, 'account', this.state.accounts);
-    setFirstIfUndefined(transaction, 'type', PAYMENT_TYPES);
-    setFirstIfUndefined(transaction, 'category', this.state.categories);
+    // setFirstIfUndefined(transaction, 'account', this.state.accounts);
+    // setFirstIfUndefined(transaction, 'type', PAYMENT_TYPES);
+    // setFirstIfUndefined(transaction, 'category', this.state.categories);
 
     if (transaction.date !== undefined) {
       transaction.date = transaction.date.getTime();
@@ -118,7 +121,7 @@ class TransactionEditor extends React.Component {
   }
 
   resetTransaction() {
-    this.setState({transaction: {}});
+    this.setState({transaction: _.clone(DEFAULT_TRANSACTION)});
   }
 
   submit() {

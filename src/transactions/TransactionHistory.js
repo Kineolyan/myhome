@@ -44,7 +44,10 @@ class TransactionHistory extends React.Component {
         .findAll({account: this.state.account})
         .order('date', 'descending')
         .fetch()
-        // .filter(transaction => expr.test(transaction.name))
+        .defaultIfEmpty()
+        .mergeMap(_.identity)
+        .filter(transaction => expr.test(transaction.object))
+        .toArray()
         ;
 
       this.setState({selection});
