@@ -7,6 +7,9 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
 
+import CategoryPicker from '../categories/CategoryPicker';
+import AccountPicker from '../comptes/AccountPicker';
+
 const Type = {
   CARTE: 'carte',
   MONNAIE: 'monnaie',
@@ -44,36 +47,16 @@ class TransactionEditor extends React.Component {
     this.cbks = {
       setObject: this.setInput.bind(this, 'object'),
       setAmount: this.setInput.bind(this, 'amount'),
-      setAccount: this.setChoice.bind(this, 'account'),
+      setAccount: this.setValue.bind(this, 'account'),
       setType: this.setChoice.bind(this, 'type'),
-      setCategory: this.setChoice.bind(this, 'category'),
+      setCategory: this.setValue.bind(this, 'category'),
       setDate: this.setInput.bind(this, 'date'),
       submit: this.submit.bind(this)
     };
-
-    this.categoryFeed
-      .order('name', 'ascending')
-      .watch().subscribe(
-        categories => {
-          // weirdly, not sorted
-          this.setState({categories: _.sortBy(categories, ['name'])})
-        },
-        err => console.log('[Failure] fetch categories', err)
-      );
-    this.accountFeed
-      .order('name', 'ascending')
-      .watch().subscribe(
-        accounts => this.setState({accounts}),
-        err => console.log('[Failure] fetch accounts', err)
-      );
   }
 
   get feed() {
     return this.context.horizons.transactions;
-  }
-
-  get categoryFeed() {
-    return this.context.horizons.categories;
   }
 
   get accountFeed() {
@@ -86,6 +69,11 @@ class TransactionEditor extends React.Component {
 
   setChoice(key, event, index, value) {
     return this.setValue(key, value);
+  }
+
+  getValue(key) {
+    return this.state.transaction[key]
+      || this.props.transaction[key];
   }
 
   setValue(key, value) {
@@ -151,12 +139,15 @@ class TransactionEditor extends React.Component {
   }
 
   renderAccount() {
-    return this.renderChoices(
-      this.state.accounts,
-      store => store.transaction.account,
-      this.cbks.setAccount,
-      'Compte'
-    );
+    return <AccountPicker
+      value={this.getValue('account')}
+      onSelect={this.cbks.setAccount} />;
+    // return this.renderChoices(
+    //   this.state.accounts,
+    //   store => store.transaction.account,
+    //   this.cbks.setAccount,
+    //   'Compte'
+    // );
   }
 
   renderType() {
@@ -169,12 +160,15 @@ class TransactionEditor extends React.Component {
   }
 
   renderCategories() {
-    return this.renderChoices(
-      this.state.categories,
-      store => store.transaction.category,
-      this.cbks.setCategory,
-      'Catégorie de la transaction'
-    );
+    return <CategoryPicker
+      value={this.getValue('category')}
+      onSelect={this.cbks.setCategory} />;
+    // return this.renderChoices(
+    //   this.state.categories,
+    //   store => store.transaction.category,
+    //   this.cbks.setCategory,
+    //   'Catégorie de la transaction'
+    // );
   }
 
   render() {
