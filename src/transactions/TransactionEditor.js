@@ -36,10 +36,15 @@ class TransactionEditor extends React.Component {
   constructor(props) {
     super(props);
 
+    const transaction = _.clone(DEFAULT_TRANSACTION);
+    if (this.props.transaction.date !== undefined) {
+      transaction.date = new Date(this.props.transaction.date);
+    }
+
     this.state = {
       categories: [],
       accounts: [],
-      transaction: _.clone(DEFAULT_TRANSACTION),
+      transaction,
       openCategoryForm: false
     };
   }
@@ -92,6 +97,9 @@ class TransactionEditor extends React.Component {
 
   getEditedTransaction() {
     const transaction = _.clone(this.state.transaction); // Shallow clone is enough
+    if (this.props.transaction.id !== undefined) {
+      transaction.id = this.props.transaction.id;
+    }
 
     if (transaction.date !== undefined) {
       transaction.date = transaction.date.getTime();
@@ -104,16 +112,11 @@ class TransactionEditor extends React.Component {
   }
 
   saveTransaction(transaction) {
-    if (transaction.id === undefined) {
-      return new Promise((resolve, reject) => {
-        this.feed.store(transaction).subscribe(
-          resolve,
-          reject
-        );
-      });
-    } else {
-      return Promise.reject(new Error('Unsupported update'));
-    }
+    return new Promise((resolve, reject) => {
+      const action = transaction.id === undefined ?
+        this.feed.store(transaction) : this.feed.update(transaction);
+        action.subscribe(resolve, reject);
+    });
   }
 
   resetTransaction() {
@@ -123,7 +126,10 @@ class TransactionEditor extends React.Component {
   submit() {
     const transaction = this.getEditedTransaction();
     this.saveTransaction(transaction)
-      .then(() => this.resetTransaction());
+      .then(() => {
+        this.resetTransaction();
+        this.props.onSubmit();
+      });
   }
 
   toggleCategoryForm(open) {
@@ -206,11 +212,13 @@ class TransactionEditor extends React.Component {
 }
 
 TransactionEditor.propTypes = {
-  transaction: React.PropTypes.object
+  transaction: React.PropTypes.object,
+  onSubmit: React.PropTypes.func
 };
 
 TransactionEditor.defaultProps = {
-  transaction: {}
+  transaction: {},
+  onSubmit: _.noop
 };
 
 TransactionEditor.contextTypes = {

@@ -3,9 +3,8 @@ import _ from 'lodash';
 
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
 
-import TransactionView from './TransactionView';
+import TransactionPanel from './TransactionPanel';
 
 class TransactionsView extends React.Component {
   constructor(props) {
@@ -43,16 +42,11 @@ class TransactionsView extends React.Component {
 
     let details;
     if (this.state.detailledTransaction !== null) {
-      const actions = [
-        <FlatButton label="Fermer" primary={true}
-          onTouchTap={this.cbks.hideTransaction} />
-      ];
-
       details = <Dialog title="Transaction"
           modal={false} open={true}
-          actions={actions}
-          onRequestClose={this.cbks.hideTransaction}>
-        <TransactionView transaction={this.state.detailledTransaction} />
+          onRequestClose={this.cbks.hideTransaction}
+          autoScrollBodyContent={true}>
+        <TransactionPanel transaction={this.state.detailledTransaction} />
       </Dialog>;
     }
 
