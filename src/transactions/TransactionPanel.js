@@ -22,19 +22,20 @@ class TransactionPanel extends React.Component {
   }
 
   render() {
-    const view = this.state.edit ?
-      <TransactionEditor transaction={this.props.transaction}
-        onSubmit={this.cbks.closeEditor}/> :
-      <TransactionView transaction={this.props.transaction} />;
-
     // TODO Pas la version maj après edit,
     // Bug pendant edition pour faire -
-    // Pas de bouton pour fermer
-    return <div>
-      <FlatButton label="Edit"
-        onClick={this.cbks.openEditor} />
-      {view}
-    </div>;
+    if (this.state.edit) {
+      return <div>
+        <TransactionEditor transaction={this.props.transaction}
+          onSubmit={this.cbks.closeEditor}/>
+      </div>;
+    } else {
+      return <div>
+        <TransactionView transaction={this.props.transaction} />
+        <FlatButton label="Edit"
+          onClick={this.cbks.openEditor} />
+      </div>;
+    }
   }
 
 }

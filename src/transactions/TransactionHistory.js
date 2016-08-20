@@ -18,7 +18,7 @@ class TransactionHistory extends React.Component {
 
   componentWillMount() {
     this.cbks = {
-      filter: _.debounce(this.setFilter.bind(this), 250),
+      filter: _.debounce(this.setFilter.bind(this), 500),
       setAccount: this.setAccount.bind(this)
     };
   }
@@ -26,7 +26,7 @@ class TransactionHistory extends React.Component {
   setFilter(event, value) {
     this.setState({needle: value});
     if (_.isString(value) && value.length >= 3) {
-      this.filterTransactions();
+      this.filterTransactions(this.state.account, value);
     } else if (_.isEmpty(value)) {
       this.setState({selection: null});
     }
@@ -34,14 +34,14 @@ class TransactionHistory extends React.Component {
 
   setAccount(account) {
     this.setState({account});
-    this.filterTransactions();
+    this.filterTransactions(account, this.state.needle);
   }
 
-  filterTransactions() {
-    if (this.state.needle && this.state.account) {
-      const expr = new RegExp(this.state.needle, 'i');
+  filterTransactions(account, needle) {
+    if (needle && account) {
+      const expr = new RegExp(needle, 'i');
       const selection = this.feed
-        .findAll({account: this.state.account})
+        .findAll({account: account})
         .order('date', 'descending')
         .fetch()
         .defaultIfEmpty()
@@ -50,7 +50,7 @@ class TransactionHistory extends React.Component {
         .toArray();
 
       this.setState({selection});
-      console.log(`Selection changed to ${this.state.account} for ${expr}`);
+      console.log(`Selection changed to ${account} for ${expr}`);
     }
   }
 

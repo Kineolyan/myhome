@@ -16,15 +16,39 @@ class TransactionsView extends React.Component {
   }
 
   componentWillMount() {
-    this.props.feed.subscribe(
-      transactions => this.setState({transactions}),
-      err => console.error('[Failure] retrieving transactions', err)
-    );
-
     this.cbks = {
       showTransaction: this.showTransaction.bind(this),
       hideTransaction: this.hideTransaction.bind(this)
     };
+
+    this.subscribeToFeed();
+  }
+
+  componentWillUnmount() {
+    this.unsubscribeFromFeed();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.feed !== prevProps.feed) {
+      this.setState({transactions: []});
+      this.subscribeToFeed();
+    }
+  }
+
+  subscribeToFeed() {
+    this.unsubscribeFromFeed();
+
+    this.subscription = this.props.feed.subscribe(
+      transactions => this.setState({transactions}),
+      err => console.error('[Failure] retrieving transactions', err)
+    );
+  }
+
+  unsubscribeFromFeed() {
+    if (this.subscription !== undefined) {
+      this.subscription.unsubscribe();
+      this.subscription = undefined;
+    }
   }
 
   showTransaction(rowId) {
