@@ -41,3 +41,20 @@
   margin: 5px;
   padding: 5px 10px;
 }
+
+.panel {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: stretch;
+  text-align: left;
+}
+
+.panel .block {
+  flex-grow: 1;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #cecece;
+  margin: 5px;
+  padding: 5px 10px;
+}

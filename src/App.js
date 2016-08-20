@@ -13,6 +13,7 @@ import CategoryEditor from './categories/CategoryEditor';
 import TransactionList from './transactions/TransactionList';
 import TransactionEditor from './transactions/TransactionEditor';
 import TransactionHistory from './transactions/TransactionHistory';
+import TransactionActivity from './activities/TransactionActivity';
 
 class Messages extends Component {
   constructor(props) {
@@ -77,6 +78,49 @@ Messages.contextTypes = {
 };
 
 class App extends Component {
+  renderShowcase() {
+    return <div style={{borderTop: 'solid 2px #000'}}>
+      <h3>Showcase</h3>
+      <div className="grid">
+        <div className="block">
+          <Messages />
+        </div>
+        <div className="block">
+          <AccountEditor onSubmit={account => {
+            console.log('new account', account);
+            auditItem(account);
+
+            this.context.horizons.accounts
+              .store(account).subscribe(
+                result => console.log('Saved account', result),
+                error => console.log('[Failure] account', error)
+              );
+          }} />
+        </div>
+        <div className="block">
+          <AccountList />
+        </div>
+        <div className="block">
+          <CategoryEditor />
+          <CategoryList />
+        </div>
+        <div className="block">
+          <TransactionEditor />
+        </div>
+        <div className="block">
+          <TransactionList />
+        </div>
+        <div className="block">
+          <TransactionHistory />
+        </div>
+      </div>
+    </div>;
+  }
+
+  renderTransactionView() {
+    return <TransactionActivity />;
+  }
+
   render() {
     return (
       <div className="App">
@@ -87,39 +131,8 @@ class App extends Component {
         <p className="App-intro">
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
-        <div className="grid">
-          <div className="block">
-            <Messages />
-          </div>
-          <div className="block">
-            <AccountEditor onSubmit={account => {
-              console.log('new account', account);
-              auditItem(account);
-
-              this.context.horizons.accounts
-                .store(account).subscribe(
-                  result => console.log('Saved account', result),
-                  error => console.log('[Failure] account', error)
-                );
-            }} />
-          </div>
-          <div className="block">
-            <AccountList />
-          </div>
-          <div className="block">
-            <CategoryEditor />
-            <CategoryList />
-          </div>
-          <div className="block">
-            <TransactionEditor />
-          </div>
-          <div className="block">
-            <TransactionList />
-          </div>
-          <div className="block">
-            <TransactionHistory />
-          </div>
-        </div>
+        {this.renderTransactionView()}
+        {this.renderShowcase()}
       </div>
     );
   }
