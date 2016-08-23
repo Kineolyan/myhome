@@ -36,10 +36,9 @@ class TransactionEditor extends React.Component {
   constructor(props) {
     super(props);
 
-    const transaction = _.clone(DEFAULT_TRANSACTION);
-    if (this.props.transaction.date !== undefined) {
-      transaction.date = new Date(this.props.transaction.date);
-    }
+    const transaction = _.assign({}, DEFAULT_TRANSACTION, this.props.transaction);
+    transaction.date = transaction.date !== undefined ?
+      new Date(transaction.date) : new Date();
 
     this.state = {
       categories: [],
@@ -120,7 +119,12 @@ class TransactionEditor extends React.Component {
   }
 
   resetTransaction() {
-    this.setState({transaction: _.clone(DEFAULT_TRANSACTION)});
+    const transaction = this.state.transaction;
+    // Remove changing props
+    ['object', 'amount'].forEach(prop => Reflect.deleteProperty(transaction, prop));
+    // Reset to default props
+    _.assign(transaction, DEFAULT_TRANSACTION);
+    this.setState({transaction});
   }
 
   submit() {
@@ -177,13 +181,11 @@ class TransactionEditor extends React.Component {
       </Dialog>
       <div>
         <TextField hintText="Objet de la transaction"
-          defaultValue={this.props.transaction.object}
           value={this.state.transaction.object}
           onChange={this.cbks.setObject} />
       </div>
       <div>
         <TextField hintText="Montant de la transaction" type="number"
-          defaultValue={this.props.transaction.amount}
           value={this.state.transaction.amount}
           onChange={this.cbks.setAmount} />
       </div>

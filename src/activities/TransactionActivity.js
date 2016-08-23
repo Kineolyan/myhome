@@ -6,6 +6,7 @@ import RaisedButton from 'material-ui/RaisedButton';
 import TransactionList from '../transactions/TransactionList';
 import TransactionEditor from '../transactions/TransactionEditor';
 import TransactionHistory from '../transactions/TransactionHistory';
+import LatestTransactions from '../transactions/LatestTransactions';
 
 const TOGGLE_BUTTON_STYLE = {
   paddingLeft: 5,
@@ -32,15 +33,40 @@ class TransactionActivity extends React.Component {
     this.setState({[property]: !this.state[property]});
   }
 
+  getRatio(main) {
+    if (this.state.displaySearch && this.state.displayTransactions) {
+      return main ? '40%' : '30%';
+    } else if (this.state.displaySearch || this.state.displayTransactions) {
+      return '50%';
+    } else {
+      return '100%';
+    }
+  }
+
+  renderTransactionView() {
+    return <div className="block" style={{maxWidth: this.getRatio(false)}}>
+      <TransactionList />
+    </div>;
+  }
+
+  renderSearchView() {
+    return <div className="block" style={{maxWidth: this.getRatio(false)}}>
+      <TransactionHistory />
+    </div>;
+  }
+
+  renderEditorView() {
+    return <div className="block" style={{maxWidth: this.getRatio(true)}}>
+      <TransactionEditor />
+      <LatestTransactions />
+    </div>;
+  }
+
   render() {
     const transactionsView = this.state.displayTransactions ?
-      <div className="block">
-        <TransactionList />
-      </div> : null;
+      this.renderTransactionView() : null;
     const searchView = this.state.displaySearch ?
-      <div className="block">
-        <TransactionHistory />
-      </div> : null;
+      this.renderSearchView() : null;
 
     return <div>
       <div style={{width: '100%', textAlign: 'center'}}>
@@ -54,10 +80,7 @@ class TransactionActivity extends React.Component {
       </div>
       <div className="panel">
         {transactionsView}
-        <div className="block">
-          <TransactionEditor />
-          <div>Latest transactions</div>
-        </div>
+        {this.renderEditorView()}
         {searchView}
       </div>
     </div>;

@@ -6,7 +6,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 injectTapEventPlugin();
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import App from './App';
+import {RouterApp} from './App';
 import './index.css';
 
 const horizons = (function() {
@@ -28,7 +28,7 @@ class MuiApp extends React.Component {
   render() {
     return (
       <MuiThemeProvider>
-        <App />
+        <RouterApp />
       </MuiThemeProvider>
     );
   }

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+import { Router, Route, Link, IndexRoute, browserHistory } from 'react-router';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 
@@ -77,8 +78,8 @@ Messages.contextTypes = {
   horizons: React.PropTypes.object
 };
 
-class App extends Component {
-  renderShowcase() {
+class Showcase extends Component {
+  render() {
     return <div style={{borderTop: 'solid 2px #000'}}>
       <h3>Showcase</h3>
       <div className="grid">
@@ -116,11 +117,24 @@ class App extends Component {
       </div>
     </div>;
   }
+}
 
-  renderTransactionView() {
-    return <TransactionActivity />;
+const AccountActivity = () => <p>AccountActivity</p>;
+
+class RouterApp extends Component {
+  render() {
+    return <Router history={browserHistory}>
+      <Route path="/" component={App}>
+        <IndexRoute component={AccountActivity} />
+        <Route path="comptes" component={AccountActivity}/>
+        <Route path="comptes/edit" component={TransactionActivity}/>
+        <Route path="*" component={Showcase}/>
+      </Route>
+    </Router>;
   }
+}
 
+class App extends Component {
   render() {
     return (
       <div className="App">
@@ -131,15 +145,19 @@ class App extends Component {
         <p className="App-intro">
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
-        {this.renderTransactionView()}
-        {this.renderShowcase()}
+        <p>
+          <Link to={`/comptes`}>Comptes</Link>&nbsp;
+          <Link to={`/comptes/edit`}>Ajouter</Link>
+          <Link to={`/showcase`}>Show case</Link>
+        </p>
+
+        {this.props.children}
       </div>
     );
   }
 }
 
-App.contextTypes = {
-  horizons: React.PropTypes.object
-};
-
 export default App;
+export {
+  RouterApp
+};
