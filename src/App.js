@@ -5,6 +5,9 @@ import './App.css';
 import { Router, Route, Link, IndexRoute, browserHistory } from 'react-router';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
+import AppBar from 'material-ui/AppBar';
+import Drawer from 'material-ui/Drawer';
+import MenuItem from 'material-ui/MenuItem';
 
 import {auditItem} from './core/auditActions';
 import AccountEditor from './comptes/AccountEditor';
@@ -121,6 +124,69 @@ class Showcase extends Component {
 
 const AccountActivity = () => <p>AccountActivity</p>;
 
+class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      openMenu: false
+    };
+
+    this.cbks = {
+      toggleMenu: this.toggleMenu.bind(this),
+      openMenu: this.toggleMenu.bind(this, true),
+      closeMenu: this.toggleMenu.bind(this, false)
+    };
+  }
+
+  toggleMenu(open) {
+    this.setState({openMenu: open});
+  }
+
+  renderMenu() {
+    return <Drawer
+        docked={false}
+        width={200}
+        open={this.state.openMenu}
+        onRequestChange={this.cbks.toggleMenu}>
+      <Link to={`/comptes`}>
+        <MenuItem onTouchTap={this.cbks.closeMenu}>Comptes</MenuItem>
+      </Link>
+      <Link to={`/comptes/edit`}>
+        <MenuItem onTouchTap={this.cbks.closeMenu}>
+          Ajouter
+        </MenuItem>
+      </Link>
+      <Link to={`/showcase`}>
+        <MenuItem onTouchTap={this.cbks.closeMenu}>
+          Show case
+        </MenuItem>
+      </Link>
+    </Drawer>;
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <AppBar
+          title="My Home"
+          iconClassNameRight="muidocs-icon-navigation-expand-more"
+          onLeftIconButtonTouchTap={this.cbks.openMenu}/>
+        {this.renderMenu()}
+        <div className="App-header">
+          <img src={logo} className="App-logo" alt="logo" />
+          <h2>Welcome to React</h2>
+        </div>
+        <p className="App-intro">
+          To get started, edit <code>src/App.js</code> and save to reload.
+        </p>
+
+        {this.props.children}
+      </div>
+    );
+  }
+}
+
 class RouterApp extends Component {
   render() {
     return <Router history={browserHistory}>
@@ -131,29 +197,6 @@ class RouterApp extends Component {
         <Route path="*" component={Showcase}/>
       </Route>
     </Router>;
-  }
-}
-
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          <Link to={`/comptes`}>Comptes</Link>&nbsp;
-          <Link to={`/comptes/edit`}>Ajouter</Link>
-          <Link to={`/showcase`}>Show case</Link>
-        </p>
-
-        {this.props.children}
-      </div>
-    );
   }
 }
 

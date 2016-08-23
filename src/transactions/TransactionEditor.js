@@ -8,6 +8,9 @@ import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
 
+import FloatingActionButton from 'material-ui/FloatingActionButton';
+import ContentAdd from 'material-ui/svg-icons/content/add';
+
 import CategoryPicker from '../categories/CategoryPicker';
 import CategoryEditor from '../categories/CategoryEditor';
 import AccountPicker from '../comptes/AccountPicker';
@@ -204,8 +207,9 @@ class TransactionEditor extends React.Component {
       </div>
       <div>
         {this.renderCategories()}
-        <RaisedButton label="+" primary={true}
-          onClick={this.cbks.addCategory}/>
+        <FloatingActionButton onTouchTap={this.cbks.addCategory} mini={true}>
+          <ContentAdd />
+        </FloatingActionButton>
       </div>
       <RaisedButton label="Sauver" primary={true}
         onClick={this.cbks.submit} />
