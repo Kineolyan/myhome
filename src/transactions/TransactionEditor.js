@@ -124,7 +124,7 @@ class TransactionEditor extends React.Component {
   resetTransaction() {
     const transaction = this.state.transaction;
     // Remove changing props
-    ['object', 'amount'].forEach(prop => Reflect.deleteProperty(transaction, prop));
+    ['object', 'amount'].forEach(prop => { transaction[prop] = '';});
     // Reset to default props
     _.assign(transaction, DEFAULT_TRANSACTION);
     this.setState({transaction});

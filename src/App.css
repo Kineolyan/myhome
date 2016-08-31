@@ -24,12 +24,31 @@
 }
 
 .grid {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: stretch;
-  flex-wrap: wrap;
   text-align: left;
+}
+
+.panel {
+  text-align: left;
+}
+
+/* Do better for smartphone */
+@media (min-width: 100px) {
+  .grid {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: stretch;
+    flex-wrap: wrap;
+    text-align: left;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: stretch;
+    text-align: left;
+  }
 }
 
 .grid .block {
@@ -42,14 +61,6 @@
   padding: 5px 10px;
 }
 
-.panel {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  align-items: stretch;
-  text-align: left;
-}
-
 .panel .block {
   flex-grow: 1;
   border-style: solid;
@@ -57,4 +68,9 @@
   border-color: #cecece;
   margin: 5px;
   padding: 5px 10px;
+}
+
+.dialog-header .dialog-actions {
+  display: inline-block;
+  float: right;
 }

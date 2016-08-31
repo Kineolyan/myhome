@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 import { Router, Route, Link, IndexRoute, browserHistory } from 'react-router';
@@ -18,6 +17,7 @@ import TransactionList from './transactions/TransactionList';
 import TransactionEditor from './transactions/TransactionEditor';
 import TransactionHistory from './transactions/TransactionHistory';
 import TransactionActivity from './activities/TransactionActivity';
+import AccountActivity from './activities/AccountActivity';
 
 class Messages extends Component {
   constructor(props) {
@@ -122,8 +122,6 @@ class Showcase extends Component {
   }
 }
 
-const AccountActivity = () => <p>AccountActivity</p>;
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -173,13 +171,6 @@ class App extends Component {
           iconClassNameRight="muidocs-icon-navigation-expand-more"
           onLeftIconButtonTouchTap={this.cbks.openMenu}/>
         {this.renderMenu()}
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
 
         {this.props.children}
       </div>
