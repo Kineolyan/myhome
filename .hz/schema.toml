@@ -1,0 +1,17 @@
+# This is a TOML document
+
+[collections.accounts]
+indexes = ["name"]
+
+[collections.messages]
+indexes = ["datetime"]
+
+[collections.transactions]
+indexes = ["account_category_date","account_date","category_date","date","updatedAt"]
+
+[collections.categories]
+indexes = ["name"]
+
+[groups.admin]
+[groups.admin.rules.carte_blanche]
+template = "any()"
