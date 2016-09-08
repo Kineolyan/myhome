@@ -8,6 +8,7 @@ import NavigationClose from 'material-ui/svg-icons/navigation/close';
 import TransactionHistory from '../transactions/TransactionHistory';
 import TransactionsView from '../transactions/TransactionsView';
 import AccountPicker from '../comptes/AccountPicker';
+import AccountEditor from '../comptes/AccountEditor';
 import CategoryPicker from '../categories/CategoryPicker';
 
 class AccountActivity extends React.Component {
@@ -112,11 +113,14 @@ class AccountActivity extends React.Component {
       this.renderSearchView() : null;
 
     return <div>
-      <div style={{width: '100%', textAlign: 'right'}}>
-        <FloatingActionButton onTouchTap={this.cbks.toggleSearchDisplay}
-            secondary={this.state.displaySearch}>
-          <ActionSearch />
-        </FloatingActionButton>
+      <div>
+        <div style={{float: 'right'}}>
+          <FloatingActionButton onTouchTap={this.cbks.toggleSearchDisplay}
+              secondary={this.state.displaySearch}>
+            <ActionSearch />
+          </FloatingActionButton>
+        </div>
+        <AccountEditor />
       </div>
       <div className="panel">
         {this.renderList()}

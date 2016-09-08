@@ -8,7 +8,6 @@ import AppBar from 'material-ui/AppBar';
 import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
 
-import {auditItem} from './core/auditActions';
 import AccountEditor from './comptes/AccountEditor';
 import AccountList from './comptes/AccountList';
 import CategoryList from './categories/CategoryList';
@@ -90,16 +89,7 @@ class Showcase extends Component {
           <Messages />
         </div>
         <div className="block">
-          <AccountEditor onSubmit={account => {
-            console.log('new account', account);
-            auditItem(account);
-
-            this.context.horizons.accounts
-              .store(account).subscribe(
-                result => console.log('Saved account', result),
-                error => console.log('[Failure] account', error)
-              );
-          }} />
+          <AccountEditor />
         </div>
         <div className="block">
           <AccountList />

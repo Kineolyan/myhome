@@ -4,12 +4,14 @@ import _ from 'lodash';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 
+import {auditItem} from '../core/auditActions';
+
 class AccountEditor extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      edited: {}
+      account: {}
     };
   }
 
@@ -20,19 +22,45 @@ class AccountEditor extends React.Component {
     };
   }
 
+  get feed() {
+    return this.context.horizons.accounts;
+  }
+
   setModel(key, event, value) {
-    const account = this.state.edited;
+    const account = this.state.account;
     if (!_.isEmpty(value)) {
       account[key] = value;
     } else {
       Reflect.deleteProperty(account, key);
     }
 
-    this.setState({edited: account});
+    this.setState({ account });
+  }
+
+  getEditedAccount() {
+    const account = _.clone(this.state.account);
+    if (this.props.account.id !== undefined) {
+      account.id = this.props.account.id;
+    }
+
+    return auditItem(account);
+  }
+
+  saveAccount(account) {
+    return new Promise((resolve, reject) => {
+      const action = account.id === undefined ?
+        this.feed.store(account) : this.feed.update(account);
+      action.subscribe(resolve, reject);
+    });
+  }
+
+  resetAccount() {
+    this.setState({ account: {} })
   }
 
   submit() {
-    this.props.onSubmit(this.state.edited);
+    const account = this.getEditedAccount();
+    this.saveAccount(account).then(() => this.resetAccount());
   }
 
   render() {
@@ -51,11 +79,17 @@ class AccountEditor extends React.Component {
 }
 
 AccountEditor.propTypes = {
-  account: React.PropTypes.object
+  account: React.PropTypes.object,
+  onSubmit: React.PropTypes.func
 };
 
 AccountEditor.defaultProps = {
-  account: {}
+  account: {},
+  onSubmit: _.noop
+};
+
+AccountEditor.contextTypes = {
+  horizons: React.PropTypes.object
 };
 
 export default AccountEditor;
