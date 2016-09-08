@@ -8,9 +8,10 @@ injectTapEventPlugin();
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {RouterApp} from './App';
 import './index.css';
+const {MyHome} = window;
 
 const horizons = (function() {
-  const horizon = new Horizon({host: '127.0.0.1:8181'}); // eslint-disable-line no-undef
+  const horizon = new Horizon({host: `${MyHome.horizon.url}:${MyHome.horizon.port}`}); // eslint-disable-line no-undef
 
   return {
      messages: horizon('messages'),
