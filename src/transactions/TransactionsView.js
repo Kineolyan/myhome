@@ -4,7 +4,12 @@ import _ from 'lodash';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
+import CreditCardIcon from 'material-ui/svg-icons/action/credit-card';
+import ChequeIcon from 'material-ui/svg-icons/action/tab';
+import CoinIcon from 'material-ui/svg-icons/maps/local-atm';
+import TransferIcon from 'material-ui/svg-icons/action/swap-horiz';
 
+import {Type} from './models';
 import TransactionPanel, {Mode as PanelMode} from './TransactionPanel';
 
 class TransactionsView extends React.Component {
@@ -44,7 +49,7 @@ class TransactionsView extends React.Component {
     this.unsubscribeFromFeed();
 
     this.subscription = this.props.feed.subscribe(
-      transactions => this.setState({transactions}),
+      transactions => this.setState({transactions: [...transactions]}),
       err => console.error('[Failure] retrieving transactions', err)
     );
   }
@@ -73,7 +78,19 @@ class TransactionsView extends React.Component {
     this.hideTransaction();
   }
 
+  renderTypeIcon(type) {
+    switch (type) {
+    case Type.CARTE: return <CreditCardIcon/>;
+    case Type.CHEQUE: return <ChequeIcon />;
+    case Type.MONNAIE: return <CoinIcon />;
+    case Type.VIREMENT: return <TransferIcon />;
+    default: return <span>Unknown: {type}</span>;
+    }
+  }
+
   render() {
+    const typeColumnStyle = {width: 30};
+
     if (_.isEmpty(this.state.transactions)) {
       return <p>No transactions</p>;
     }
@@ -99,8 +116,9 @@ class TransactionsView extends React.Component {
     return <div>
       {details}
       <Table onCellClick={this.cbks.showTransaction}>
-        <TableHeader displaySelectAll={false}>
+        <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
           <TableRow>
+            <TableHeaderColumn style={typeColumnStyle}>Type</TableHeaderColumn>
             <TableHeaderColumn>Objet</TableHeaderColumn>
             <TableHeaderColumn>Montant</TableHeaderColumn>
             <TableHeaderColumn>Date</TableHeaderColumn>
@@ -113,6 +131,7 @@ class TransactionsView extends React.Component {
           {this.state.transactions.map(transaction => {
             return (
               <TableRow key={transaction.id}>
+                <TableRowColumn style={typeColumnStyle}>{this.renderTypeIcon(transaction.type)}</TableRowColumn>
                 <TableRowColumn>{transaction.object}</TableRowColumn>
                 <TableRowColumn>{transaction.amount} €</TableRowColumn>
                 <TableRowColumn>

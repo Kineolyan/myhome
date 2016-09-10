@@ -11,17 +11,11 @@ import Dialog from 'material-ui/Dialog';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
 
+import {Type} from './models';
 import CategoryPicker from '../categories/CategoryPicker';
 import CategoryEditor from '../categories/CategoryEditor';
 import AccountPicker from '../comptes/AccountPicker';
 import {auditItem} from '../core/auditActions';
-
-const Type = {
-  CARTE: 'carte',
-  MONNAIE: 'monnaie',
-  CHEQUE: 'cheque',
-  VIREMENT: 'virement'
-};
 
 const PAYMENT_TYPES = [
   {id: Type.CARTE, name: 'Carte'},

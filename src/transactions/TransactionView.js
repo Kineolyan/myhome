@@ -51,10 +51,13 @@ class TransactionView extends React.Component {
       Montant de {this.transaction.amount} €
       </p>
       <p>
-        Compte: {this.state.account.name || this.transaction.account}
+        Compte : {this.state.account.name || this.transaction.account}
       </p>
       <p>
-        Catégorie: {this.state.category.name || this.transaction.category}
+        Catégorie : {this.state.category.name || this.transaction.category}
+      </p>
+      <p>
+        Type de payement : {this.transaction.type}
       </p>
       <p style={{fontStyle: 'italic', fontSize: '0.8em'}}>
         Créée le {asDate(this.transaction.createdAt)}, mise à jour le {asDate(this.transaction.updatedAt)}
