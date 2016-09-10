@@ -9,6 +9,7 @@ import TransactionHistory from '../transactions/TransactionHistory';
 import TransactionsView from '../transactions/TransactionsView';
 import AccountPicker from '../comptes/AccountPicker';
 import AccountEditor from '../comptes/AccountEditor';
+import AccountValidator from '../comptes/validations/AccountValidator';
 import CategoryPicker from '../categories/CategoryPicker';
 
 class AccountActivity extends React.Component {
@@ -105,6 +106,7 @@ class AccountActivity extends React.Component {
         </FloatingActionButton>
       </div>
       <TransactionsView feed={this.state.selection} />
+      <AccountValidator />
     </div>;
   }
 

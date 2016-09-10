@@ -74,3 +74,10 @@
   display: inline-block;
   float: right;
 }
+
+.account-balance {
+  margin: 5px;
+  padding: 5px 10px;
+  border: 1px solid black;
+  border-radius: 5px;
+}

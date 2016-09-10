@@ -17,7 +17,8 @@ const horizons = (function() {
      messages: horizon('messages'),
      accounts: horizon('accounts'),
      categories: horizon('categories'),
-     transactions: horizon('transactions')
+     transactions: horizon('transactions'),
+     validations: horizon('account_validations')
    };
 })();
 
