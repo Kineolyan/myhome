@@ -18,13 +18,6 @@ class LatestTransactions extends React.Component {
     this.setState({selection});
   }
 
-  componentWillUnmount() {
-    if (this.subscription !== undefined) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
-  }
-
   get feed() {
     return this.context.horizons.transactions;
   }
