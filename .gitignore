@@ -5,6 +5,7 @@ node_modules
 
 # Data
 rethinkdb_data
+backups
 
 # production
 build

@@ -1,16 +1,26 @@
 # This is a TOML document
 
 [collections.accounts]
-indexes = ["name"]
+[[collections.accounts.indexes]]
+fields = [["name"]]
 
 [collections.messages]
-indexes = ["datetime"]
+[[collections.messages.indexes]]
+fields = [["datetime"]]
 
 [collections.transactions]
-indexes = ["account_category_date","account_date","category_date","date","updatedAt"]
+[[collections.transactions.indexes]]
+fields = [["account"],["date"]]
+[[collections.transactions.indexes]]
+fields = [["date"]]
+[[collections.transactions.indexes]]
+fields = [["updatedAt"]]
+
+[collections.users]
 
 [collections.categories]
-indexes = ["name"]
+[[collections.categories.indexes]]
+fields = [["name"]]
 
 [groups.admin]
 [groups.admin.rules.carte_blanche]
