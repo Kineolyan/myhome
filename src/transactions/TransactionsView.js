@@ -133,7 +133,7 @@ class TransactionsView extends React.Component {
               <TableRow key={transaction.id}>
                 <TableRowColumn style={typeColumnStyle}>{this.renderTypeIcon(transaction.type)}</TableRowColumn>
                 <TableRowColumn>{transaction.object}</TableRowColumn>
-                <TableRowColumn>{transaction.amount} €</TableRowColumn>
+                <TableRowColumn>{transaction.amount.toFixed(2)} €</TableRowColumn>
                 <TableRowColumn>
                   {new Date(transaction.date).toLocaleDateString()}
                 </TableRowColumn>
