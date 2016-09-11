@@ -10,13 +10,23 @@ fields = [["datetime"]]
 
 [collections.transactions]
 [[collections.transactions.indexes]]
+fields = [["account"],["category"],["date"]]
+[[collections.transactions.indexes]]
+fields = [["account"],["createdAt"]]
+[[collections.transactions.indexes]]
 fields = [["account"],["date"]]
+[[collections.transactions.indexes]]
+fields = [["account"]]
 [[collections.transactions.indexes]]
 fields = [["date"]]
 [[collections.transactions.indexes]]
 fields = [["updatedAt"]]
 
 [collections.users]
+
+[collections.account_validations]
+[[collections.account_validations.indexes]]
+fields = [["account"],["validatedAt"]]
 
 [collections.categories]
 [[collections.categories.indexes]]
