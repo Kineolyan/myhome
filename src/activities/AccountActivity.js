@@ -4,6 +4,7 @@ import _ from 'lodash';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ActionSearch from 'material-ui/svg-icons/action/search';
 import NavigationClose from 'material-ui/svg-icons/navigation/close';
+import DoneAllIcon from 'material-ui/svg-icons/action/done-all';
 
 import TransactionHistory from '../transactions/TransactionHistory';
 import TransactionsView from '../transactions/TransactionsView';
@@ -12,18 +13,24 @@ import AccountEditor from '../comptes/AccountEditor';
 import AccountValidator from '../comptes/validations/AccountValidator';
 import CategoryPicker from '../categories/CategoryPicker';
 
+const Panel = {
+  SEARCH: 'search',
+  VALIDATION: 'validation'
+};
+
 class AccountActivity extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      displaySearch: false,
+      displayedPanel: null,
       account: null,
       category: null
     };
 
     this.cbks = {
-      toggleSearchDisplay: this.toggleSearchDisplay.bind(this),
+      toggleSearchDisplay: this.togglePanel.bind(this, Panel.SEARCH),
+      toggleValidationDisplay: this.togglePanel.bind(this, Panel.VALIDATION),
       setAccount: this.setAccount.bind(this),
       clearAccount: this.setAccount.bind(this, null),
       setCategory: this.setCategory.bind(this),
@@ -39,8 +46,10 @@ class AccountActivity extends React.Component {
     return this.context.horizons.transactions;
   }
 
-  toggleSearchDisplay() {
-    this.setState({displaySearch: !this.state.displaySearch});
+  togglePanel(panel) {
+    this.setState({
+      displayedPanel: this.state.displayedPanel === panel ? null : panel
+    });
   }
 
   setAccount(account) {
@@ -71,7 +80,7 @@ class AccountActivity extends React.Component {
   }
 
   getRatio(main) {
-    if (this.state.displaySearch) {
+    if (this.state.displayedPanel) {
       return main ? '55%' : '45%';
     } else {
       return '100%';
@@ -79,9 +88,30 @@ class AccountActivity extends React.Component {
   }
 
   renderSearchView() {
-    return <div className="block" style={{maxWidth: this.getRatio(false)}}>
-      <TransactionHistory />
-    </div>;
+    return <TransactionHistory />;
+  }
+
+  renderValidationView() {
+    return <AccountValidator />;
+  }
+
+  renderPanel() {
+    let cpn;
+    switch (this.state.displayedPanel) {
+    case Panel.SEARCH:
+      cpn = this.renderSearchView();
+      break;
+    case Panel.VALIDATION:
+      cpn = this.renderValidationView();
+      break;
+    default: cpn = null;
+    }
+
+    if (cpn) {
+      return <div className="block" style={{maxWidth: this.getRatio(false)}}>
+        {cpn}
+      </div>;
+    }
   }
 
   renderList() {
@@ -101,14 +131,10 @@ class AccountActivity extends React.Component {
         </FloatingActionButton>
       </div>
       <TransactionsView feed={this.state.selection} />
-      <AccountValidator />
     </div>;
   }
 
   render() {
-    const searchView = this.state.displaySearch ?
-      this.renderSearchView() : null;
-
     return <div>
       <div>
         <div style={{float: 'right'}}>
@@ -116,12 +142,16 @@ class AccountActivity extends React.Component {
               secondary={this.state.displaySearch}>
             <ActionSearch />
           </FloatingActionButton>
+          <FloatingActionButton onTouchTap={this.cbks.toggleValidationDisplay}
+              secondary={this.state.displaySearch}>
+            <DoneAllIcon />
+          </FloatingActionButton>
         </div>
         <AccountEditor />
       </div>
       <div className="panel">
         {this.renderList()}
-        {searchView}
+        {this.renderPanel()}
       </div>
     </div>;
   }

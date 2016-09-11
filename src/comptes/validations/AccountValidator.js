@@ -143,7 +143,7 @@ const AccountValidator = reactStamp(React)
 					à hauteur de <TextField type="number" hintText="Solde du compte"
 						value={this.state.balance}
 						onChange={this.cbks.setBalance} />
-					au <DatePicker hintText="Date"
+					€ au <DatePicker hintText="Date"
 								value={this.state.validationDate}
 								maxDate={TODAY}
 								onChange={this.cbks.setValidationDate}
