@@ -96,7 +96,7 @@ const AccountBalance = reactStamp(React)
 			const lastBalance = validation ? validation.balance : 0;
 			const stream = this.fetchUnvalidatedTransactions(this.props.account, validation, date)
 				.watch()
-				.filter(transaction => transaction.type !== Type.MONNAIE)
+				.map(transactions => _.filter(transactions, t => t.type !== Type.MONNAIE))
 				.subscribe(
 					transactions => {
 						const balance = lastBalance + _.sumBy(transactions, 'amount');
