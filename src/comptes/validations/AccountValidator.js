@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -16,6 +17,7 @@ class AccountValidator extends React.Component {
 
 		this.state = {
 			account: null,
+			lastValidation: null,
 			balance: null,
 			validationDate: TODAY
 		};
@@ -32,8 +34,19 @@ class AccountValidator extends React.Component {
 		return this.context.horizons.validations;
 	}
 
+	get transactionFeed() {
+		return this.context.horizons.transactions;
+	}
+
 	setAccount(account) {
 		this.setState({account});
+		this.transactionFeed.findAll({account})
+			.order('date', 'descending')
+			.watch()
+			.subscribe(
+				transactions => this.setState({transactions}),
+				error => console.error('[Failure]', 'Fetch transactions', error)
+			)
 	}
 
 	setBalance(event, value) {
@@ -49,12 +62,45 @@ class AccountValidator extends React.Component {
 			account: this.state.account,
 			balance: this.state.balance,
 			validatedAt: Date.now(),
-			validationDate: this.state.validationDate.getTime() 
+			validationDate: this.state.validationDate.getTime()
 		};
 		this.validationFeed.store(validation).subscribe(
 			() => console.log('Account balanced validated'),
-			error => console.error('[Failure] Account validation', error) 
+			error => console.error('[Failure] Account validation', error)
 		);
+	}
+
+	renderTransactions() {
+		if (!_.isEmpty(this.state.transactions)) {
+			// Group transactions by date
+			const lastWeek = new Date();
+			lastWeek.setDate(TODAY.getDate() - 7);
+			lastWeek.setHours(0);
+			lastWeek.setMinutes(0);
+			lastWeek.setSeconds(0);
+			lastWeek.setMilliseconds(0);
+
+			const groups = _(this.state.transactions)
+				.filter(transaction => transaction.date >= lastWeek)
+				.groupBy(transaction => new Date(transaction.date).toLocaleDateString())
+				.value();
+			const oldTransactions = _.filter(this.state.transactions, transaction => transaction.date < lastWeek);
+			if (!_.isEmpty(oldTransactions)) {
+				groups.Before = oldTransactions;
+			}
+
+			return <div>
+				{_.map(groups, (transactions, date) => {
+					return <div key={date}>
+						<div style={{fontWeight: 'bold'}}>
+							{date}
+							{date !== 'Before' ? <AccountBalance account={this.state.account} date={date} /> : null}
+						</div>
+						<TransactionsView transactions={transactions} />
+					</div>;
+				})}
+			</div>;
+		}
 	}
 
 	render() {
@@ -70,11 +116,12 @@ class AccountValidator extends React.Component {
 							maxDate={TODAY}
 							onChange={this.cbks.setValidationDate}
 							autoOk={true} style={{display: 'inline-block'}}/>
-				<RaisedButton label="Valider" primary={true} 
+				<RaisedButton label="Valider" primary={true}
 					onTouchTap={this.cbks.validate}/>
 			</div>
 			<div>
 				{this.state.account ? <AccountBalance account={this.state.account}/> : null}
+				{this.renderTransactions()}
 			</div>
 		</div>;
 	}
@@ -83,7 +130,8 @@ class AccountValidator extends React.Component {
 
 AccountValidator.contextTypes = {
 	horizons: React.PropTypes.shape({
-		validations: React.PropTypes.object
+		validations: React.PropTypes.object,
+		transactions: React.PropTypes.object
 	})
 };
 

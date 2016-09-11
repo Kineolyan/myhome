@@ -1,6 +1,8 @@
 import React from 'react';
 import _ from 'lodash';
 
+import {Type} from '../../transactions/models';
+
 class AccountBalance extends React.Component {
 	constructor(props) {
 		super(props);
@@ -18,6 +20,16 @@ class AccountBalance extends React.Component {
 
 	get transactionFeed() {
 		return this.context.horizons.transactions;
+	}
+
+	getBalanceDate() {
+		if (_.isNumber(this.props.date)) {
+			return this.props.date;
+		} else if (_.isString(this.props.date)) {
+			return new Date(this.props.date).getTime();
+		} else { // Must be a date
+			return this.props.date.getTime();
+		}
 	}
 
 	componentDidMount() {
@@ -47,26 +59,31 @@ class AccountBalance extends React.Component {
 			.fetch().defaultIfEmpty()
 			.subscribe(
 				([validation]) => this.setValidation(validation),
-				error => console.error('[Failure] Cannot retrieve last validation', error) 
+				error => console.error('[Failure] Cannot retrieve last validation', error)
 			);
 	}
 
-	setValidation(validation) {
+	setValidation(account, validation) {
 		this.setState({validation});
 		let stream = this.transactionFeed
 			.findAll({account: this.props.account});
 		let lastBalance = 0;
 		if (validation) {
-			stream = stream.above({createdAt: validation.validatedAt}, 'closed');
-			lastBalance = validation.balance; 
+			stream = stream.above({date: validation.validationDate}, 'closed');
+			lastBalance = validation.balance;
 		}
-		this.streams.balance = stream.watch().subscribe(
-			transactions => {
-				const balance = lastBalance + _.sumBy(transactions, 'amount');
-				this.setState({balance});
-			},
-			error => console.log('[Failure] Cannot compute balance', error)
-		);
+		if (this.props.date) {
+			stream = stream.below({date: this.getBalanceDate()});
+		}
+		this.streams.balance = stream.watch()
+			.filter(transaction => transaction.type !== Type.MONNAIE)
+			.subscribe(
+				transactions => {
+					const balance = lastBalance + _.sumBy(transactions, 'amount');
+					this.setState({balance});
+				},
+				error => console.log('[Failure] Cannot compute balance', error)
+			);
 	}
 
 	render() {
@@ -81,7 +98,12 @@ class AccountBalance extends React.Component {
 }
 
 AccountBalance.propTypes = {
-	account: React.PropTypes.string.isRequired
+	account: React.PropTypes.string.isRequired,
+	date: React.PropTypes.oneOfType([
+		React.PropTypes.object,
+		React.PropTypes.string,
+		React.PropTypes.number
+	])
 }
 
 AccountBalance.contextTypes = {

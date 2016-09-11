@@ -16,7 +16,7 @@ class TransactionsView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      transactions: null,
+      transactions: this.props.transactions,
       detailledTransaction: null
     };
   }
@@ -27,16 +27,21 @@ class TransactionsView extends React.Component {
       hideTransaction: this.hideTransaction.bind(this)
     };
 
-    this.subscribeToFeed();
+    if (this.props.feed) {
+      this.subscribeToFeed();
+    }
   }
 
   componentWillUnmount() {
     this.unsubscribeFromFeed();
   }
 
+  componentWillReceiveProps(nextProps) {
+    this.setState({transactions: nextProps.transactions});
+  }
+
   componentDidUpdate(prevProps) {
     if (this.props.feed !== prevProps.feed) {
-      this.setState({transactions: []});
       this.subscribeToFeed();
     }
   }
@@ -149,7 +154,12 @@ class TransactionsView extends React.Component {
 TransactionsView.propTypes = {
   feed: React.PropTypes.shape({
     subscribe: React.PropTypes.func.isRequired
-  }).isRequired
+  }),
+  transactions: React.PropTypes.array
+};
+
+TransactionsView.defaultProps = {
+  transactions: []
 };
 
 TransactionsView.contextTypes = {

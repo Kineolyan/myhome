@@ -65,12 +65,7 @@ class AccountActivity extends React.Component {
     let selection = _.isEmpty(conditions) ? this.feed : this.feed.findAll(conditions);
     selection = selection
       .order('date', 'descending')
-      .watch()
-      // .tap(values => console.log('values', values))
-      // .defaultIfEmpty()
-      // .mergeMap(_.identity)
-      // .toArray()
-      ;
+      .watch();
 
     this.setState({selection});
   }
