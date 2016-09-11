@@ -81,3 +81,11 @@
   border: 1px solid black;
   border-radius: 5px;
 }
+
+.last-validation {
+  margin: 5px;
+  padding: 5px 10px;
+  border: 1px solid #00329b;
+  border-radius: 5px;
+  background-color: #99dcff;
+}
