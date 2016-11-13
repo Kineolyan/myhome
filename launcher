@@ -1,0 +1,19 @@
+#!/bin/bash
+
+BAK_DIR=/mnt/Grishka/Fichiers/save/home-again
+
+# Perform a backup if not existing yet
+backup() {
+	local readonly bak_ark="$BAK_DIR/ha_$(date +%Y%V).bak.tgz"
+	if [ ! -f "$bak_ark" ]
+	then
+		tar czf "$bak_ark" rethinkdb_data/
+	fi
+}
+
+start() {
+	hz serve --secure no --permissions no --port 8000
+}
+
+backup
+start
