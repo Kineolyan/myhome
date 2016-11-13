@@ -1,0 +1,49 @@
+#!/bin/bash
+
+APP_DIR=/usr/share/webapps/home-again
+# APP_DIR=/mnt/Grishka/Projets/web/home-again/tmp
+
+mark_version() {
+	local readonly version_file=$APP_DIR/VERSION
+	# Create file
+	> "$version_file"
+
+	echo "Version: $(git rev-parse HEAD)" >> "$version_file"
+	echo "Deployed $(date '+%x at %X')" >> "$version_file"
+
+	echo -e "\e[34mVERSION file\e[0m .... \e[32m[WRITTEN ]\e[0m"
+}
+
+deploy_server() {
+	local readonly hz_dir=$APP_DIR/.hz
+	[ ! -d "$hz_dir" ] && mkdir "$hz_dir"
+	cp .hz/* "$hz_dir"
+
+	echo -e "\e[34mServer\e[0m       .... \e[32m[DEPLOYED]\e[0m"
+}
+
+deploy_ui() {
+	local readonly ui_dir=$APP_DIR/build
+	if [ -d "$ui_dir" ]
+	then
+		rm -r "$ui_dir"/*
+	else
+		mkdir "$ui_dir"
+	fi
+
+	cp -R build/static "$ui_dir"
+	sed s,http://127.0.0.1:8181,, < build/index.html | sed s,port:8181,port:8000, > "$ui_dir/index.html"
+
+	echo -e "\e[34mUI\e[0m           .... \e[32m[DEPLOYED]\e[0m"
+}
+
+deploy_launcher() {
+	cp launcher "$APP_DIR"
+
+	echo -e "\e[34mTools\e[0m        .... \e[32m[DEPLOYED]\e[0m"
+}
+
+mark_version
+deploy_server
+deploy_ui
+deploy_launcher
