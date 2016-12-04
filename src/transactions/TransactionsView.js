@@ -8,6 +8,10 @@ import CreditCardIcon from 'material-ui/svg-icons/action/credit-card';
 import ChequeIcon from 'material-ui/svg-icons/action/tab';
 import CoinIcon from 'material-ui/svg-icons/maps/local-atm';
 import TransferIcon from 'material-ui/svg-icons/action/swap-horiz';
+import AddIcon from 'material-ui/svg-icons/content/add';
+import RemoveIcon from 'material-ui/svg-icons/content/remove';
+import Avatar from 'material-ui/Avatar';
+import Chip from 'material-ui/Chip';
 
 import {Type} from './models';
 import TransactionPanel, {Mode as PanelMode} from './TransactionPanel';
@@ -93,6 +97,15 @@ class TransactionsView extends React.Component {
     }
   }
 
+  renderAmount(transaction) {
+    const amount = transaction.amount || 0;
+    const color = amount >= 0 ? '#a0fdbd' : '#fea4a9';
+
+    return <Chip style={{margin: 4}} backgroundColor={color}>
+      <span style={{fontSize: 13}}>{amount.toFixed(2)} €</span>
+    </Chip>;
+  }
+
   render() {
     const typeColumnStyle = {width: 30};
 
@@ -138,7 +151,7 @@ class TransactionsView extends React.Component {
               <TableRow key={transaction.id}>
                 <TableRowColumn style={typeColumnStyle}>{this.renderTypeIcon(transaction.type)}</TableRowColumn>
                 <TableRowColumn>{transaction.object}</TableRowColumn>
-                <TableRowColumn>{transaction.amount.toFixed(2)} €</TableRowColumn>
+                <TableRowColumn>{this.renderAmount(transaction)}</TableRowColumn>
                 <TableRowColumn>
                   {new Date(transaction.date).toLocaleDateString()}
                 </TableRowColumn>
