@@ -8,6 +8,7 @@ backup() {
 	if [ ! -f "$bak_ark" ]
 	then
 		tar czf "$bak_ark" rethinkdb_data/
+		echo -e "\e[32mDatabase backup created\e[0m ($bak_ark)"
 	fi
 }
 
