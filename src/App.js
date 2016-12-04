@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 
-import { Router, Route, Link, IndexRoute, browserHistory } from 'react-router';
+import { Router, Route, Link, IndexRoute, hashHistory } from 'react-router';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import AppBar from 'material-ui/AppBar';
@@ -170,7 +170,7 @@ class App extends Component {
 
 class RouterApp extends Component {
   render() {
-    return <Router history={browserHistory}>
+    return <Router history={hashHistory}>
       <Route path="/" component={App}>
         <IndexRoute component={AccountActivity} />
         <Route path="comptes" component={AccountActivity}/>
