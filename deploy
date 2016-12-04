@@ -3,6 +3,15 @@
 APP_DIR=/usr/share/webapps/home-again
 # APP_DIR=/mnt/Grishka/Projets/web/home-again/tmp
 
+build_app() {
+	npm run build
+	local readonly ec=$?
+	if [[ $ec != 0 ]]
+	then
+		echo -e "\e[34mBundle of application .. \e[31m[FAILED]\e[0m"
+	fi
+}
+
 mark_version() {
 	local readonly version_file=$APP_DIR/VERSION
 	# Create file
@@ -43,6 +52,7 @@ deploy_launcher() {
 	echo -e "\e[34mTools\e[0m        .... \e[32m[DEPLOYED]\e[0m"
 }
 
+build_app
 mark_version
 deploy_server
 deploy_ui
