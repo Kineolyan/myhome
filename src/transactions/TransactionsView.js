@@ -12,23 +12,31 @@ import AddIcon from 'material-ui/svg-icons/content/add';
 import RemoveIcon from 'material-ui/svg-icons/content/remove';
 import Avatar from 'material-ui/Avatar';
 import Chip from 'material-ui/Chip';
+import ArrowDown from 'material-ui/svg-icons/hardware/keyboard-arrow-down';
+import ArrowUp from 'material-ui/svg-icons/hardware/keyboard-arrow-up';
+import FloatingActionButton from 'material-ui/FloatingActionButton';
 
 import {Type} from './models';
 import TransactionPanel, {Mode as PanelMode} from './TransactionPanel';
+
+const TYPE_COLUMN_STYLE = {width: 30};
 
 class TransactionsView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       transactions: this.props.transactions,
-      detailledTransaction: null
+      detailledTransaction: null,
+      index: 0
     };
   }
 
   componentWillMount() {
     this.cbks = {
       showTransaction: this.showTransaction.bind(this),
-      hideTransaction: this.hideTransaction.bind(this)
+      hideTransaction: this.hideTransaction.bind(this),
+      goPrevious: () => this.setState({index: this.state.index - 1}),
+      goNext: () => this.setState({index: this.state.index + 1})
     };
 
     if (this.props.feed) {
@@ -54,11 +62,22 @@ class TransactionsView extends React.Component {
     return this.context.horizons.transactions;
   }
 
+  getMaxIndex(transactions) {
+    return parseInt((transactions.length + 1) / this.props.pagination, 10)
+  }
+
   subscribeToFeed() {
     this.unsubscribeFromFeed();
 
     this.subscription = this.props.feed.subscribe(
-      transactions => this.setState({transactions: [...transactions]}),
+      transactions => {
+        this.setState({transactions: [...transactions]});
+
+        const maxIdx = this.getMaxIndex(transactions);
+        if (maxIdx <= this.state.index) {
+          this.setState({index: maxIdx - 1});
+        }
+      },
       err => console.error('[Failure] retrieving transactions', err)
     );
   }
@@ -106,9 +125,64 @@ class TransactionsView extends React.Component {
     </Chip>;
   }
 
-  render() {
-    const typeColumnStyle = {width: 30};
+  renderRows() {
+    const startIdx = this.state.index * this.props.pagination;
+    const endIdx = Math.min(startIdx + this.props.pagination, this.state.transactions.length);
 
+    const rows = [];
+    for (let i = startIdx; i < endIdx; i += 1) {
+      const transaction = this.state.transactions[i];
+      rows.push(<TableRow key={transaction.id} onClick={this.cbks.goPrevious}>
+        <TableRowColumn style={TYPE_COLUMN_STYLE}>{this.renderTypeIcon(transaction.type)}</TableRowColumn>
+        <TableRowColumn>{transaction.object}</TableRowColumn>
+        <TableRowColumn>{this.renderAmount(transaction)}</TableRowColumn>
+        <TableRowColumn>
+          {new Date(transaction.date).toLocaleDateString()}
+        </TableRowColumn>
+      </TableRow>);
+    }
+
+    return rows;
+  }
+
+  renderPrevious() {
+    const enabled = this.state.index > 0;
+
+    return <FloatingActionButton onTouchTap={this.cbks.goPrevious}
+        mini={true} disabled={!enabled}>
+      <ArrowUp/>
+    </FloatingActionButton>;
+  }
+
+  renderNext() {
+    const lastIndex = (this.state.index + 1) * this.props.pagination;
+    const enabled = lastIndex < this.state.transactions.length;
+
+    return <FloatingActionButton onTouchTap={this.cbks.goNext}
+        mini={true} disabled={!enabled}>
+      <ArrowDown/>
+    </FloatingActionButton>;
+  }
+
+  renderPagination() {
+    if (this.props.pagination < this.state.transactions.length) {
+      return <div style={{
+          width: 50,
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '60px 10px 10px',
+          justifyContent: 'center'
+      }}>
+        {this.renderPrevious()}
+        <div style={{textAlign: 'center', padding: '10px 0'}}>
+          {this.state.index + 1} / {this.getMaxIndex(this.state.transactions)}
+        </div>
+        {this.renderNext()}
+      </div>;
+    }
+  }
+
+  render() {
     if (_.isEmpty(this.state.transactions)) {
       return <p>No transactions</p>;
     }
@@ -133,33 +207,25 @@ class TransactionsView extends React.Component {
 
     return <div>
       {details}
-      <Table onCellClick={this.cbks.showTransaction}>
-        <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
-          <TableRow>
-            <TableHeaderColumn style={typeColumnStyle}>Type</TableHeaderColumn>
-            <TableHeaderColumn>Objet</TableHeaderColumn>
-            <TableHeaderColumn>Montant</TableHeaderColumn>
-            <TableHeaderColumn>Date</TableHeaderColumn>
-          </TableRow>
-        </TableHeader>
-        <TableBody
-            displayRowCheckbox={false}
-            showRowHover={true}
-            stripedRows={true}>
-          {this.state.transactions.map(transaction => {
-            return (
-              <TableRow key={transaction.id}>
-                <TableRowColumn style={typeColumnStyle}>{this.renderTypeIcon(transaction.type)}</TableRowColumn>
-                <TableRowColumn>{transaction.object}</TableRowColumn>
-                <TableRowColumn>{this.renderAmount(transaction)}</TableRowColumn>
-                <TableRowColumn>
-                  {new Date(transaction.date).toLocaleDateString()}
-                </TableRowColumn>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+      <div style={{display: 'flex', flexDirection: 'row'}}>
+        <Table onCellClick={this.cbks.showTransaction} style={{flex: 1}}>
+          <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
+            <TableRow>
+              <TableHeaderColumn style={TYPE_COLUMN_STYLE}>Type</TableHeaderColumn>
+              <TableHeaderColumn>Objet</TableHeaderColumn>
+              <TableHeaderColumn>Montant</TableHeaderColumn>
+              <TableHeaderColumn>Date</TableHeaderColumn>
+            </TableRow>
+          </TableHeader>
+          <TableBody
+              displayRowCheckbox={false}
+              showRowHover={true}
+              stripedRows={true}>
+            {this.renderRows()}
+          </TableBody>
+        </Table>
+        {this.renderPagination()}
+      </div>
     </div>;
   }
 }
@@ -168,11 +234,13 @@ TransactionsView.propTypes = {
   feed: React.PropTypes.shape({
     subscribe: React.PropTypes.func.isRequired
   }),
-  transactions: React.PropTypes.array
+  transactions: React.PropTypes.array,
+  pagination: React.PropTypes.number
 };
 
 TransactionsView.defaultProps = {
-  transactions: []
+  transactions: [],
+  pagination: 20
 };
 
 TransactionsView.contextTypes = {

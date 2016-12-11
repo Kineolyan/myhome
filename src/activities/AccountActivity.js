@@ -130,7 +130,7 @@ class AccountActivity extends React.Component {
           <NavigationClose />
         </FloatingActionButton>
       </div>
-      <TransactionsView feed={this.state.selection} />
+      <TransactionsView feed={this.state.selection} pagination={20}/>
     </div>;
   }
 
