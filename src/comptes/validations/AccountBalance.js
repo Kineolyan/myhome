@@ -4,6 +4,10 @@ import reactStamp from 'react-stamp';
 
 import {Type} from '../../transactions/models';
 
+/**
+ * Gets the timestamp of the next day of a given value.
+ * @param {Number} date - unix timestamp in ms
+ */
 function nextDay(date) {
 	return new Date(date).setHours(23, 59, 59, 999) + 1;
 }
@@ -36,6 +40,10 @@ const UnvalidatedTransactions = {
 			stream = stream.below({date: nextDay(date)});
 		}
 		return stream;
+	},
+	fetchNewTransactions(account, validation) {
+		return this.getTransactionFeed().findAll({account})
+			.above({date: validation.validatedAt});
 	}
 };
 
