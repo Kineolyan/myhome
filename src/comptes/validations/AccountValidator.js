@@ -9,7 +9,7 @@ import FloatingActionButton from 'material-ui/FloatingActionButton';
 import DeleteIcon from 'material-ui/svg-icons/action/delete';
 
 import AccountPicker from '../AccountPicker';
-import AccountBalance, {WithHorizons, UnvalidatedTransactions, WithStreams} from './AccountBalance';
+import AccountBalance, {WithHorizons, UnvalidatedTransactions, WithStreams, nextDay} from './AccountBalance';
 import TransactionsView from '../../transactions/TransactionsView';
 
 const TODAY = new Date();
@@ -47,16 +47,32 @@ const AccountValidator = reactStamp(React)
 				.fetch().subscribe(
 					([validation]) => {
 						this.setState({lastValidation: validation});
-						const transactionsStream = this.fetchUnvalidatedTransactions(account, validation)
-							.watch().subscribe(
-								transactions => this.setState({transactions}),
-								error => console.error('[Failure]', 'Fetch transactions', error)
-							);
-						this.setStream('transactions', transactionsStream);
+						this.getTransactions(account, validation);
+						this.getSuspicious(account, validation);
 					},
 					error => console.error('[Failure]', 'Fetch validation', error)
 				);
 			this.setStream('validation', validationStream);
+		},
+		getTransactions(account, validation) {
+			const stream = this.fetchUnvalidatedTransactions(account, validation)
+				.watch()
+				.subscribe(
+					transactions => this.setState({transactions}),
+					error => console.error('[Failure]', 'Fetch transactions', error)
+				);
+			this.setStream('transactions', stream);
+		},
+		getSuspicious(account, validation) {
+			const stream = this.fetchNewTransactions(account, validation)
+				.watch()
+				.subscribe(
+					transactions => this.setState({
+						suspicious: _.filter(transactions, t => t.date < nextDay(validation.validationDate))
+					}),
+					error => console.error('[Failure]', 'Fetch suspicious transactions', error)
+				);
+			this.setStream('suspicious', stream);
 		},
 		validate() {
 			const validation = {
@@ -121,10 +137,16 @@ const AccountValidator = reactStamp(React)
 						transactions: oldTransactions
 					});
 				}
+				if (!_.isEmpty(this.state.suspicious)) {
+					order.push({
+						caption: 'Suspicious transactions',
+						transactions: this.state.suspicious
+					});
+				}
 
 				return <div>
-					{_.map(order, entry => {
-						return <div key={entry.date}>
+					{_.map(order, (entry, i) => {
+						return <div key={entry.date || `entry-${i}`}>
 							<div style={{fontWeight: 'bold'}}>
 								{entry.caption}
 								{entry.date ? <AccountBalance account={this.state.account} date={entry.date} /> : null}

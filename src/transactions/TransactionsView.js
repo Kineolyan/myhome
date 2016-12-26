@@ -8,9 +8,6 @@ import CreditCardIcon from 'material-ui/svg-icons/action/credit-card';
 import ChequeIcon from 'material-ui/svg-icons/action/tab';
 import CoinIcon from 'material-ui/svg-icons/maps/local-atm';
 import TransferIcon from 'material-ui/svg-icons/action/swap-horiz';
-import AddIcon from 'material-ui/svg-icons/content/add';
-import RemoveIcon from 'material-ui/svg-icons/content/remove';
-import Avatar from 'material-ui/Avatar';
 import Chip from 'material-ui/Chip';
 import ArrowDown from 'material-ui/svg-icons/hardware/keyboard-arrow-down';
 import ArrowUp from 'material-ui/svg-icons/hardware/keyboard-arrow-up';
@@ -62,8 +59,14 @@ class TransactionsView extends React.Component {
     return this.context.horizons.transactions;
   }
 
+  /**
+   * Gets the maximum index for pagination.
+   * The contract is that state#index < maxIndex.
+   * @param {Object[]} transactions - transactions to paginate
+   * @return {Number} max index
+   */
   getMaxIndex(transactions) {
-    return parseInt((transactions.length + 1) / this.props.pagination, 10)
+    return _.isEmpty(transactions) ? 1 : parseInt((transactions.length - 1) / this.props.pagination, 10) + 1;
   }
 
   subscribeToFeed() {
