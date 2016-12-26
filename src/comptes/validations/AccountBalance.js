@@ -25,11 +25,17 @@ const WithHorizons = {
 }
 
 const UnvalidatedTransactions = {
-	fetchLatestValidation(account) {
-		return this.getValidationFeed()
+	fetchLatestValidation(account, lastNth = 1) {
+		const feed = this.getValidationFeed()
 			.findAll({account: account})
 			.order('validatedAt', 'descending')
-			.limit(1);
+			.limit(lastNth)
+			.fetch()
+			.defaultIfEmpty();
+
+		return lastNth <= 1 ? 
+			feed.map(_.last) : 
+			feed.map(elements => elements[lastNth - 1]);
 	},
 	fetchUnvalidatedTransactions(account, validation, date) {
 		let stream = this.getTransactionFeed().findAll({account});
@@ -94,9 +100,8 @@ const AccountBalance = reactStamp(React)
 		},
 		fetchValidation(account) {
 			const stream = this.fetchLatestValidation(account)
-				.fetch().defaultIfEmpty()
 				.subscribe(
-					([validation]) => this.setValidation(validation),
+					(validation) => this.setValidation(validation),
 					error => console.error('[Failure] Cannot retrieve last validation', error)
 				);
 			this.setStream('validation', stream);

@@ -7,6 +7,8 @@ import RaisedButton from 'material-ui/RaisedButton';
 import DatePicker from 'material-ui/DatePicker';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import DeleteIcon from 'material-ui/svg-icons/action/delete';
+import ArrowLeft from 'material-ui/svg-icons/hardware/keyboard-arrow-left';
+import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right';
 
 import AccountPicker from '../AccountPicker';
 import AccountBalance, {WithHorizons, UnvalidatedTransactions, WithStreams, nextDay} from './AccountBalance';
@@ -21,7 +23,8 @@ const AccountValidator = reactStamp(React)
 			account: null,
 			lastValidation: null,
 			balance: null,
-			validationDate: TODAY
+			validationDate: TODAY,
+			balanceIdx: 1
 		},
 		init(props, {instance}) {
 			instance.cbks = {
@@ -29,12 +32,14 @@ const AccountValidator = reactStamp(React)
 				setBalance: instance.setBalance.bind(instance),
 				setValidationDate: instance.setValidationDate.bind(instance),
 				validate: instance.validate.bind(instance),
-				deleteLastValidation: instance.deleteLastValidation.bind(instance)
+				deleteLastValidation: instance.deleteLastValidation.bind(instance),
+				previousValidation: instance.shiftValidation.bind(instance, -1),
+				nextValidation: instance.shiftValidation.bind(instance, 1),
 			};
 		},
 		setAccount(account) {
 			this.setState({account});
-			this.getValidation(account);
+			this.getValidation(account, this.state.balanceIdx);
 		},
 		setBalance(event, value) {
 			this.setState({balance: parseFloat(value)});
@@ -42,10 +47,10 @@ const AccountValidator = reactStamp(React)
 		setValidationDate(event, date) {
 			this.setState({validationDate: date});
 		},
-		getValidation(account) {
-			const validationStream = this.fetchLatestValidation(account)
-				.fetch().subscribe(
-					([validation]) => {
+		getValidation(account, balanceIdx) {
+			const validationStream = this.fetchLatestValidation(account, balanceIdx)
+				.subscribe(
+					validation => {
 						this.setState({lastValidation: validation});
 						this.getTransactions(account, validation);
 						this.getSuspicious(account, validation);
@@ -64,15 +69,17 @@ const AccountValidator = reactStamp(React)
 			this.setStream('transactions', stream);
 		},
 		getSuspicious(account, validation) {
-			const stream = this.fetchNewTransactions(account, validation)
-				.watch()
-				.subscribe(
-					transactions => this.setState({
-						suspicious: _.filter(transactions, t => t.date < nextDay(validation.validationDate))
-					}),
-					error => console.error('[Failure]', 'Fetch suspicious transactions', error)
-				);
-			this.setStream('suspicious', stream);
+			if (validation) {
+				const stream = this.fetchNewTransactions(account, validation)
+					.watch()
+					.subscribe(
+						transactions => this.setState({
+							suspicious: _.filter(transactions, t => t.date < nextDay(validation.validationDate))
+						}),
+						error => console.error('[Failure]', 'Fetch suspicious transactions', error)
+					);
+				this.setStream('suspicious', stream);
+			}
 		},
 		validate() {
 			const validation = {
@@ -95,6 +102,25 @@ const AccountValidator = reactStamp(React)
 				this.getValidation(this.state.account);
 			}
 		},
+		shiftValidation(shift) {
+			const balanceIdx = this.state.balanceIdx - shift;
+			this.setState({balanceIdx});
+			this.getValidation(this.state.account, balanceIdx);
+		},
+		renderPrevValidation() {
+			return <FloatingActionButton primary={true} mini={true}
+				onTouchTap={this.cbks.previousValidation}>
+					<ArrowLeft/>
+			</FloatingActionButton>;
+		},
+		renderNextValidation() {
+			const enabled = this.state.balanceIdx > 1;
+			return <FloatingActionButton primary={true} mini={true}
+				onTouchTap={this.cbks.nextValidation}
+				disabled={!enabled}>
+					<ArrowRight/>
+			</FloatingActionButton>;
+		},
 		renderLastValidation() {
 			if (this.state.lastValidation) {
 				return <div className="last-validation">
@@ -103,6 +129,8 @@ const AccountValidator = reactStamp(React)
 							onTouchTap={this.cbks.deleteLastValidation}>
 								<DeleteIcon />
 						</FloatingActionButton>
+						{this.renderPrevValidation()}
+						{this.renderNextValidation()}
 					</div>
 					Validé le {new Date(this.state.lastValidation.validatedAt).toLocaleString()} à hauteur de {this.state.lastValidation.balance.toFixed(2)} € le {new Date(this.state.lastValidation.validationDate).toLocaleDateString()}
 				</div>;
