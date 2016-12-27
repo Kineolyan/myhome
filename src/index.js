@@ -7,19 +7,14 @@ injectTapEventPlugin();
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {RouterApp} from './App';
+import {defineHorizons, HorizonsShape} from './core/horizon';
 import './index.css';
 const {MyHome} = window;
 
 const horizons = (function() {
   const horizon = new Horizon({host: `${MyHome.horizon.url}:${MyHome.horizon.port}`}); // eslint-disable-line no-undef
 
-  return {
-     messages: horizon('messages'),
-     accounts: horizon('accounts'),
-     categories: horizon('categories'),
-     transactions: horizon('transactions'),
-     validations: horizon('account_validations')
-   };
+  return defineHorizons(horizon);
 })();
 
 class MuiApp extends React.Component {
@@ -37,10 +32,7 @@ class MuiApp extends React.Component {
 }
 
 MuiApp.childContextTypes = {
-  horizons: React.PropTypes.shape({
-    messages: React.PropTypes.object,
-    accounts: React.PropTypes.object
-  })
+  horizons: HorizonsShape
 };
 
 ReactDOM.render(
