@@ -7,9 +7,11 @@ import RaisedButton from 'material-ui/RaisedButton';
 import DatePicker from 'material-ui/DatePicker';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import DeleteIcon from 'material-ui/svg-icons/action/delete';
+import ArrowLeft from 'material-ui/svg-icons/hardware/keyboard-arrow-left';
+import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right';
 
 import AccountPicker from '../AccountPicker';
-import AccountBalance, {WithHorizons, UnvalidatedTransactions, WithStreams} from './AccountBalance';
+import AccountBalance, {WithHorizons, UnvalidatedTransactions, WithStreams, nextDay} from './AccountBalance';
 import TransactionsView from '../../transactions/TransactionsView';
 
 const TODAY = new Date();
@@ -21,7 +23,8 @@ const AccountValidator = reactStamp(React)
 			account: null,
 			lastValidation: null,
 			balance: null,
-			validationDate: TODAY
+			validationDate: TODAY,
+			balanceIdx: 1
 		},
 		init(props, {instance}) {
 			instance.cbks = {
@@ -29,12 +32,14 @@ const AccountValidator = reactStamp(React)
 				setBalance: instance.setBalance.bind(instance),
 				setValidationDate: instance.setValidationDate.bind(instance),
 				validate: instance.validate.bind(instance),
-				deleteLastValidation: instance.deleteLastValidation.bind(instance)
+				deleteLastValidation: instance.deleteLastValidation.bind(instance),
+				previousValidation: instance.shiftValidation.bind(instance, -1),
+				nextValidation: instance.shiftValidation.bind(instance, 1),
 			};
 		},
 		setAccount(account) {
 			this.setState({account});
-			this.getValidation(account);
+			this.getValidation(account, this.state.balanceIdx);
 		},
 		setBalance(event, value) {
 			this.setState({balance: parseFloat(value)});
@@ -42,21 +47,39 @@ const AccountValidator = reactStamp(React)
 		setValidationDate(event, date) {
 			this.setState({validationDate: date});
 		},
-		getValidation(account) {
-			const validationStream = this.fetchLatestValidation(account)
-				.fetch().subscribe(
-					([validation]) => {
+		getValidation(account, balanceIdx) {
+			const validationStream = this.fetchLatestValidation(account, balanceIdx)
+				.subscribe(
+					validation => {
 						this.setState({lastValidation: validation});
-						const transactionsStream = this.fetchUnvalidatedTransactions(account, validation)
-							.watch().subscribe(
-								transactions => this.setState({transactions}),
-								error => console.error('[Failure]', 'Fetch transactions', error)
-							);
-						this.setStream('transactions', transactionsStream);
+						this.getTransactions(account, validation);
+						this.getSuspicious(account, validation);
 					},
 					error => console.error('[Failure]', 'Fetch validation', error)
 				);
 			this.setStream('validation', validationStream);
+		},
+		getTransactions(account, validation) {
+			const stream = this.fetchUnvalidatedTransactions(account, validation)
+				.watch()
+				.subscribe(
+					transactions => this.setState({transactions}),
+					error => console.error('[Failure]', 'Fetch transactions', error)
+				);
+			this.setStream('transactions', stream);
+		},
+		getSuspicious(account, validation) {
+			if (validation) {
+				const stream = this.fetchNewTransactions(account, validation)
+					.watch()
+					.subscribe(
+						transactions => this.setState({
+							suspicious: _.filter(transactions, t => t.date < nextDay(validation.validationDate))
+						}),
+						error => console.error('[Failure]', 'Fetch suspicious transactions', error)
+					);
+				this.setStream('suspicious', stream);
+			}
 		},
 		validate() {
 			const validation = {
@@ -79,6 +102,32 @@ const AccountValidator = reactStamp(React)
 				this.getValidation(this.state.account);
 			}
 		},
+		shiftValidation(shift) {
+			const balanceIdx = this.state.balanceIdx - shift;
+			this.setState({balanceIdx});
+			this.getValidation(this.state.account, balanceIdx);
+		},
+		renderPrevValidation() {
+			return <FloatingActionButton primary={true} mini={true}
+				onTouchTap={this.cbks.previousValidation}>
+					<ArrowLeft/>
+			</FloatingActionButton>;
+		},
+		renderNextValidation() {
+			const enabled = this.state.balanceIdx > 1;
+			return <FloatingActionButton primary={true} mini={true}
+				onTouchTap={this.cbks.nextValidation}
+				disabled={!enabled}>
+					<ArrowRight/>
+			</FloatingActionButton>;
+		},
+		renderBalance() {
+			if (this.state.lastValidation) {
+				return <AccountBalance 
+					account={this.state.account}
+					validation={this.state.lastValidation}/>;
+			}
+		},
 		renderLastValidation() {
 			if (this.state.lastValidation) {
 				return <div className="last-validation">
@@ -87,6 +136,8 @@ const AccountValidator = reactStamp(React)
 							onTouchTap={this.cbks.deleteLastValidation}>
 								<DeleteIcon />
 						</FloatingActionButton>
+						{this.renderPrevValidation()}
+						{this.renderNextValidation()}
 					</div>
 					Validé le {new Date(this.state.lastValidation.validatedAt).toLocaleString()} à hauteur de {this.state.lastValidation.balance.toFixed(2)} € le {new Date(this.state.lastValidation.validationDate).toLocaleDateString()}
 				</div>;
@@ -121,13 +172,25 @@ const AccountValidator = reactStamp(React)
 						transactions: oldTransactions
 					});
 				}
+				if (!_.isEmpty(this.state.suspicious)) {
+					order.push({
+						caption: 'Suspicious transactions',
+						transactions: this.state.suspicious
+					});
+				}
 
 				return <div>
-					{_.map(order, entry => {
-						return <div key={entry.date}>
+					{_.map(order, (entry, i) => {
+						return <div key={entry.date || `entry-${i}`}>
 							<div style={{fontWeight: 'bold'}}>
 								{entry.caption}
-								{entry.date ? <AccountBalance account={this.state.account} date={entry.date} /> : null}
+								{entry.date ? 
+									<AccountBalance 
+										account={this.state.account} 
+										date={entry.date}
+										validation={this.state.lastValidation} /> :
+									null
+								}
 							</div>
 							<TransactionsView transactions={entry.transactions} />
 						</div>;
@@ -152,7 +215,7 @@ const AccountValidator = reactStamp(React)
 						onTouchTap={this.cbks.validate}/>
 				</div>
 				<div>
-					{this.state.account ? <AccountBalance account={this.state.account}/> : null}
+					{this.renderBalance()}
 					{this.renderLastValidation()}
 					{this.renderTransactions()}
 				</div>

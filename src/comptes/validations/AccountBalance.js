@@ -4,6 +4,10 @@ import reactStamp from 'react-stamp';
 
 import {Type} from '../../transactions/models';
 
+/**
+ * Gets the timestamp of the next day of a given value.
+ * @param {Number} date - unix timestamp in ms
+ */
 function nextDay(date) {
 	return new Date(date).setHours(23, 59, 59, 999) + 1;
 }
@@ -21,11 +25,17 @@ const WithHorizons = {
 }
 
 const UnvalidatedTransactions = {
-	fetchLatestValidation(account) {
-		return this.getValidationFeed()
+	fetchLatestValidation(account, lastNth = 1) {
+		const feed = this.getValidationFeed()
 			.findAll({account: account})
 			.order('validatedAt', 'descending')
-			.limit(1);
+			.limit(lastNth)
+			.fetch()
+			.defaultIfEmpty();
+
+		return lastNth <= 1 ? 
+			feed.map(_.last) : 
+			feed.map(elements => elements[lastNth - 1]);
 	},
 	fetchUnvalidatedTransactions(account, validation, date) {
 		let stream = this.getTransactionFeed().findAll({account});
@@ -35,6 +45,13 @@ const UnvalidatedTransactions = {
 		if (date) {
 			stream = stream.below({date: nextDay(date)});
 		}
+		return stream;
+	},
+	fetchNewTransactions(account, validation) {
+		let stream = this.getTransactionFeed().findAll({account});
+		if (validation) {
+			return stream.above({createdAt: validation.validatedAt}, 'open');
+		} // TODO else do something bad
 		return stream;
 	}
 };
@@ -60,7 +77,8 @@ const AccountBalance = reactStamp(React)
 	.compose({
 		propTypes: {
 			account: React.PropTypes.string.isRequired,
-			date: React.PropTypes.number
+			date: React.PropTypes.number,
+			validation: React.PropTypes.object
 		},
 		state: {
 			balance: null,
@@ -70,7 +88,11 @@ const AccountBalance = reactStamp(React)
 			return this.props.date;
 		},
 		componentDidMount() {
-			this.fetchValidation(this.props.account);
+			if (this.props.validation) {
+				this.setValidation(this.props.validation);
+			} else {
+				this.fetchValidation(this.props.account);
+			}
 		},
 		componentWillReceiveProps(nextProps) {
 			if (this.props.account !== nextProps.account) {
@@ -80,12 +102,20 @@ const AccountBalance = reactStamp(React)
 				});
 				this.fetchValidation(nextProps.account);
 			}
+			if (nextProps.validation) {
+				if (this.props.validation.id !== nextProps.validation.id) {
+					this.setState({balance: null});
+					this.setValidation(nextProps.validation);
+				}
+			} else if (this.props.validation) {
+				// Validation prop was previously used
+				this.setState({balance: null, validation: null});
+			}
 		},
 		fetchValidation(account) {
 			const stream = this.fetchLatestValidation(account)
-				.fetch().defaultIfEmpty()
 				.subscribe(
-					([validation]) => this.setValidation(validation),
+					(validation) => this.setValidation(validation),
 					error => console.error('[Failure] Cannot retrieve last validation', error)
 				);
 			this.setStream('validation', stream);
@@ -116,94 +146,6 @@ const AccountBalance = reactStamp(React)
 			</div>;
 		}
 	});
-// class AccountBalance extends React.Component {
-// 	constructor(props) {
-// 		super(props);
-
-// 		this.state = {
-// 			balance: null,
-// 			validation: null
-// 		};
-// 		this.streams = {};
-// 	}
-
-// 	get validationFeed() {
-// 		return this.context.horizons.validations;
-// 	}
-
-// 	get transactionFeed() {
-// 		return this.context.horizons.transactions;
-// 	}
-
-// 	getBalanceDate() {
-// 		if (_.isNumber(this.props.date)) {
-// 			return this.props.date;
-// 		} else if (_.isString(this.props.date)) {
-// 			return new Date(this.props.date).getTime();
-// 		} else { // Must be a date
-// 			return this.props.date.getTime();
-// 		}
-// 	}
-
-// 	componentDidMount() {
-// 		this.fetchValidation(this.props.account);
-// 	}
-
-// 	componentWillReceiveProps(nextProps) {
-// 		if (this.props.account !== nextProps.account) {
-// 			this.setState({
-// 				balance: null,
-// 				validation: null
-// 			});
-// 			this.fetchValidation(nextProps.account);
-// 		}
-// 	}
-
-// 	fetchValidation(account) {
-// 		this.streams.validation = this.validationFeed
-// 			.findAll({account: account})
-// 			.order('validatedAt', 'descending')
-// 			.limit(1)
-// 			.fetch().defaultIfEmpty()
-// 			.subscribe(
-// 				([validation]) => this.setValidation(validation),
-// 				error => console.error('[Failure] Cannot retrieve last validation', error)
-// 			);
-// 	}
-
-// 	setValidation(account, validation) {
-// 		this.setState({validation});
-// 		let stream = this.transactionFeed
-// 			.findAll({account: this.props.account});
-// 		let lastBalance = 0;
-// 		if (validation) {
-// 			stream = stream.above({date: validation.validationDate}, 'closed');
-// 			lastBalance = validation.balance;
-// 		}
-// 		if (this.props.date) {
-// 			stream = stream.below({date: this.getBalanceDate()});
-// 		}
-// 		this.streams.balance = stream.watch()
-// 			.filter(transaction => transaction.type !== Type.MONNAIE)
-// 			.subscribe(
-// 				transactions => {
-// 					const balance = lastBalance + _.sumBy(transactions, 'amount');
-// 					this.setState({balance});
-// 				},
-// 				error => console.log('[Failure] Cannot compute balance', error)
-// 			);
-// 	}
-
-// 	render() {
-// 		if (this.state.balance === null) {
-// 			return <div>Computing ...</div>;
-// 		}
-
-// 		return <div className="account-balance">
-// 			Solde du compte: {this.state.balance.toFixed(2)} €
-// 		</div>;
-// 	}
-// }
 
 AccountBalance.propTypes = {
 	account: React.PropTypes.string.isRequired,
@@ -223,6 +165,7 @@ AccountBalance.contextTypes = {
 
 export default AccountBalance;
 export {
+	nextDay,
 	WithHorizons,
 	UnvalidatedTransactions,
 	WithStreams
