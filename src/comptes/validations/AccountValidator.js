@@ -121,6 +121,13 @@ const AccountValidator = reactStamp(React)
 					<ArrowRight/>
 			</FloatingActionButton>;
 		},
+		renderBalance() {
+			if (this.state.lastValidation) {
+				return <AccountBalance 
+					account={this.state.account}
+					validation={this.state.lastValidation}/>;
+			}
+		},
 		renderLastValidation() {
 			if (this.state.lastValidation) {
 				return <div className="last-validation">
@@ -177,7 +184,13 @@ const AccountValidator = reactStamp(React)
 						return <div key={entry.date || `entry-${i}`}>
 							<div style={{fontWeight: 'bold'}}>
 								{entry.caption}
-								{entry.date ? <AccountBalance account={this.state.account} date={entry.date} /> : null}
+								{entry.date ? 
+									<AccountBalance 
+										account={this.state.account} 
+										date={entry.date}
+										validation={this.state.lastValidation} /> :
+									null
+								}
 							</div>
 							<TransactionsView transactions={entry.transactions} />
 						</div>;
@@ -202,7 +215,7 @@ const AccountValidator = reactStamp(React)
 						onTouchTap={this.cbks.validate}/>
 				</div>
 				<div>
-					{this.state.account ? <AccountBalance account={this.state.account}/> : null}
+					{this.renderBalance()}
 					{this.renderLastValidation()}
 					{this.renderTransactions()}
 				</div>

@@ -77,7 +77,8 @@ const AccountBalance = reactStamp(React)
 	.compose({
 		propTypes: {
 			account: React.PropTypes.string.isRequired,
-			date: React.PropTypes.number
+			date: React.PropTypes.number,
+			validation: React.PropTypes.object
 		},
 		state: {
 			balance: null,
@@ -87,7 +88,11 @@ const AccountBalance = reactStamp(React)
 			return this.props.date;
 		},
 		componentDidMount() {
-			this.fetchValidation(this.props.account);
+			if (this.props.validation) {
+				this.setValidation(this.props.validation);
+			} else {
+				this.fetchValidation(this.props.account);
+			}
 		},
 		componentWillReceiveProps(nextProps) {
 			if (this.props.account !== nextProps.account) {
@@ -96,6 +101,15 @@ const AccountBalance = reactStamp(React)
 					validation: null
 				});
 				this.fetchValidation(nextProps.account);
+			}
+			if (nextProps.validation) {
+				if (this.props.validation.id !== nextProps.validation.id) {
+					this.setState({balance: null});
+					this.setValidation(nextProps.validation);
+				}
+			} else if (this.props.validation) {
+				// Validation prop was previously used
+				this.setState({balance: null, validation: null});
 			}
 		},
 		fetchValidation(account) {
