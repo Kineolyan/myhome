@@ -1,28 +1,34 @@
 import React from 'react';
+import _ from 'lodash';
 import reactStamp from 'react-stamp';
 
-const HorizonsShape = React.PropTypes.shape({
-  messages: React.PropTypes.object,
-  accounts: React.PropTypes.object,
-  categories: React.PropTypes.object,
-  transactions: React.PropTypes.object,
-  validations: React.PropTypes.object
-});
+const FEEDS = {
+  messages: 'messages',
+  accounts: 'accounts',
+  categories: 'categories',
+  transactions: 'transactions',
+  validations: 'account_validations'
+};
+
+const HorizonsShape = React.PropTypes.shape(
+  _(FEEDS).keys()
+    .reduce((shape, feedName, feed) => {
+      shape[feed] = React.PropTypes.object
+      return shape;
+    }, {})
+);
 
 const WithHorizons = reactStamp(React).compose({
 	contextTypes: {
 		horizons: HorizonsShape
 	},
   init(props, {instance}) {
-    Reflect.defineProperty(instance, 'accountFeed', {
-      get: function() {
-        return this.context.horizons.accounts();
-      }
-    });
-    Reflect.defineProperty(instance, 'transactionFeed', {
-      get: function() {
-        return this.getTransactionFeed();
-      }
+    _(FEEDS).keys().forEach(feed => {
+      Reflect.defineProperty(instance, `${feed}Feed`, {
+        get: function() {
+          return this.context.horizons[feed]();
+        }
+      });
     });
   },
 	getValidationFeed() {
@@ -34,13 +40,7 @@ const WithHorizons = reactStamp(React).compose({
 });
 
 function defineHorizons(hz) {
-  return {
-     messages: hz('messages'),
-     accounts: hz('accounts'),
-     categories: hz('categories'),
-     transactions: hz('transactions'),
-     validations: hz('account_validations')
-   };
+  return _.mapValues(FEEDS, feed => hz(feed));
 }
 
 export {

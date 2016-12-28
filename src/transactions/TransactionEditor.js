@@ -53,12 +53,6 @@ const TransactionEditor = reactStamp(React)
         new Date(transaction.date) : new Date();
 
       instance.state.transaction = transaction;
-
-      Reflect.defineProperty(instance, 'feed', {
-        get: function() {
-          return this.transactionFeed;
-        }
-      });
     },
     componentWillMount() {
       this.cbks = {
@@ -111,8 +105,9 @@ const TransactionEditor = reactStamp(React)
     saveTransaction(transaction) {
       return new Promise((resolve, reject) => {
         const action = transaction.id === undefined ?
-          this.feed.store(transaction) : this.feed.update(transaction);
-          action.subscribe(resolve, reject);
+          this.transactionsFeed.store(transaction) :
+          this.transactionsFeed.update(transaction);
+        action.subscribe(resolve, reject);
       });
     },
     resetTransaction() {
