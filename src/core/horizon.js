@@ -7,7 +7,8 @@ const FEEDS = {
   accounts: 'accounts',
   categories: 'categories',
   transactions: 'transactions',
-  validations: 'account_validations'
+  validations: 'account_validations',
+  groups: 'transactions_groups'
 };
 
 const HorizonsShape = React.PropTypes.shape(

@@ -16,8 +16,11 @@ import {Type} from './models';
 import CategoryPicker from '../categories/CategoryPicker';
 import CategoryEditor from '../categories/CategoryEditor';
 import AccountPicker from '../comptes/AccountPicker';
+import GroupPicker from '../groups/GroupPicker';
+import GroupEditor from '../groups/GroupEditor';
 import {auditItem} from '../core/auditActions';
-import {WithHorizons, HorizonsShape} from '../core/horizon';
+import {WithHorizons} from '../core/horizon';
+import {WithStreams} from '../core/rx';
 
 const PAYMENT_TYPES = [
   {id: Type.CARTE, name: 'Carte'},
@@ -32,7 +35,7 @@ const DEFAULT_TRANSACTION = {
 };
 
 const TransactionEditor = reactStamp(React)
-  .compose(WithHorizons)
+  .compose(WithHorizons, WithStreams)
   .compose({
     propTypes: {
       transaction: React.PropTypes.object,
@@ -45,7 +48,8 @@ const TransactionEditor = reactStamp(React)
     state: {
       categories: [],
       accounts: [],
-      openCategoryForm: false
+      openCategoryForm: false,
+      openGroupForm: false
     },
     init(props, {instance}) {
       const transaction = _.assign({}, DEFAULT_TRANSACTION, instance.props.transaction);
@@ -61,10 +65,13 @@ const TransactionEditor = reactStamp(React)
         setAccount: this.setValue.bind(this, 'account'),
         setType: this.setChoice.bind(this, 'type'),
         setCategory: this.setValue.bind(this, 'category'),
+        setGroup: this.setValue.bind(this, 'group'),
         setDate: this.setInput.bind(this, 'date'),
         submit: this.submit.bind(this),
         addCategory: this.toggleCategoryForm.bind(this, true),
-        closeCategoryForm: this.toggleCategoryForm.bind(this, false)
+        closeCategoryForm: this.toggleCategoryForm.bind(this, false),
+        addGroup: this.toggleGroupForm.bind(this, true),
+        closeGroupForm: this.toggleGroupForm.bind(this, false)
       };
     },
     setInput(key, event, value) {
@@ -107,7 +114,8 @@ const TransactionEditor = reactStamp(React)
         const action = transaction.id === undefined ?
           this.transactionsFeed.store(transaction) :
           this.transactionsFeed.update(transaction);
-        action.subscribe(resolve, reject);
+        const stream = action.subscribe(resolve, reject);
+        this.setStream('transactionSave', stream);
       });
     },
     resetTransaction() {
@@ -138,6 +146,9 @@ const TransactionEditor = reactStamp(React)
     toggleCategoryForm(open) {
       this.setState({openCategoryForm: open});
     },
+    toggleGroupForm(open) {
+      this.setState({openGroupForm: open});
+    },
     renderChoices(values, valueFn, cbk, hintText) {
       return <SelectField
           value={valueFn(this.state) || valueFn(this.props) || null}
@@ -166,13 +177,30 @@ const TransactionEditor = reactStamp(React)
         value={this.getValue('category')}
         onSelect={this.cbks.setCategory} />;
     },
-    render() {
-      return <div>
-        <Dialog title="Ajouter une catégorie"
+    renderGroups() {
+      return <GroupPicker
+        value={this.getValue('group')}
+        onSelect={this.cbks.setGroup} />;
+    },
+    renderForms() {
+      return [
+        <Dialog key="category"
+          title="Ajouter une catégorie"
           modal={false} open={this.state.openCategoryForm}
           onRequestClose={this.cbks.closeCategoryForm}>
           <CategoryEditor onSubmit={_.noop} />
+        </Dialog>,
+        <Dialog key="group"
+          title="Ajouter un group"
+          modal={false} open={this.state.openGroupForm}
+          onRequestClose={this.cbks.closeGroupForm}>
+          <GroupEditor onSubmit={_.noop} />
         </Dialog>
+      ];
+    },
+    render() {
+      return <div>
+        {this.renderForms()}
         <div>
           <TextField hintText="Objet de la transaction"
             value={this.state.transaction.object}
@@ -199,6 +227,12 @@ const TransactionEditor = reactStamp(React)
         <div>
           {this.renderCategories()}
           <FloatingActionButton onTouchTap={this.cbks.addCategory} mini={true}>
+            <ContentAdd />
+          </FloatingActionButton>
+        </div>
+        <div>
+          {this.renderGroups()}
+          <FloatingActionButton onTouchTap={this.cbks.addGroup} mini={true}>
             <ContentAdd />
           </FloatingActionButton>
         </div>
