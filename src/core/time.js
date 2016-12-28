@@ -6,6 +6,20 @@ function nextDay(date) {
 	return new Date(date).setHours(23, 59, 59, 999) + 1;
 }
 
+/**
+ * Displays a timestamp as a date, if defined.
+ * @param {Number} value - timestamp to display
+ * @return {String} equivalent date, or default value if empty
+ */
+function asDate(value, none = '--') {
+  if (value) {
+    return new Date(value).toLocaleDateString();
+  } else {
+    return none;
+  }
+}
+
 export {
-  nextDay
+  nextDay,
+  asDate
 };
