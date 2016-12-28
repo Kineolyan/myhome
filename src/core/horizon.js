@@ -26,7 +26,7 @@ const WithHorizons = reactStamp(React).compose({
     _(FEEDS).keys().forEach(feed => {
       Reflect.defineProperty(instance, `${feed}Feed`, {
         get: function() {
-          return this.context.horizons[feed]();
+          return this.context.horizons[feed];
         }
       });
     });

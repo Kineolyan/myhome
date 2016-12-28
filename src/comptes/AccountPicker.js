@@ -1,41 +1,29 @@
 import React from 'react';
 import _ from 'lodash';
+import reactStamp from 'react-stamp'; 
 
 import ElementPicker from '../core/ElementPicker';
+import {WithStreams} from '../core/rx';
+import {WithHorizons} from '../core/horizon';
 
-class AccountPicker extends ElementPicker {
-
-  get feed() {
-    return this.context.horizons.accounts;
-  }
-
-  componentWillMount() {
-    super.componentWillMount();
-
-    this.feed
-      .order('name', 'ascending')
-      .watch().subscribe(
-        categories => this.setState({values: categories}),
-        err => console.error('Can\'t retrieve accounts', err)
-      );
-  }
-
-  renderEmpty() {
-    return <div>No account</div>;
-  }
-}
-
-AccountPicker.contextTypes = {
-  horizons: React.PropTypes.object
-};
-
-AccountPicker.propTypes = ElementPicker.propTypes;
-
-AccountPicker.defaultProps = _.assign({},
-  ElementPicker.defaultProps,
-  {
-    hintText: 'Compte'
-  }
-);
+const AccountPicker = reactStamp(React)
+  .compose(WithStreams, WithHorizons, ElementPicker)
+  .compose({
+    defaultProps:   {
+      hintText: 'Compte'
+    },
+    componentWillMount() {
+      const stream = this.accountsFeed
+        .order('name', 'ascending')
+        .watch().subscribe(
+          categories => this.setState({values: categories}),
+          err => console.error('Can\'t retrieve accounts', err)
+        );
+      this.setStream('accounts', stream);
+    },
+    renderEmpty() {
+      return <div>No account</div>;
+    }
+  });
 
 export default AccountPicker;
