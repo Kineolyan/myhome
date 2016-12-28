@@ -44,8 +44,12 @@ const AccountBalance = reactStamp(React)
 	.compose({
 		propTypes: {
 			account: React.PropTypes.string.isRequired,
-			date: React.PropTypes.number,
-			validation: React.PropTypes.object
+			validation: React.PropTypes.object,
+			date: React.PropTypes.oneOfType([
+				React.PropTypes.object,
+				React.PropTypes.string,
+				React.PropTypes.number
+			])
 		},
 		state: {
 			balance: null,
@@ -113,22 +117,6 @@ const AccountBalance = reactStamp(React)
 			</div>;
 		}
 	});
-
-AccountBalance.propTypes = {
-	account: React.PropTypes.string.isRequired,
-	date: React.PropTypes.oneOfType([
-		React.PropTypes.object,
-		React.PropTypes.string,
-		React.PropTypes.number
-	])
-}
-
-AccountBalance.contextTypes = {
-	horizons: React.PropTypes.shape({
-		transactions: React.PropTypes.object,
-		validations: React.PropTypes.object
-	})
-};
 
 export default AccountBalance;
 export {
