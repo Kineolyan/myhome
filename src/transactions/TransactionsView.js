@@ -16,6 +16,7 @@ import FloatingActionButton from 'material-ui/FloatingActionButton';
 
 import {Type} from './models';
 import TransactionPanel, {Mode as PanelMode} from './TransactionPanel';
+import GroupView from '../groups/GroupView';
 import {WithStreams} from '../core/rx';
 import {WithHorizons} from '../core/horizon';
 
@@ -46,8 +47,9 @@ const TransactionsView = reactStamp(React)
     },
     componentWillMount() {
       this.cbks = {
-        showTransaction: this.showTransaction.bind(this),
+        highlightRow: this.highlightRow.bind(this),
         hideTransaction: this.hideTransaction.bind(this),
+        hideGroup: this.hideGroup.bind(this),
         goPrevious: () => this.setState({index: this.state.index - 1}),
         goNext: () => this.setState({index: this.state.index + 1})
       };
@@ -126,10 +128,12 @@ const TransactionsView = reactStamp(React)
 
       return rows;
     },
-    showTransaction(rowId) {
+    highlightRow(rowId) {
       const row = this.state.transactions[rowId];
       if (row.groupRow) {
-        // TODO do something to display a group
+        this.setState({
+          detailledGroup: row.groupId
+        });
       } else {
         this.setState({
           detailledTransaction: this.state.transactions[rowId],
@@ -144,6 +148,9 @@ const TransactionsView = reactStamp(React)
       const transaction = this.state.detailledTransaction;
       this.transactionsFeed.remove(transaction.id);
       this.hideTransaction();
+    },
+    hideGroup() {
+      this.setState({detailledGroup: null});
     },
     renderTypeIcon(type) {
       switch (type) {
@@ -229,13 +236,8 @@ const TransactionsView = reactStamp(React)
         </div>;
       }
     },
-    render() {
-      if (_.isEmpty(this.state.transactions)) {
-        return <p>No transactions</p>;
-      }
-
-      let details;
-      if (this.state.detailledTransaction !== null) {
+    renderHighlightedTransaction() {
+      if (this.state.detailledTransaction) {
         const title = <div className="dialog-header">
           <span className="dialog-title">Transaction</span>
           <div className="dialog-actions">
@@ -243,7 +245,8 @@ const TransactionsView = reactStamp(React)
             <FlatButton label="Delete" onTouchTap={() => this.deleteTransaction()}/>
           </div>
         </div>;
-        details = <Dialog title={title}
+
+        return <Dialog title={title}
             modal={false} open={true}
             onRequestClose={this.cbks.hideTransaction}
             autoScrollBodyContent={true}>
@@ -251,11 +254,32 @@ const TransactionsView = reactStamp(React)
             mode={this.state.detailViewMode} />
         </Dialog>;
       }
+    },
+    renderHighlightedGroup() {
+      const {detailledGroup: groupId} = this.state; 
+      if (groupId) {
+        const title = <div className="dialog-header">
+          <span className="dialog-title">Group {groupId}</span>
+        </div>;
+
+        return <Dialog title={title}
+            modal={false} open={true}
+            onRequestClose={this.cbks.hideGroup}
+            autoScrollBodyContent={true}>
+          <GroupView groupId={groupId}/>
+        </Dialog>;
+      }
+    },
+    render() {
+      if (_.isEmpty(this.state.transactions)) {
+        return <p>No transactions</p>;
+      }
 
       return <div>
-        {details}
+        {this.renderHighlightedTransaction()}
+        {this.renderHighlightedGroup()}
         <div style={{display: 'flex', flexDirection: 'row'}}>
-          <Table onCellClick={this.cbks.showTransaction} style={{flex: 1}}>
+          <Table onCellClick={this.cbks.highlightRow} style={{flex: 1}}>
             <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
               <TableRow>
                 <TableHeaderColumn style={TYPE_COLUMN_STYLE}>Type</TableHeaderColumn>
