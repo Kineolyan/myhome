@@ -3,26 +3,9 @@ import _ from 'lodash';
 import reactStamp from 'react-stamp';
 
 import {Type} from '../../transactions/models';
-
-/**
- * Gets the timestamp of the next day of a given value.
- * @param {Number} date - unix timestamp in ms
- */
-function nextDay(date) {
-	return new Date(date).setHours(23, 59, 59, 999) + 1;
-}
-
-const WithHorizons = {
-	contextTypes: {
-		horizons: React.PropTypes.object
-	},
-	getValidationFeed() {
-		return this.context.horizons.validations;
-	},
-	getTransactionFeed() {
-		return this.context.horizons.transactions;
-	}
-}
+import {nextDay} from '../../core/time';
+import {WithHorizons} from '../../core/horizon';
+import {WithStreams} from '../../core/rx';
 
 const UnvalidatedTransactions = {
 	fetchLatestValidation(account, lastNth = 1) {
@@ -56,29 +39,17 @@ const UnvalidatedTransactions = {
 	}
 };
 
-const WithStreams = {
-	init(props, {instance}) {
-		instance.streams = {};
-	},
-	setStream(name, stream) {
-		if (name in this.streams) {
-			this.streams[name].unsubscribe();
-		}
-		this.streams[name] = stream;
-	},
-	componentWillUnmount() {
-		_.forEach(this.streams, stream => stream.unsubscribe());
-		this.streams = {};
-	}
-}
-
 const AccountBalance = reactStamp(React)
 	.compose(WithHorizons, UnvalidatedTransactions, WithStreams)
 	.compose({
 		propTypes: {
 			account: React.PropTypes.string.isRequired,
-			date: React.PropTypes.number,
-			validation: React.PropTypes.object
+			validation: React.PropTypes.object,
+			date: React.PropTypes.oneOfType([
+				React.PropTypes.object,
+				React.PropTypes.string,
+				React.PropTypes.number
+			])
 		},
 		state: {
 			balance: null,
@@ -147,26 +118,8 @@ const AccountBalance = reactStamp(React)
 		}
 	});
 
-AccountBalance.propTypes = {
-	account: React.PropTypes.string.isRequired,
-	date: React.PropTypes.oneOfType([
-		React.PropTypes.object,
-		React.PropTypes.string,
-		React.PropTypes.number
-	])
-}
-
-AccountBalance.contextTypes = {
-	horizons: React.PropTypes.shape({
-		transactions: React.PropTypes.object,
-		validations: React.PropTypes.object
-	})
-};
-
 export default AccountBalance;
 export {
-	nextDay,
-	WithHorizons,
 	UnvalidatedTransactions,
 	WithStreams
 };

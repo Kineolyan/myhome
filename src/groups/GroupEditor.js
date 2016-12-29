@@ -9,33 +9,33 @@ import ElementEditor, {HorizonEditor} from '../core/ElementEditor';
 import {StateForm} from '../core/muiForm';
 import {WithHorizons} from '../core/horizon';
 
-const CategoryEditor = reactStamp(React)
+const GroupEditor = reactStamp(React)
   .compose(WithHorizons, ElementEditor, HorizonEditor, StateForm)
   .compose({
     propTypes: {
-      category: React.PropTypes.object
+      group: React.PropTypes.object
     },
     defaultProps: {
-      category: {}
+      group: {}
     },
     state: {
-      category: {}
+      group: {}
     },
     init(props, {instance}) {
-      const elementKey = 'category';
+      const elementKey = 'group';
       instance.elementKey = elementKey;
       instance.formStateKey = elementKey;
     },
     getElementFeed() {
-      return this.categoriesFeed;
+      return this.groupsFeed;
     },
     componentWillMount() {
       this.cbks.setName = this.setModelFromInput.bind(this, 'name');
     },
     render() {
       return <div>
-        <TextField hintText="Nom de la catégorie"
-          defaultValue={this.props.category.name}
+        <TextField hintText="Nom pour le groupe de transactions"
+          defaultValue={this.props.group.name}
           onChange={this.cbks.setName} />
         <RaisedButton label="Ajouter" primary={true}
           onClick={this.cbks.submit} />
@@ -43,4 +43,4 @@ const CategoryEditor = reactStamp(React)
     }
   });
 
-export default CategoryEditor;
+export default GroupEditor;

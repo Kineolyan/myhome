@@ -1,5 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
+import reactStamp from 'react-stamp';
 
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import Dialog from 'material-ui/Dialog';
@@ -15,239 +16,299 @@ import FloatingActionButton from 'material-ui/FloatingActionButton';
 
 import {Type} from './models';
 import TransactionPanel, {Mode as PanelMode} from './TransactionPanel';
+import GroupView from '../groups/GroupView';
+import {WithStreams} from '../core/rx';
+import {WithHorizons} from '../core/horizon';
 
-const TYPE_COLUMN_STYLE = {width: 30};
+const TYPE_COLUMN_STYLE = {
+  width: 40, 
+  textAlign: 'center'
+};
 
-class TransactionsView extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      transactions: this.props.transactions,
-      detailledTransaction: null,
-      index: 0
-    };
-  }
+const TransactionsView = reactStamp(React)
+  .compose(WithStreams, WithHorizons)
+  .compose({
+    propTypes: {
+      feed: React.PropTypes.shape({
+        subscribe: React.PropTypes.func.isRequired
+      }),
+      transactions: React.PropTypes.array,
+      pagination: React.PropTypes.number,
+      byGroup: React.PropTypes.bool
+    },
+    defaultProps: {
+      transactions: [],
+      pagination: 20,
+      byGroup: true
+    },
+    init(props, {instance}) {
+      instance.state = {
+        transactions: props.transactions,
+        detailledTransaction: null,
+        index: 0
+      }
+    },
+    componentWillMount() {
+      this.cbks = {
+        highlightRow: this.highlightRow.bind(this),
+        hideTransaction: this.hideTransaction.bind(this),
+        hideGroup: this.hideGroup.bind(this),
+        goPrevious: () => this.setState({index: this.state.index - 1}),
+        goNext: () => this.setState({index: this.state.index + 1})
+      };
 
-  componentWillMount() {
-    this.cbks = {
-      showTransaction: this.showTransaction.bind(this),
-      hideTransaction: this.hideTransaction.bind(this),
-      goPrevious: () => this.setState({index: this.state.index - 1}),
-      goNext: () => this.setState({index: this.state.index + 1})
-    };
+      if (this.props.feed) {
+        this.subscribeToFeed();
+      }
+    },
+    componentWillReceiveProps(nextProps) {
+      this.setState({transactions: nextProps.transactions});
+    },
+    componentDidUpdate(prevProps) {
+      if (this.props.feed !== prevProps.feed) {
+        this.subscribeToFeed();
+      }
+    },
+    /**
+     * Gets the maximum index for pagination.
+     * The contract is that state#index < maxIndex.
+     * @param {Object[]} transactions - transactions to paginate
+     * @return {Number} max index
+     */
+    getMaxIndex(transactions) {
+      return _.isEmpty(transactions) ? 1 : parseInt((transactions.length - 1) / this.props.pagination, 10) + 1;
+    },
+    subscribeToFeed() {
+      const stream = this.props.feed.subscribe(
+        transactions => {
+          const rows = this.computeRows(transactions);
 
-    if (this.props.feed) {
-      this.subscribeToFeed();
-    }
-  }
-
-  componentWillUnmount() {
-    this.unsubscribeFromFeed();
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({transactions: nextProps.transactions});
-  }
-
-  componentDidUpdate(prevProps) {
-    if (this.props.feed !== prevProps.feed) {
-      this.subscribeToFeed();
-    }
-  }
-
-  get transactionFeed() {
-    return this.context.horizons.transactions;
-  }
-
-  /**
-   * Gets the maximum index for pagination.
-   * The contract is that state#index < maxIndex.
-   * @param {Object[]} transactions - transactions to paginate
-   * @return {Number} max index
-   */
-  getMaxIndex(transactions) {
-    return _.isEmpty(transactions) ? 1 : parseInt((transactions.length - 1) / this.props.pagination, 10) + 1;
-  }
-
-  subscribeToFeed() {
-    this.unsubscribeFromFeed();
-
-    this.subscription = this.props.feed.subscribe(
-      transactions => {
-        this.setState({transactions: [...transactions]});
-
-        const maxIdx = this.getMaxIndex(transactions);
-        if (maxIdx <= this.state.index) {
-          this.setState({index: maxIdx - 1});
+          const maxIdx = this.getMaxIndex(rows);
+          if (maxIdx <= this.state.index) {
+            this.setState({index: maxIdx - 1});
+          }
+        },
+        err => console.error('[Failure] retrieving transactions', err)
+      );
+      this.setStream('transactions', stream);
+    },
+    computeRows(transactions) {
+      if (!this.props.byGroup) {
+        this.setState({transactions});
+        return transactions;
+      }
+      
+      const rows = [];
+      const groups = {};
+      for (const transaction of transactions) {
+        if (transaction.group) {
+          if (!Reflect.has(groups, transaction.group)) {
+            const idx = rows.push({
+              groupRow: true,
+              groupId: transaction.group,
+              count: 1
+            }) - 1;
+            groups[transaction.group] = {
+              id: transaction.group,
+              ref: idx // temporary information for processing time
+            };
+          } else {
+            const idx = groups[transaction.group].ref;
+            rows[idx].count += 1;
+          }
+        } else {
+          rows.push(transaction);
         }
-      },
-      err => console.error('[Failure] retrieving transactions', err)
-    );
-  }
+      }
 
-  unsubscribeFromFeed() {
-    if (this.subscription !== undefined) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
-  }
+      this.setState({transactions: rows, groups});
 
-  showTransaction(rowId) {
-    this.setState({
-      detailledTransaction: this.state.transactions[rowId],
-      detailViewMode: PanelMode.VIEW
-    });
-  }
+      const groupStream = this.groupsFeed
+        .findAll(..._(groups).values()
+          .map(group => ({id: group.id}))
+          .value()
+        ).watch()
+        .subscribe(
+          groups => this.setState({
+            groups: _.keyBy(groups, 'id')
+          }),
+          err => console.error('Cannot retrieve groups', err)
+        );
+      this.setStream('groups', groupStream);
 
-  hideTransaction() {
-    this.setState({detailledTransaction: null});
-  }
+      return rows;
+    },
+    highlightRow(rowId) {
+      const row = this.state.transactions[rowId];
+      if (row.groupRow) {
+        this.setState({
+          detailledGroup: row.groupId
+        });
+      } else {
+        this.setState({
+          detailledTransaction: this.state.transactions[rowId],
+          detailViewMode: PanelMode.VIEW
+        });
+      }
+    },
+    hideTransaction() {
+      this.setState({detailledTransaction: null});
+    },
+    deleteTransaction() {
+      const transaction = this.state.detailledTransaction;
+      this.transactionsFeed.remove(transaction.id);
+      this.hideTransaction();
+    },
+    hideGroup() {
+      this.setState({detailledGroup: null});
+    },
+    renderTypeIcon(type) {
+      switch (type) {
+      case Type.CARTE: return <CreditCardIcon/>;
+      case Type.CHEQUE: return <ChequeIcon />;
+      case Type.MONNAIE: return <CoinIcon />;
+      case Type.VIREMENT: return <TransferIcon />;
+      default: return <span title={type}>??</span>;
+      }
+    },
+    renderAmount(transaction) {
+      const amount = transaction.amount || 0;
+      const color = amount >= 0 ? '#a0fdbd' : '#fea4a9';
 
-  deleteTransaction() {
-    const transaction = this.state.detailledTransaction;
-    this.transactionFeed.remove(transaction.id);
-    this.hideTransaction();
-  }
-
-  renderTypeIcon(type) {
-    switch (type) {
-    case Type.CARTE: return <CreditCardIcon/>;
-    case Type.CHEQUE: return <ChequeIcon />;
-    case Type.MONNAIE: return <CoinIcon />;
-    case Type.VIREMENT: return <TransferIcon />;
-    default: return <span>Unknown: {type}</span>;
-    }
-  }
-
-  renderAmount(transaction) {
-    const amount = transaction.amount || 0;
-    const color = amount >= 0 ? '#a0fdbd' : '#fea4a9';
-
-    return <Chip style={{margin: 4}} backgroundColor={color}>
-      <span style={{fontSize: 13}}>{amount.toFixed(2)} €</span>
-    </Chip>;
-  }
-
-  renderRows() {
-    const startIdx = this.state.index * this.props.pagination;
-    const endIdx = Math.min(startIdx + this.props.pagination, this.state.transactions.length);
-
-    const rows = [];
-    for (let i = startIdx; i < endIdx; i += 1) {
-      const transaction = this.state.transactions[i];
-      rows.push(<TableRow key={transaction.id} onClick={this.cbks.goPrevious}>
+      return <Chip style={{margin: 4}} backgroundColor={color}>
+        <span style={{fontSize: 13}}>{amount.toFixed(2)} €</span>
+      </Chip>;
+    },
+    renderTransaction(transaction) {
+      return <TableRow key={transaction.id} onClick={this.cbks.goPrevious}>
         <TableRowColumn style={TYPE_COLUMN_STYLE}>{this.renderTypeIcon(transaction.type)}</TableRowColumn>
         <TableRowColumn>{transaction.object}</TableRowColumn>
         <TableRowColumn>{this.renderAmount(transaction)}</TableRowColumn>
         <TableRowColumn>
           {new Date(transaction.date).toLocaleDateString()}
         </TableRowColumn>
-      </TableRow>);
-    }
+      </TableRow>;
+    },
+    renderGroup({groupId, count}) {
+      const group = this.state.groups[groupId];
+      return <TableRow key={group.id}>
+        <TableRowColumn style={TYPE_COLUMN_STYLE}>{count}+</TableRowColumn>
+        <TableRowColumn>{group.name || group.id}</TableRowColumn>
+        <TableRowColumn>...</TableRowColumn>
+        <TableRowColumn>...</TableRowColumn>
+      </TableRow>;
+    },
+    renderRows() {
+      const startIdx = this.state.index * this.props.pagination;
+      const endIdx = Math.min(startIdx + this.props.pagination, this.state.transactions.length);
 
-    return rows;
-  }
+      const rows = [];
+      for (let i = startIdx; i < endIdx; i += 1) {
+        const row = this.state.transactions[i];
+        const rowElt = row.groupRow ?
+          this.renderGroup(row) : this.renderTransaction(row);
+        rows.push(rowElt);
+      }
 
-  renderPrevious() {
-    const enabled = this.state.index > 0;
+      return rows;
+    },
+    renderPrevious() {
+      const enabled = this.state.index > 0;
 
-    return <FloatingActionButton onTouchTap={this.cbks.goPrevious}
-        mini={true} disabled={!enabled}>
-      <ArrowUp/>
-    </FloatingActionButton>;
-  }
+      return <FloatingActionButton onTouchTap={this.cbks.goPrevious}
+          mini={true} disabled={!enabled}>
+        <ArrowUp/>
+      </FloatingActionButton>;
+    },
+    renderNext() {
+      const lastIndex = (this.state.index + 1) * this.props.pagination;
+      const enabled = lastIndex < this.state.transactions.length;
 
-  renderNext() {
-    const lastIndex = (this.state.index + 1) * this.props.pagination;
-    const enabled = lastIndex < this.state.transactions.length;
+      return <FloatingActionButton onTouchTap={this.cbks.goNext}
+          mini={true} disabled={!enabled}>
+        <ArrowDown/>
+      </FloatingActionButton>;
+    },
+    renderPagination() {
+      if (this.props.pagination < this.state.transactions.length) {
+        return <div style={{
+            width: 50,
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '60px 10px 10px',
+            justifyContent: 'center'
+        }}>
+          {this.renderPrevious()}
+          <div style={{textAlign: 'center', padding: '10px 0'}}>
+            {this.state.index + 1} / {this.getMaxIndex(this.state.transactions)}
+          </div>
+          {this.renderNext()}
+        </div>;
+      }
+    },
+    renderHighlightedTransaction() {
+      if (this.state.detailledTransaction) {
+        const title = <div className="dialog-header">
+          <span className="dialog-title">Transaction</span>
+          <div className="dialog-actions">
+            <FlatButton label="Edit" onTouchTap={() => this.setState({detailViewMode: PanelMode.EDIT})}/>
+            <FlatButton label="Delete" onTouchTap={() => this.deleteTransaction()}/>
+          </div>
+        </div>;
 
-    return <FloatingActionButton onTouchTap={this.cbks.goNext}
-        mini={true} disabled={!enabled}>
-      <ArrowDown/>
-    </FloatingActionButton>;
-  }
+        return <Dialog title={title}
+            modal={false} open={true}
+            onRequestClose={this.cbks.hideTransaction}
+            autoScrollBodyContent={true}>
+          <TransactionPanel transaction={this.state.detailledTransaction}
+            mode={this.state.detailViewMode} />
+        </Dialog>;
+      }
+    },
+    renderHighlightedGroup() {
+      const {detailledGroup: groupId} = this.state; 
+      if (groupId) {
+        const title = <div className="dialog-header">
+          <span className="dialog-title">Group {groupId}</span>
+        </div>;
 
-  renderPagination() {
-    if (this.props.pagination < this.state.transactions.length) {
-      return <div style={{
-          width: 50,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '60px 10px 10px',
-          justifyContent: 'center'
-      }}>
-        {this.renderPrevious()}
-        <div style={{textAlign: 'center', padding: '10px 0'}}>
-          {this.state.index + 1} / {this.getMaxIndex(this.state.transactions)}
+        return <Dialog title={title}
+            modal={false} open={true}
+            onRequestClose={this.cbks.hideGroup}
+            autoScrollBodyContent={true}>
+          <GroupView groupId={groupId}/>
+        </Dialog>;
+      }
+    },
+    render() {
+      if (_.isEmpty(this.state.transactions)) {
+        return <p>No transactions</p>;
+      }
+
+      return <div>
+        {this.renderHighlightedTransaction()}
+        {this.renderHighlightedGroup()}
+        <div style={{display: 'flex', flexDirection: 'row'}}>
+          <Table onCellClick={this.cbks.highlightRow} style={{flex: 1}}>
+            <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
+              <TableRow>
+                <TableHeaderColumn style={TYPE_COLUMN_STYLE}>Type</TableHeaderColumn>
+                <TableHeaderColumn>Objet</TableHeaderColumn>
+                <TableHeaderColumn>Montant</TableHeaderColumn>
+                <TableHeaderColumn>Date</TableHeaderColumn>
+              </TableRow>
+            </TableHeader>
+            <TableBody
+                displayRowCheckbox={false}
+                showRowHover={true}
+                stripedRows={true}>
+              {this.renderRows()}
+            </TableBody>
+          </Table>
+          {this.renderPagination()}
         </div>
-        {this.renderNext()}
       </div>;
     }
-  }
-
-  render() {
-    if (_.isEmpty(this.state.transactions)) {
-      return <p>No transactions</p>;
-    }
-
-    let details;
-    if (this.state.detailledTransaction !== null) {
-      const title = <div className="dialog-header">
-        <span className="dialog-title">Transaction</span>
-        <div className="dialog-actions">
-          <FlatButton label="Edit" onTouchTap={() => this.setState({detailViewMode: PanelMode.EDIT})}/>
-          <FlatButton label="Delete" onTouchTap={() => this.deleteTransaction()}/>
-        </div>
-      </div>;
-      details = <Dialog title={title}
-          modal={false} open={true}
-          onRequestClose={this.cbks.hideTransaction}
-          autoScrollBodyContent={true}>
-        <TransactionPanel transaction={this.state.detailledTransaction}
-          mode={this.state.detailViewMode} />
-      </Dialog>;
-    }
-
-    return <div>
-      {details}
-      <div style={{display: 'flex', flexDirection: 'row'}}>
-        <Table onCellClick={this.cbks.showTransaction} style={{flex: 1}}>
-          <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
-            <TableRow>
-              <TableHeaderColumn style={TYPE_COLUMN_STYLE}>Type</TableHeaderColumn>
-              <TableHeaderColumn>Objet</TableHeaderColumn>
-              <TableHeaderColumn>Montant</TableHeaderColumn>
-              <TableHeaderColumn>Date</TableHeaderColumn>
-            </TableRow>
-          </TableHeader>
-          <TableBody
-              displayRowCheckbox={false}
-              showRowHover={true}
-              stripedRows={true}>
-            {this.renderRows()}
-          </TableBody>
-        </Table>
-        {this.renderPagination()}
-      </div>
-    </div>;
-  }
-}
-
-TransactionsView.propTypes = {
-  feed: React.PropTypes.shape({
-    subscribe: React.PropTypes.func.isRequired
-  }),
-  transactions: React.PropTypes.array,
-  pagination: React.PropTypes.number
-};
-
-TransactionsView.defaultProps = {
-  transactions: [],
-  pagination: 20
-};
-
-TransactionsView.contextTypes = {
-  horizons: React.PropTypes.object
-};
+  });
 
 export default TransactionsView;

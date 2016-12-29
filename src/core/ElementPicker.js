@@ -1,24 +1,28 @@
 import React from 'react';
 import _ from 'lodash';
+import reactStamp from 'react-stamp';
 
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 
-class ElementPicker extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      values: []
-    };
-  }
-
+const ElementPicker = reactStamp(React).compose({
+  state: {
+    values: []
+  },
+  propTypes: {
+    value: React.PropTypes.string,
+    onSelect: React.PropTypes.func.isRequired,
+    hintText: React.PropTypes.string,
+    withEmpty: React.PropTypes.bool
+  },
+  defaultProps: {
+    withEmpty: true
+  },
   componentWillMount() {
     this.cbks = {
       select: (event, index, value) => this.props.onSelect(value)
     };
-  }
-
+  },
   render() {
     if (_.isEmpty(this.state.values)) {
       return this.renderEmpty();
@@ -42,17 +46,6 @@ class ElementPicker extends React.Component {
       })}
     </SelectField>;
   }
-}
-
-ElementPicker.propTypes = {
-  value: React.PropTypes.string,
-  onSelect: React.PropTypes.func.isRequired,
-  hintText: React.PropTypes.string,
-  withEmpty: React.PropTypes.bool
-};
-
-ElementPicker.defaultProps = {
-  withEmpty: true
-};
+});
 
 export default ElementPicker;
