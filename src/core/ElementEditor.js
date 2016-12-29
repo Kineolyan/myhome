@@ -21,6 +21,7 @@ const ElementEditor = reactStamp(React).compose({
     const element = this.getEditedElement();
     this.save(element)
       .then(result => this.onElementSaved(result))
+      .then(result => this.props.onSubmit(result))
       .catch(err => this.onFailedSubmit(err, element));
   },
   onFailedSubmit(error, element) {
@@ -56,8 +57,9 @@ const HorizonEditor = reactStamp(React)
     reset() {
       this.setState({ [this.elementKey]: {} });
     },
-    onElementSaved() {
-      this.reset();
+    onElementSaved(element) {
+      this.reset(element);
+      return element;
     }
   });
 
