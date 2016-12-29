@@ -20,7 +20,10 @@ import GroupView from '../groups/GroupView';
 import {WithStreams} from '../core/rx';
 import {WithHorizons} from '../core/horizon';
 
-const TYPE_COLUMN_STYLE = {width: 30};
+const TYPE_COLUMN_STYLE = {
+  width: 40, 
+  textAlign: 'center'
+};
 
 const TransactionsView = reactStamp(React)
   .compose(WithStreams, WithHorizons)
@@ -100,11 +103,18 @@ const TransactionsView = reactStamp(React)
       for (const transaction of transactions) {
         if (transaction.group) {
           if (!Reflect.has(groups, transaction.group)) {
-            groups[transaction.group] = {id: transaction.group};
-            rows.push({
+            const idx = rows.push({
               groupRow: true,
-              groupId: transaction.group
-            });
+              groupId: transaction.group,
+              count: 1
+            }) - 1;
+            groups[transaction.group] = {
+              id: transaction.group,
+              ref: idx // temporary information for processing time
+            };
+          } else {
+            const idx = groups[transaction.group].ref;
+            rows[idx].count += 1;
           }
         } else {
           rows.push(transaction);
@@ -179,12 +189,12 @@ const TransactionsView = reactStamp(React)
         </TableRowColumn>
       </TableRow>;
     },
-    renderGroup({groupId}) {
+    renderGroup({groupId, count}) {
       const group = this.state.groups[groupId];
       return <TableRow key={group.id}>
-        <TableRowColumn style={TYPE_COLUMN_STYLE}>{this.renderTypeIcon(group.id)}</TableRowColumn>
+        <TableRowColumn style={TYPE_COLUMN_STYLE}>{count}+</TableRowColumn>
         <TableRowColumn>{group.name || group.id}</TableRowColumn>
-        <TableRowColumn>{this.renderAmount({})}</TableRowColumn>
+        <TableRowColumn>...</TableRowColumn>
         <TableRowColumn>...</TableRowColumn>
       </TableRow>;
     },
