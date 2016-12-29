@@ -21,6 +21,7 @@ const ElementEditor = reactStamp(React).compose({
     const element = this.getEditedElement();
     this.save(element)
       .then(result => this.onElementSaved(result))
+      .then(result => this.props.onSubmit(result))
       .catch(err => this.onFailedSubmit(err, element));
   },
   onFailedSubmit(error, element) {
@@ -44,20 +45,21 @@ const HorizonEditor = reactStamp(React)
     formatEditedElement(element) {
       return element;
     },
-    save(element) {
+    save(element, streamName = 'elementSaved') {
       return new Promise((resolve, reject) => {
         const action = element.id === undefined ?
           this.getElementFeed().store(element) :
           this.getElementFeed().update(element);
         const stream = action.subscribe(resolve, reject);
-        this.setStream('elementSaved', stream);
+        this.setStream(streamName, stream);
       });
     },
     reset() {
       this.setState({ [this.elementKey]: {} });
     },
-    onElementSaved() {
-      this.reset();
+    onElementSaved(element) {
+      this.reset(element);
+      return element;
     }
   });
 

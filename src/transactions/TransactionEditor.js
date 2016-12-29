@@ -18,9 +18,9 @@ import CategoryEditor from '../categories/CategoryEditor';
 import AccountPicker from '../comptes/AccountPicker';
 import GroupPicker from '../groups/GroupPicker';
 import GroupEditor from '../groups/GroupEditor';
-import {auditItem} from '../core/auditActions';
 import {WithHorizons} from '../core/horizon';
-import {WithStreams} from '../core/rx';
+import {StateForm} from '../core/muiForm';
+import ElementEditor, {HorizonEditor} from '../core/ElementEditor';
 
 const PAYMENT_TYPES = [
   {id: Type.CARTE, name: 'Carte'},
@@ -35,23 +35,26 @@ const DEFAULT_TRANSACTION = {
 };
 
 const TransactionEditor = reactStamp(React)
-  .compose(WithHorizons, WithStreams)
+  .compose(WithHorizons, ElementEditor, HorizonEditor, StateForm)
   .compose({
     propTypes: {
-      transaction: React.PropTypes.object,
-      onSubmit: React.PropTypes.func
+      transaction: React.PropTypes.object
     },
     defaultProps: {
-      transaction: {},
-      onSubmit: _.noop
+      transaction: {}
     },
     state: {
       categories: [],
       accounts: [],
       openCategoryForm: false,
-      openGroupForm: false
+      openGroupForm: false,
+      askTransferAccount: false
     },
     init(props, {instance}) {
+      const key = 'transaction';
+      instance.elementKey = key;
+      instance.formStateKey = key;
+
       const transaction = _.assign({}, DEFAULT_TRANSACTION, instance.props.transaction);
       transaction.date = transaction.date !== undefined ?
         new Date(transaction.date) : new Date();
@@ -59,75 +62,48 @@ const TransactionEditor = reactStamp(React)
       instance.state.transaction = transaction;
     },
     componentWillMount() {
-      this.cbks = {
-        setObject: this.setInput.bind(this, 'object'),
-        setAmount: this.setInput.bind(this, 'amount'),
-        setAccount: this.setValue.bind(this, 'account'),
-        setType: this.setChoice.bind(this, 'type'),
-        setCategory: this.setValue.bind(this, 'category'),
-        setGroup: this.setValue.bind(this, 'group'),
-        setDate: this.setInput.bind(this, 'date'),
-        submit: this.submit.bind(this),
+      this.cbks = Object.assign({}, this.cbks, {
+        setObject: this.setModelFromInput.bind(this, 'object'),
+        setAmount: this.setModelFromInput.bind(this, 'amount'),
+        setAccount: this.setModelValue.bind(this, 'account'),
+        setType: this.setModelFromChoice.bind(this, 'type'),
+        setCategory: this.setModelValue.bind(this, 'category'),
+        setGroup: this.setModelValue.bind(this, 'group'),
+        setDate: this.setModelFromInput.bind(this, 'date'),
         addCategory: this.toggleCategoryForm.bind(this, true),
         closeCategoryForm: this.toggleCategoryForm.bind(this, false),
         addGroup: this.toggleGroupForm.bind(this, true),
-        closeGroupForm: this.toggleGroupForm.bind(this, false)
-      };
+        closeGroupForm: this.toggleGroupForm.bind(this, false),
+        startTransfer: this.transfer.bind(this),
+        completeTransfer: this.transfer.bind(this, true),
+        cancelTransfer: this.transfer.bind(this, false)
+      });
     },
-    setInput(key, event, value) {
-      return this.setValue(key, value);
-    },
-    setChoice(key, event, index, value) {
-      return this.setValue(key, value);
+    getElementFeed() {
+      return this.transactionsFeed;
     },
     getValue(key) {
       return this.state.transaction[key]
         || this.props.transaction[key];
     },
-    setValue(key, value) {
-      const transaction = this.state.transaction;
-      if (!_.isEmpty(value) || value instanceof Date) {
-        transaction[key] = value;
-      } else {
-        Reflect.deleteProperty(transaction, key);
-      }
-
-      this.setState({transaction: transaction});
-    },
-    getEditedTransaction() {
-      const transaction = _.clone(this.state.transaction); // Shallow clone is enough
-      if (this.props.transaction.id !== undefined) {
-        transaction.id = this.props.transaction.id;
-      }
-
+    formatEditedElement(transaction) {
       if (transaction.date !== undefined) {
         transaction.date = transaction.date.getTime();
       }
       if (transaction.amount !== undefined) {
         transaction.amount = parseFloat(transaction.amount);
       }
-
-      return auditItem(transaction);
     },
-    saveTransaction(transaction) {
-      return new Promise((resolve, reject) => {
-        const action = transaction.id === undefined ?
-          this.transactionsFeed.store(transaction) :
-          this.transactionsFeed.update(transaction);
-        const stream = action.subscribe(resolve, reject);
-        this.setStream('transactionSave', stream);
-      });
-    },
-    resetTransaction() {
+    reset() { // Override from HorizonEditor
       const transaction = this.state.transaction;
       // Remove changing props
-      ['object', 'amount'].forEach(prop => { transaction[prop] = '';});
+      ['object', 'amount', 'group'].forEach(prop => { transaction[prop] = '';});
       // Reset to default props
-      _.assign(transaction, DEFAULT_TRANSACTION);
-      this.setState({transaction});
+      const newValue = _.assign({}, transaction, DEFAULT_TRANSACTION);
+      this.setState({transaction: newValue});
     },
     canSubmit() {
-      const transaction = this.getEditedTransaction();
+      const transaction = this.getEditedElement();
       return !_.isEmpty(transaction.object)
         && transaction.amount
         && transaction.date
@@ -135,13 +111,30 @@ const TransactionEditor = reactStamp(React)
         && transaction.type
         && transaction.category;
     },
-    submit() {
-      const transaction = this.getEditedTransaction();
-      this.saveTransaction(transaction)
-        .then(() => {
-          this.resetTransaction();
-          this.props.onSubmit();
-        });
+    transfer(execute, toAccount) {
+      if (execute === true) {
+        const transaction = this.getEditedElement();
+        if (transaction.account !== toAccount) {
+          const oppositeTransaction = Object.assign(
+            {}, transaction, {amount: -transaction.amount, account: toAccount}
+          );
+          Promise.all([
+            this.save(transaction, 'transferFrom'),
+            this.save(oppositeTransaction, 'transferTo')
+          ]).then(([original]) => this.onElementSaved(original))
+            // Do not call the submit callback as it is a special case
+            .catch(err => this.onFailedSubmit(err, transaction))
+            .then(() => this.setState({askTransferAccount: false}));
+        } else {
+          console.error('Cannot transfer to the same account', toAccount);
+          this.setState({askTransferAccount: false});
+        }
+      } else if (execute === false) {
+        this.setState({askTransferAccount: false});
+      } else {
+        // Ask the destination account
+        this.setState({askTransferAccount: true});
+      }
     },
     toggleCategoryForm(open) {
       this.setState({openCategoryForm: open});
@@ -195,8 +188,30 @@ const TransactionEditor = reactStamp(React)
           modal={false} open={this.state.openGroupForm}
           onRequestClose={this.cbks.closeGroupForm}>
           <GroupEditor onSubmit={_.noop} />
+        </Dialog>,
+        <Dialog key="transfer"
+          title="Choisir le compte pour le transfert"
+          modal={false} open={this.state.askTransferAccount}
+          onRequestClose={this.cbks.cancelTransfer}>
+          <AccountPicker onSelect={this.cbks.completeTransfer} />
         </Dialog>
       ];
+    },
+    renderSubmitButtons() {
+      const btns = [
+        <RaisedButton key="save-btn" label="Sauver" primary={true}
+          disabled={!this.canSubmit()}
+          onClick={this.cbks.submit} />
+      ];
+
+      if (!this.getValue('id')) {
+        btns.push(<RaisedButton key="transfer-btn" label="Transférer"
+          disabled={!this.canSubmit()}
+          onClick={this.cbks.startTransfer}/>
+        );
+      }
+
+      return btns;
     },
     render() {
       return <div>
@@ -236,9 +251,7 @@ const TransactionEditor = reactStamp(React)
             <ContentAdd />
           </FloatingActionButton>
         </div>
-        <RaisedButton label="Sauver" primary={true}
-          disabled={!this.canSubmit()}
-          onClick={this.cbks.submit} />
+        {this.renderSubmitButtons()}
       </div>;
     }
   });
