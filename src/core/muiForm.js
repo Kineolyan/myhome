@@ -7,7 +7,7 @@ const StateForm = reactStamp()
       this.setModelValue(key, value);
     },
     setModelFromChoice(key, event, index, value) {
-      return this.setValue(key, value);
+      return this.setModelValue(key, value);
     },
     setModelValue(key, value) {
       const element = this.state[this.formStateKey];

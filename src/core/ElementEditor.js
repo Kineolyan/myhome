@@ -45,13 +45,13 @@ const HorizonEditor = reactStamp(React)
     formatEditedElement(element) {
       return element;
     },
-    save(element) {
+    save(element, streamName = 'elementSaved') {
       return new Promise((resolve, reject) => {
         const action = element.id === undefined ?
           this.getElementFeed().store(element) :
           this.getElementFeed().update(element);
         const stream = action.subscribe(resolve, reject);
-        this.setStream('elementSaved', stream);
+        this.setStream(streamName, stream);
       });
     },
     reset() {

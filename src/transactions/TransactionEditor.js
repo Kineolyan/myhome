@@ -47,7 +47,8 @@ const TransactionEditor = reactStamp(React)
       categories: [],
       accounts: [],
       openCategoryForm: false,
-      openGroupForm: false
+      openGroupForm: false,
+      askTransferAccount: false
     },
     init(props, {instance}) {
       const key = 'transaction';
@@ -72,7 +73,10 @@ const TransactionEditor = reactStamp(React)
         addCategory: this.toggleCategoryForm.bind(this, true),
         closeCategoryForm: this.toggleCategoryForm.bind(this, false),
         addGroup: this.toggleGroupForm.bind(this, true),
-        closeGroupForm: this.toggleGroupForm.bind(this, false)
+        closeGroupForm: this.toggleGroupForm.bind(this, false),
+        startTransfer: this.transfer.bind(this),
+        completeTransfer: this.transfer.bind(this, true),
+        cancelTransfer: this.transfer.bind(this, false)
       });
     },
     getElementFeed() {
@@ -106,6 +110,31 @@ const TransactionEditor = reactStamp(React)
         && transaction.account
         && transaction.type
         && transaction.category;
+    },
+    transfer(execute, toAccount) {
+      if (execute === true) {
+        const transaction = this.getEditedElement();
+        if (transaction.account !== toAccount) {
+          const oppositeTransaction = Object.assign(
+            {}, transaction, {amount: -transaction.amount, account: toAccount}
+          );
+          Promise.all([
+            this.save(transaction, 'transferFrom'),
+            this.save(oppositeTransaction, 'transferTo')
+          ]).then(([original]) => this.onElementSaved(original))
+            // Do not call the submit callback as it is a special case
+            .catch(err => this.onFailedSubmit(err, transaction))
+            .then(() => this.setState({askTransferAccount: false}));
+        } else {
+          console.error('Cannot transfer to the same account', toAccount);
+          this.setState({askTransferAccount: false});
+        }
+      } else if (execute === false) {
+        this.setState({askTransferAccount: false});
+      } else {
+        // Ask the destination account
+        this.setState({askTransferAccount: true});
+      }
     },
     toggleCategoryForm(open) {
       this.setState({openCategoryForm: open});
@@ -159,8 +188,30 @@ const TransactionEditor = reactStamp(React)
           modal={false} open={this.state.openGroupForm}
           onRequestClose={this.cbks.closeGroupForm}>
           <GroupEditor onSubmit={_.noop} />
+        </Dialog>,
+        <Dialog key="transfer"
+          title="Choisir le compte pour le transfert"
+          modal={false} open={this.state.askTransferAccount}
+          onRequestClose={this.cbks.cancelTransfer}>
+          <AccountPicker onSelect={this.cbks.completeTransfer} />
         </Dialog>
       ];
+    },
+    renderSubmitButtons() {
+      const btns = [
+        <RaisedButton key="save-btn" label="Sauver" primary={true}
+          disabled={!this.canSubmit()}
+          onClick={this.cbks.submit} />
+      ];
+
+      if (!this.getValue('id')) {
+        btns.push(<RaisedButton key="transfer-btn" label="Transférer"
+          disabled={!this.canSubmit()}
+          onClick={this.cbks.startTransfer}/>
+        );
+      }
+
+      return btns;
     },
     render() {
       return <div>
@@ -200,9 +251,7 @@ const TransactionEditor = reactStamp(React)
             <ContentAdd />
           </FloatingActionButton>
         </div>
-        <RaisedButton label="Sauver" primary={true}
-          disabled={!this.canSubmit()}
-          onClick={this.cbks.submit} />
+        {this.renderSubmitButtons()}
       </div>;
     }
   });
