@@ -21,6 +21,12 @@ fields = [["account"]]
 fields = [["date"]]
 [[collections.transactions.indexes]]
 fields = [["updatedAt"]]
+[[collections.transactions.indexes]]
+fields = [["group"],["date"]]
+
+[collections.transactions_groups]
+[[collections.transactions_groups.indexes]]
+fields = [["createdAt"]]
 
 [collections.users]
 

@@ -60,7 +60,7 @@ class TransactionHistory extends React.Component {
 
   render() {
     const history = this.state.selection ?
-      <TransactionsView feed={this.state.selection} /> : null;
+      <TransactionsView feed={this.state.selection} byGroup={false}/> : null;
 
     return <div>
       <div>
