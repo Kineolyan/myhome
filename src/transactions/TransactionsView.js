@@ -21,7 +21,7 @@ import {WithStreams} from '../core/rx';
 import {WithHorizons} from '../core/horizon';
 
 const TYPE_COLUMN_STYLE = {
-  width: 40, 
+  width: 40,
   textAlign: 'center'
 };
 
@@ -97,7 +97,7 @@ const TransactionsView = reactStamp(React)
         this.setState({transactions});
         return transactions;
       }
-      
+
       const rows = [];
       const groups = {};
       for (const transaction of transactions) {
@@ -123,18 +123,20 @@ const TransactionsView = reactStamp(React)
 
       this.setState({transactions: rows, groups});
 
-      const groupStream = this.groupsFeed
-        .findAll(..._(groups).values()
-          .map(group => ({id: group.id}))
-          .value()
-        ).watch()
-        .subscribe(
-          groups => this.setState({
-            groups: _.keyBy(groups, 'id')
-          }),
-          err => console.error('Cannot retrieve groups', err)
-        );
-      this.setStream('groups', groupStream);
+      if (!_.isEmpty(groups)) {
+        const groupStream = this.groupsFeed
+          .findAll(..._(groups).values()
+            .map(group => ({id: group.id}))
+            .value()
+          ).watch()
+          .subscribe(
+            groups => this.setState({
+              groups: _.keyBy(groups, 'id')
+            }),
+            err => console.error('Cannot retrieve groups', err)
+          );
+        this.setStream('groups', groupStream);
+      }
 
       return rows;
     },
@@ -266,7 +268,7 @@ const TransactionsView = reactStamp(React)
       }
     },
     renderHighlightedGroup() {
-      const {detailledGroup: groupId} = this.state; 
+      const {detailledGroup: groupId} = this.state;
       if (groupId) {
         const title = <div className="dialog-header">
           <span className="dialog-title">Group {groupId}</span>

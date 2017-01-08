@@ -126,7 +126,7 @@ const AccountValidator = reactStamp(React)
 		},
 		renderBalance() {
 			if (this.state.lastValidation) {
-				return <AccountBalance 
+				return <AccountBalance
 					account={this.state.account}
 					validation={this.state.lastValidation}/>;
 			}
@@ -187,15 +187,15 @@ const AccountValidator = reactStamp(React)
 						return <div key={entry.date || `entry-${i}`}>
 							<div style={{fontWeight: 'bold'}}>
 								{entry.caption}
-								{entry.date ? 
-									<AccountBalance 
-										account={this.state.account} 
+								{entry.date ?
+									<AccountBalance
+										account={this.state.account}
 										date={entry.date}
 										validation={this.state.lastValidation} /> :
 									null
 								}
 							</div>
-							<TransactionsView transactions={entry.transactions} />
+							<TransactionsView transactions={entry.transactions} pagination={10}/>
 						</div>;
 					})}
 				</div>;
