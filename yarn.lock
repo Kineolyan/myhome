@@ -17,6 +17,17 @@
     "@cycle/base" "4.2"
     "@cycle/rxjs-adapter" "3.x.x"
 
+"@cycle/xstream-adapter@3.x.x":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@cycle/xstream-adapter/-/xstream-adapter-3.1.0.tgz#97b64f3161d91913666be81ee11a13f3d1e754b4"
+
+"@cycle/xstream-run@^4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@cycle/xstream-run/-/xstream-run-4.2.0.tgz#156b1ed0a9561169d13617aefa9548470e7c1c00"
+  dependencies:
+    "@cycle/base" "4.2"
+    "@cycle/xstream-adapter" "3.x.x"
+
 Base64@~0.2.0:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/Base64/-/Base64-0.2.1.tgz#ba3a4230708e186705065e66babdd4c35cf60028"

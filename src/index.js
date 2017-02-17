@@ -8,8 +8,10 @@ injectTapEventPlugin();
 import {createStore, applyMiddleware, compose} from 'redux';
 import {Provider} from 'react-redux';
 // Cannot use redux-cycles as it supports only xstream
-import {createCycleMiddleware} from './redux/middleware'; // redux-cycles';
-import Cycle from '@cycle/rxjs-run';
+import {createCycleMiddleware} from 'redux-cycles';
+// import {createCycleMiddleware} from './redux/middleware';
+import Cycle from '@cycle/xstream-run';
+// import Cycle from '@cycle/rxjs-run';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import main from './redux/cycle';
@@ -58,9 +60,18 @@ MuiApp.childContextTypes = {
   horizons: HorizonsShape
 };
 
+const LogDriver = msg$ => {
+  msg$.addListener({
+    next(msg) {
+      console.log(msg);
+    }
+  });
+};
+
 Cycle.run(main, {
   ACTION: makeActionDriver(),
-  STATE: makeStateDriver()
+  STATE: makeStateDriver(),
+  LOG: LogDriver
 });
 
 

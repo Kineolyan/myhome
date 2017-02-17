@@ -1,4 +1,5 @@
 import Rx from 'rxjs';
+import xs from 'xstream';
 
 function main(sources) {
   const state$ = sources.STATE;
@@ -20,9 +21,18 @@ function main(sources) {
     .filter(action => action.type === 'DECREMENT_ASYNC')
     .mapTo({ type: 'DECREMENT' });
 
+  const actions$ = xs.merge(
+    xs.merge(increment$, decrement$),
+    incrementIfOdd$
+  );
+  const log$ = actions$
+    .map(action => ({action}));
+
   return {
-    ACTION: Rx.Observable.merge(increment$, decrement$, incrementIfOdd$)
-  }
+    ACTION: actions$,
+    STATE: state$,
+    LOG: log$
+  };
 }
 
 export default main;
