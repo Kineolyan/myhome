@@ -19,6 +19,8 @@ import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
 import TemplateList from './transactions/TemplateList';
 
+import Counter from './redux/counter';
+
 class Messages extends Component {
   constructor(props) {
     super(props);
@@ -141,6 +143,7 @@ class App extends Component {
         width={200}
         open={this.state.openMenu}
         onRequestChange={this.cbks.toggleMenu}>
+      <Counter/>
       <Link to={`/comptes`}>
         <MenuItem onTouchTap={this.cbks.closeMenu}>Comptes</MenuItem>
       </Link>
