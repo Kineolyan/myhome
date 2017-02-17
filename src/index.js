@@ -16,6 +16,7 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import main from './redux/cycle';
 import accountApp from './redux/store';
+import {createLogDriver} from './cycle/LogDriver';
 import {RouterApp} from './App';
 import {defineHorizons, HorizonsShape} from './core/horizon';
 import './index.css';
@@ -60,18 +61,10 @@ MuiApp.childContextTypes = {
   horizons: HorizonsShape
 };
 
-const LogDriver = msg$ => {
-  msg$.addListener({
-    next(msg) {
-      console.log(msg);
-    }
-  });
-};
-
 Cycle.run(main, {
   ACTION: makeActionDriver(),
   STATE: makeStateDriver(),
-  LOG: LogDriver
+  LOG: createLogDriver()
 });
 
 
