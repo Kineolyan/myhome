@@ -1,4 +1,3 @@
-import Rx from 'rxjs';
 import xs from 'xstream';
 
 function main(sources) {
@@ -9,7 +8,8 @@ function main(sources) {
 
   const incrementIfOdd$ = sources.ACTION
     .filter(action => action.type === 'INCREMENT_IF_ODD')
-    .mergeMap(action => isOdd$)
+    .map(action => isOdd$)
+    .flatten()
     .filter(isOdd => isOdd)
     .mapTo({ type: 'INCREMENT' });
 
