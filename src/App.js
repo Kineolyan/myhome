@@ -19,6 +19,8 @@ import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
 import TemplateList from './transactions/TemplateList';
 
+import ReduxTransactions from './transactions/ReduxTransactions';
+
 import Counter from './redux/counter';
 
 class Messages extends Component {
@@ -168,7 +170,7 @@ class App extends Component {
           onLeftIconButtonTouchTap={this.cbks.openMenu}/>
         {this.renderMenu()}
         <Counter/>
-
+        <ReduxTransactions viewId="all"/>
         {this.props.children}
       </div>
     );
