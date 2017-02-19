@@ -14,9 +14,10 @@ import Cycle from '@cycle/xstream-run';
 // import Cycle from '@cycle/rxjs-run';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
-import main from './redux/cycle';
+import main from './cycle/main';
 import accountApp from './redux/store';
 import {createLogDriver} from './cycle/LogDriver';
+import {makeHorizonDriver} from './cycle/HorizonDriver';
 import {RouterApp} from './App';
 import {defineHorizons, HorizonsShape} from './core/horizon';
 import './index.css';
@@ -64,6 +65,7 @@ MuiApp.childContextTypes = {
 Cycle.run(main, {
   ACTION: makeActionDriver(),
   STATE: makeStateDriver(),
+  HORIZON: makeHorizonDriver(),
   LOG: createLogDriver()
 });
 
