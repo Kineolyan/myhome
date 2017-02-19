@@ -1,16 +1,22 @@
 import _ from 'lodash';
 import actions from './actions';
 
+const initialState = {
+  value: 0,
+  transactions: {},
+  transactionQueries: {}
+};
+
 /*
  * How is the next application state calculated,
  * given the current state and the action?
  */
-const counter = (state = 0, action) => {
+const counter = (state = initialState, action) => {
   switch (action.type) {
     case 'INCREMENT':
-      return state + 1;
+      return Object.assign({}, state, {value: state.value + 1});
     case 'DECREMENT':
-      return state - 1;
+      return Object.assign({}, state, {value: state.value - 1});
     case actions.transactions.store:
       return Object.assign({}, state, {
         transactionQueries: Object.assign(
