@@ -65,7 +65,7 @@ MuiApp.childContextTypes = {
 Cycle.run(main, {
   ACTION: makeActionDriver(),
   STATE: makeStateDriver(),
-  HORIZON: makeHorizonDriver(),
+  HORIZONS: makeHorizonDriver(horizons),
   LOG: createLogDriver()
 });
 

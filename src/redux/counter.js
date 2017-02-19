@@ -1,5 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import actions from './actions';
 
 /*
  * Which injected props should be calculated
@@ -7,7 +8,7 @@ import {connect} from 'react-redux';
  */
 const mapStateToProps = (state) => {
   return {
-    value: state
+    value: state.value
   };
 }
 
@@ -31,6 +32,12 @@ const mapDispatchToProps = (dispatch) => {
       dispatch({
         type: 'INCREMENT_IF_ODD'
       })
+    },
+    loadTransactions: () => {
+      dispatch({
+        type: actions.transactions.query,
+        queryId: 'test'
+      })
     }
   };
 };
@@ -44,13 +51,19 @@ const Counter = ({
   value,
   onIncrement,
   onDecrement,
-  onIncrementOdd
+  onIncrementOdd,
+  loadTransactions
 }) => (
   <div>
-    <h1>{value}</h1>
-    <button onClick={onIncrement}>+</button>
-    <button onClick={onDecrement}>-</button>
-    <button onClick={onIncrementOdd}>odd +</button>
+    <div>
+      <h1>{value}</h1>
+      <button onClick={onIncrement}>+</button>
+      <button onClick={onDecrement}>-</button>
+      <button onClick={onIncrementOdd}>odd +</button>
+    </div>
+    <div>
+      <button onClick={loadTransactions}>Load transactions</button>
+    </div>
   </div>
 );
 

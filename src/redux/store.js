@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import actions from './actions';
 
 /*
  * How is the next application state calculated,
@@ -10,12 +11,12 @@ const counter = (state = 0, action) => {
       return state + 1;
     case 'DECREMENT':
       return state - 1;
-    case 'STORE_TRANSACTIONS':
+    case actions.transactions.store:
       return Object.assign({}, state, {
         transactionQueries: Object.assign(
           {}, state.transactionQueries,
           {
-            [action.query]: action.transactions.map(t => t.id)
+            [action.queryId]: action.transactions.map(t => t.id)
           }
         ),
         transactions: Object.assign(

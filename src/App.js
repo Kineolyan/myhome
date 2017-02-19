@@ -143,7 +143,6 @@ class App extends Component {
         width={200}
         open={this.state.openMenu}
         onRequestChange={this.cbks.toggleMenu}>
-      <Counter/>
       <Link to={`/comptes`}>
         <MenuItem onTouchTap={this.cbks.closeMenu}>Comptes</MenuItem>
       </Link>
@@ -168,6 +167,7 @@ class App extends Component {
           iconClassNameRight="muidocs-icon-navigation-expand-more"
           onLeftIconButtonTouchTap={this.cbks.openMenu}/>
         {this.renderMenu()}
+        <Counter/>
 
         {this.props.children}
       </div>

@@ -1,10 +1,10 @@
 function createLogDriver() {
 	return msg$ => {
-		// msg$.addListener({
-		// 	next(msg) {
-		// 		console.log(msg);
-		// 	}
-		// });
+		msg$.addListener({
+			next(msg) {
+				console.log(msg);
+			}
+		});
 	};
 }
 
