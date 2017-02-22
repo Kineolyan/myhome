@@ -19,7 +19,7 @@ import accountApp from './redux/store';
 import {createLogDriver} from './cycle/LogDriver';
 import {makeHorizonDriver} from './cycle/HorizonDriver';
 import {makeRouterDriver} from './cycle/RouterDriver';
-import {RouterApp} from './App';
+import App from './App';
 import {defineHorizons, HorizonsShape} from './core/horizon';
 import './index.css';
 const {MyHome} = window;
@@ -52,7 +52,7 @@ class MuiApp extends React.Component {
     return (
       <MuiThemeProvider>
         <Provider store={store}>
-          <RouterApp />
+          <App />
         </Provider>
       </MuiThemeProvider>
     );

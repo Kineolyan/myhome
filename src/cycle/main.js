@@ -12,15 +12,26 @@ function main(sources) {
           type: actions.activities.transactions
         };
       case '/comptes':
-      default:
         return {
           type: actions.activities.accounts
         };
+      default:
+        return {
+          type: actions.activities.showcase
+        };
       }
-    })
+    });
+
+  const loadUrl$ = sources.ROUTER
+    .map(url => ({
+      type: actions.location.load,
+      url: {
+        path: url
+      }
+    }));
 
   const changeUrl$ = sources.ACTION
-    .filter(action => action.type === 'GO_TO_URL')
+    .filter(action => action.type === actions.location.goto)
     .map(action => action.url);
 
   const isOdd$ = state$
@@ -62,15 +73,17 @@ function main(sources) {
   const actions$ = [
     increment$, decrement$, incrementIfOdd$,
     storeTransactions$,
-    loadPage$
+    loadPage$, loadUrl$
   ];
   const mergedActions$ = actions$.reduce((merged, stream) => xs.merge(merged, stream), actions$.pop());
+
+  const log$ = loadUrl$;
 
   return {
     ACTION: mergedActions$,
     STATE: state$,
     HORIZONS: transactionQuery$,
-    // LOG: log$,
+    LOG: log$,
     ROUTER: changeUrl$
   };
 }
