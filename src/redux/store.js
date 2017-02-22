@@ -13,6 +13,10 @@ const initialState = {
  */
 const counter = (state = initialState, action) => {
   switch (action.type) {
+    case actions.location.load:
+      return Object.assign({}, state, {
+        url: action.url
+      });
     case 'INCREMENT':
       return Object.assign({}, state, {value: state.value + 1});
     case 'DECREMENT':
@@ -37,6 +41,10 @@ const counter = (state = initialState, action) => {
     case actions.activities.accounts:
       return Object.assign({}, state, {
         view: 'accounts'
+      });
+    case actions.activities.showcase:
+      return Object.assign({}, state, {
+        view: 'showcase'
       });
     default:
       return state;

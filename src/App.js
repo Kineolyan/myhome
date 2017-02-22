@@ -146,21 +146,22 @@ class App extends Component {
         width={200}
         open={this.state.openMenu}
         onRequestChange={this.cbks.toggleMenu}>
-      <Link to={`/comptes`}>
+      <a href={`#/comptes`}>
         <MenuItem onTouchTap={this.cbks.closeMenu}>
           Comptes
         </MenuItem>
-      </Link>
-      <Link to={`/comptes/edit`}>
+      </a>
+      <a href={`#/comptes/edit`}>
         <MenuItem onTouchTap={this.cbks.closeMenu}>
           Ajouter
         </MenuItem>
-      </Link>
-      <Link to={`/showcase`}>
+      </a>
+      <a href={`#/showcase`}>
         <MenuItem onTouchTap={this.cbks.closeMenu}>
           Show case
         </MenuItem>
-      </Link>
+      </a>
+      <Counter/>
     </Drawer>;
   }
 
@@ -172,11 +173,28 @@ class App extends Component {
           iconClassNameRight="muidocs-icon-navigation-expand-more"
           onLeftIconButtonTouchTap={this.cbks.openMenu}/>
         {this.renderMenu()}
-        <Counter/>
-        {this.props.view === 'accounts' ? <ReduxTransactions viewId="all"/> : null}
         {this.props.children}
       </div>
     );
+  }
+}
+
+class RouterApp extends Component {
+  renderView() {
+    switch(this.props.view) {
+      case 'accounts': return <AccountActivity />;
+      case 'transactions': return [
+        <ReduxTransactions viewId="all"/>,
+        <TransactionActivity/>
+      ];
+      default: return <Showcase />;
+    }
+  }
+
+  render() {
+    return <App>
+      {this.renderView()}
+    </App>;
   }
 }
 
@@ -186,22 +204,6 @@ const mapStateToProps = (state, props) => {
 		view: state.view
 	};
 };
-const ReduxApp = connect(mapStateToProps, () => ({}))(App);
+const ReduxApp = connect(mapStateToProps, () => ({}))(RouterApp);
 
-class RouterApp extends Component {
-  render() {
-    return <Router history={hashHistory}>
-      <Route path="/" component={ReduxApp}>
-        <IndexRoute component={AccountActivity} />
-        <Route path="comptes" component={AccountActivity}/>
-        <Route path="comptes/edit" component={TransactionActivity}/>
-        <Route path="*" component={Showcase}/>
-      </Route>
-    </Router>;
-  }
-}
-
-export default App;
-export {
-  RouterApp
-};
+export default ReduxApp;
