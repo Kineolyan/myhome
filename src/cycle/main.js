@@ -3,8 +3,28 @@ import actions from '../redux/actions';
 
 function main(sources) {
   const state$ = sources.STATE;
+
+  const loadPage$ = sources.ROUTER
+    .map(url => {
+      switch(url) {
+      case '/comptes/edit':
+        return {
+          type: actions.activities.transactions
+        };
+      case '/comptes':
+      default:
+        return {
+          type: actions.activities.accounts
+        };
+      }
+    })
+
+  const changeUrl$ = sources.ACTION
+    .filter(action => action.type === 'GO_TO_URL')
+    .map(action => action.url);
+
   const isOdd$ = state$
-    .map(state => state % 2 === 1)
+    .map(({value}) => value % 2 === 1)
     .take(1);
 
   const incrementIfOdd$ = sources.ACTION
@@ -41,17 +61,17 @@ function main(sources) {
 
   const actions$ = [
     increment$, decrement$, incrementIfOdd$,
-    storeTransactions$
+    storeTransactions$,
+    loadPage$
   ];
   const mergedActions$ = actions$.reduce((merged, stream) => xs.merge(merged, stream), actions$.pop());
-  const log$ = mergedActions$
-    .map(action => ({action}));
 
   return {
     ACTION: mergedActions$,
     STATE: state$,
     HORIZONS: transactionQuery$,
-    LOG: log$
+    // LOG: log$,
+    ROUTER: changeUrl$
   };
 }
 

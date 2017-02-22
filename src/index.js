@@ -18,6 +18,7 @@ import main from './cycle/main';
 import accountApp from './redux/store';
 import {createLogDriver} from './cycle/LogDriver';
 import {makeHorizonDriver} from './cycle/HorizonDriver';
+import {makeRouterDriver} from './cycle/RouterDriver';
 import {RouterApp} from './App';
 import {defineHorizons, HorizonsShape} from './core/horizon';
 import './index.css';
@@ -66,7 +67,8 @@ Cycle.run(main, {
   ACTION: makeActionDriver(),
   STATE: makeStateDriver(),
   HORIZONS: makeHorizonDriver(horizons),
-  LOG: createLogDriver()
+  LOG: createLogDriver(),
+  ROUTER: makeRouterDriver()
 });
 
 
