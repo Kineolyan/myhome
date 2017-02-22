@@ -30,6 +30,14 @@ const counter = (state = initialState, action) => {
           _.keyBy(action.transactions, t => t.id)
         )
       });
+    case actions.activities.transactions:
+      return Object.assign({}, state, {
+        view: 'transactions'
+      });
+    case actions.activities.accounts:
+      return Object.assign({}, state, {
+        view: 'accounts'
+      });
     default:
       return state;
   }

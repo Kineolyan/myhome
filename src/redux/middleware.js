@@ -10,8 +10,8 @@ function createCycleMiddleware () {
     return next => {
       return action => {
         let result = next(action);
-				actionSubject.onNext(action);
-				stateSubject.onNext(store.getState());
+				actionSubject.next(action);
+				stateSubject.next(store.getState());
 
         return result;
       }

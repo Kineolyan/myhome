@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {connect} from 'react-redux';
 import './App.css';
 
 import { Router, Route, Link, IndexRoute, hashHistory } from 'react-router';
@@ -146,7 +147,9 @@ class App extends Component {
         open={this.state.openMenu}
         onRequestChange={this.cbks.toggleMenu}>
       <Link to={`/comptes`}>
-        <MenuItem onTouchTap={this.cbks.closeMenu}>Comptes</MenuItem>
+        <MenuItem onTouchTap={this.cbks.closeMenu}>
+          Comptes
+        </MenuItem>
       </Link>
       <Link to={`/comptes/edit`}>
         <MenuItem onTouchTap={this.cbks.closeMenu}>
@@ -170,17 +173,25 @@ class App extends Component {
           onLeftIconButtonTouchTap={this.cbks.openMenu}/>
         {this.renderMenu()}
         <Counter/>
-        <ReduxTransactions viewId="all"/>
+        {this.props.view === 'accounts' ? <ReduxTransactions viewId="all"/> : null}
         {this.props.children}
       </div>
     );
   }
 }
 
+const mapStateToProps = (state, props) => {
+	return {
+		...props,
+		view: state.view
+	};
+};
+const ReduxApp = connect(mapStateToProps, () => ({}))(App);
+
 class RouterApp extends Component {
   render() {
     return <Router history={hashHistory}>
-      <Route path="/" component={App}>
+      <Route path="/" component={ReduxApp}>
         <IndexRoute component={AccountActivity} />
         <Route path="comptes" component={AccountActivity}/>
         <Route path="comptes/edit" component={TransactionActivity}/>
