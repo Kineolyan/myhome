@@ -2,124 +2,22 @@ import React, { Component } from 'react';
 import {connect} from 'react-redux';
 import './App.css';
 
-import { Router, Route, Link, IndexRoute, hashHistory } from 'react-router';
-import TextField from 'material-ui/TextField';
-import RaisedButton from 'material-ui/RaisedButton';
 import AppBar from 'material-ui/AppBar';
 import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
 
-import AccountEditor from './comptes/AccountEditor';
-import AccountList from './comptes/AccountList';
-import CategoryList from './categories/CategoryList';
-import CategoryEditor from './categories/CategoryEditor';
-import TransactionList from './transactions/TransactionList';
-import TransactionEditor from './transactions/TransactionEditor';
-import TransactionHistory from './transactions/TransactionHistory';
 import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
-import TemplateList from './transactions/TemplateList';
+import Showcase from './general/Showcase';
 
 import ReduxTransactions from './transactions/ReduxTransactions';
 
 import Counter from './redux/counter';
 
-class Messages extends Component {
-  constructor(props) {
-    super(props);
 
-    this.state = {
-      messages: [],
-      value: ''
-    };
-  }
+import ReduxTransactions from './transactions/ReduxTransactions';
 
-  get messages() {
-    return this.context.horizons.messages;
-  }
-
-  componentWillMount() {
-    // Subscribe to messages
-    this.messages.order('datetime', 'descending').limit(5).watch()
-    .subscribe(
-      allMessages => this.setState({ messages: [...allMessages].reverse()}),
-      error => console.log(error)
-    )
-  }
-
-  sendMessage() {
-    if (this.state.value === '') {
-      return;
-    }
-
-    this.messages.store({
-      text: this.state.value, // Current value inside <input> tag
-      datetime: new Date() // Warning clock skew!
-    }).subscribe(
-      // Returns id of saved objects
-      result => console.log(result),
-      // Returns server error message
-      error => console.log(error)
-    );
-
-    this.setState({value: ''});
-  }
-
-  render() {
-    return <div>
-      <div>
-        <TextField hintText="Message"
-          value={this.state.value}
-          onChange={(e, value) => this.setState({value})} />
-          <RaisedButton label="Continuer" primary={true} style={{margin: 12}}
-            onClick={() => this.sendMessage(this)}/>
-      </div>
-      <ul>
-        {this.state.messages
-          .map(m => <li key={m.id}>{m.text}</li>)}
-      </ul>
-    </div>;
-  }
-}
-
-Messages.contextTypes = {
-  horizons: React.PropTypes.object
-};
-
-class Showcase extends Component {
-  render() {
-    return <div style={{borderTop: 'solid 2px #000'}}>
-      <h3>Showcase</h3>
-      <div className="grid">
-        <div className="block">
-          <Messages />
-        </div>
-        <div className="block">
-          <AccountEditor />
-        </div>
-        <div className="block">
-          <AccountList />
-        </div>
-        <div className="block">
-          <CategoryEditor />
-          <CategoryList />
-        </div>
-        <div className="block">
-          <TransactionEditor />
-        </div>
-        <div className="block">
-          <TransactionList />
-        </div>
-        <div className="block">
-          <TransactionHistory />
-        </div>
-        <div className="block">
-          <TemplateList />
-        </div>
-      </div>
-    </div>;
-  }
-}
+import Counter from './redux/counter';
 
 class App extends Component {
   constructor(props) {
