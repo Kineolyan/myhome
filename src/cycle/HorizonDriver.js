@@ -1,5 +1,6 @@
 import xs from 'xstream';
 import Rx from 'rxjs';
+import _ from 'lodash';
 
   /* for http
 
@@ -60,18 +61,27 @@ function makeHorizonDriver(horizons) {
 		const queriesSubject = new Rx.Subject();
 
 		query$.addListener({
-			next({store, queryId}) {
+			next({store, queryId, order, conditions}) {
 				if (queries.has(queryId)) {
 					// Stop the previous query
+					queries.get(queryId).unsubscribe();
+					queries.delete(queryId);
 				}
 
-				const queryStream = horizons[store]
-					.watch()
+				let queryStream = horizons[store];
+				if (order) {
+					const [field, way] = order.split(' ');
+					queryStream = queryStream.order(field, way);
+				}
+				if (_.isObject(conditions) && !_.isEmpty(conditions)) {
+					queryStream = queryStream.findAll(conditions);
+				}
+				queryStream = queryStream.watch()
 					.map(values => ({store, queryId, values}));
-				queries.set(queryId, queryStream);
 
 				// Multicasting the result
-				queryStream.subscribe(queriesSubject);
+				const unsubscribe = queryStream.subscribe(queriesSubject);
+				queries.set(queryId, unsubscribe);
 			},
 			error() {},
 			complete() {}
