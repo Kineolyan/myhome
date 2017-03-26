@@ -12,6 +12,7 @@ import AccountPicker from '../comptes/AccountPicker';
 import AccountEditor from '../comptes/AccountEditor';
 import AccountValidator from '../comptes/validations/AccountValidator';
 import CategoryPicker from '../categories/CategoryPicker';
+import ReduxTransactions from '../transactions/ReduxTransactions';
 
 const Panel = {
   SEARCH: 'search',
@@ -25,7 +26,11 @@ class AccountActivity extends React.Component {
     this.state = {
       displayedPanel: null,
       account: null,
-      category: null
+      category: null,
+      query: {
+        conditions: {},
+        order: 'date descending',
+      }
     };
 
     this.cbks = {
@@ -71,12 +76,12 @@ class AccountActivity extends React.Component {
       conditions.category = category;
     }
 
-    let selection = _.isEmpty(conditions) ? this.feed : this.feed.findAll(conditions);
-    selection = selection
-      .order('date', 'descending')
-      .watch();
-
-    this.setState({selection});
+    this.setState({
+      query: {
+        order: this.state.query.order,
+        conditions
+      }
+    });
   }
 
   getRatio(main) {
@@ -130,7 +135,8 @@ class AccountActivity extends React.Component {
           <NavigationClose />
         </FloatingActionButton>
       </div>
-      <TransactionsView feed={this.state.selection} pagination={20}/>
+      <ReduxTransactions viewId="account" pagination={20}
+        query={this.state.query}/>
     </div>;
   }
 

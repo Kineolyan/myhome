@@ -7,23 +7,39 @@ import TransactionsView from './TransactionsView';
 
 class ReduxTransactions extends React.Component {
 	componentDidMount() {
-		this.props.query(this.props.viewId);
+		this.props.startQuery(this.props.viewId, this.props.query);
 	}
 
 	componentWillUnmount() {
-		this.props.stopQuery(this.props.view);
+		this.props.stopQuery(this.props.viewId);
+	}
+
+	componentWillReceiveProps(nextProps) {
+		if (nextProps.viewId !== this.props.viewId) {
+			this.props.stopQuery(this.props.viewId);
+		}
+		if (!_.isEqual(this.props.query, nextProps.query)) {
+			nextProps.startQuery(nextProps.viewId, nextProps.query);
+		}
 	}
 
 	render() {
-		return <TransactionsView transactions={this.props.transactions}/>;
+		return <TransactionsView
+			transactions={this.props.transactions}
+			pagination={this.props.pagination}/>;
 	}
 }
 
 ReduxTransactions.propTypes = {
 	viewId: React.PropTypes.string.isRequired,
 	transactions: React.PropTypes.array,
-	query: React.PropTypes.func.isRequired,
-	stopQuery: React.PropTypes.func.isRequired
+	startQuery: React.PropTypes.func.isRequired,
+	stopQuery: React.PropTypes.func.isRequired,
+	pagination: React.PropTypes.number
+};
+
+ReduxTransactions.defaultProps = {
+	query: {}
 };
 
 const mapStateToProps = (state, props) => {
@@ -40,10 +56,12 @@ const mapStateToProps = (state, props) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-	query(viewId) {
+	startQuery(viewId, query) {
 		return dispatch({
 			type: actions.transactions.query,
-			queryId: viewId
+			queryId: viewId,
+			order: query.order,
+			conditions: query.conditions
 		});
 	},
 	stopQuery() {}

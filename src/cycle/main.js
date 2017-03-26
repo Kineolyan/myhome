@@ -59,6 +59,7 @@ function main(sources) {
       store: 'transactions',
       conditions: action.conditions,
       order: action.order,
+      conditions: action.conditions,
       queryId: action.queryId
     }));
 
@@ -77,7 +78,10 @@ function main(sources) {
   ];
   const mergedActions$ = actions$.reduce((merged, stream) => xs.merge(merged, stream), actions$.pop());
 
-  const log$ = loadUrl$;
+  const log$ = xs.merge(
+    xs.merge(loadUrl$, mergedActions$),
+    sources.ACTION
+  );
 
   return {
     ACTION: mergedActions$,

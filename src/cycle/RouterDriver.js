@@ -23,14 +23,14 @@ function makeRouterDriver() {
 		});
 
 		return xs.create({
-			start(listener) {
-				urlListener = listener;
-				listener.next(parseUrl(window.location.hash));
-			},
-			stop() {
-				urlListener = null;
-			}
-		});
+				start(listener) {
+					urlListener = listener;
+				},
+				stop() {
+					urlListener = null;
+				}
+			})
+			.startWith(parseUrl(window.location.hash));
 	};
 }
 
