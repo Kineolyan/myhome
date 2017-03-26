@@ -81,10 +81,7 @@ class RouterApp extends Component {
   renderView() {
     switch(this.props.view) {
       case 'accounts': return <AccountActivity />;
-      case 'transactions': return [
-        <ReduxTransactions viewId="all"/>,
-        <TransactionActivity/>
-      ];
+      case 'transactions': return <TransactionActivity/>;
       default: return <Showcase />;
     }
   }

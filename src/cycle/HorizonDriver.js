@@ -61,7 +61,8 @@ function makeHorizonDriver(horizons) {
 		const queriesSubject = new Rx.Subject();
 
 		query$.addListener({
-			next({store, queryId, order, conditions}) {
+			next(query) {
+				const {store, queryId, order, conditions, filters, mode, limit} = query;
 				if (queries.has(queryId)) {
 					// Stop the previous query
 					queries.get(queryId).unsubscribe();
@@ -76,8 +77,37 @@ function makeHorizonDriver(horizons) {
 				if (_.isObject(conditions) && !_.isEmpty(conditions)) {
 					queryStream = queryStream.findAll(conditions);
 				}
-				queryStream = queryStream.watch()
-					.map(values => ({store, queryId, values}));
+
+				if (query.above) {
+					queryStream = queryStream.above(...query.above);
+				}
+				if (query.below) {
+					queryStream = queryStream.below(...query.below);
+				}
+
+				if (_.isInteger(limit) && limit > 0) {
+					queryStream = queryStream.limit(limit);
+				}
+
+				// if (mode === 'fetch') {
+				// 	queryStream = queryStream.fetch()
+				// 		.defaultIfEmpty();
+				// } else {
+					queryStream = queryStream.watch();
+				// }
+
+				if (_.isArray(filters)) {
+					queryStream = filters.filter(_.isFunction)
+						.reduce(
+							(stream, filter) => stream.map(
+								values => values.filter(filter)
+							),
+							queryStream
+						);
+				}
+
+				// Dispatch the result properly
+				queryStream = queryStream.map(values => ({store, queryId, values}));
 
 				// Multicasting the result
 				const unsubscribe = queryStream.subscribe(queriesSubject);

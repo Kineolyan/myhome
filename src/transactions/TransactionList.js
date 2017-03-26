@@ -1,26 +1,22 @@
 import React from 'react';
 
-import TransactionsView from './TransactionsView';
+import ReduxTransactions from './ReduxTransactions';
 
 class TransactionList extends React.Component {
 
-  componentWillMount() {
-    this.selection = this.feed.order('date', 'descending')
-      .limit(20)
-      .watch();
-  }
-
-  get feed() {
-    return this.context.horizons.transactions;
+  constructor(props) {
+    super(props);
+    this.state = {
+      query: {
+        order: 'date descending',
+        limit: 20
+      }
+    };
   }
 
   render() {
-    return <TransactionsView feed={this.selection} />;
+    return <ReduxTransactions viewId="all-listing" query={this.state.query}/>;
   }
 }
-
-TransactionList.contextTypes = {
-  horizons: React.PropTypes.object
-};
 
 export default TransactionList;

@@ -55,13 +55,7 @@ function main(sources) {
 
   const transactionQuery$ = sources.ACTION
     .filter(action => action.type === actions.transactions.query)
-    .map(action => ({
-      store: 'transactions',
-      conditions: action.conditions,
-      order: action.order,
-      conditions: action.conditions,
-      queryId: action.queryId
-    }));
+    .map(action => Object.assign({store: 'transactions'}, action));
 
   const storeTransactions$ = sources.HORIZONS
     .filter(output => output.store === 'transactions')
