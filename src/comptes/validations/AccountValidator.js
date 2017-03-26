@@ -1,6 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
+import {connect} from 'react-redux';
 
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -10,6 +11,7 @@ import DeleteIcon from 'material-ui/svg-icons/action/delete';
 import ArrowLeft from 'material-ui/svg-icons/hardware/keyboard-arrow-left';
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right';
 
+import actions from '../../redux/actions';
 import {nextDay} from '../../core/time';
 import {WithHorizons} from '../../core/horizon';
 import {WithStreams} from '../../core/rx';
@@ -63,25 +65,13 @@ const AccountValidator = reactStamp(React)
 			this.setStream('validation', validationStream);
 		},
 		getTransactions(account, validation) {
-			const stream = this.fetchUnvalidatedTransactions(account, validation)
-				.watch()
-				.subscribe(
-					transactions => this.setState({transactions}),
-					error => console.error('[Failure]', 'Fetch transactions', error)
-				);
-			this.setStream('transactions', stream);
+			const query = this.fetchUnvalidatedTransactions(account, validation);
+			this.props.queryTransactions(query);
 		},
 		getSuspicious(account, validation) {
 			if (validation) {
-				const stream = this.fetchNewTransactions(account, validation)
-					.watch()
-					.subscribe(
-						transactions => this.setState({
-							suspicious: _.filter(transactions, t => t.date < nextDay(validation.validationDate))
-						}),
-						error => console.error('[Failure]', 'Fetch suspicious transactions', error)
-					);
-				this.setStream('suspicious', stream);
+				const query = this.fetchNewTransactions(account, validation);
+				this.props.querySuspicious(query);
 			}
 		},
 		validate() {
@@ -147,13 +137,13 @@ const AccountValidator = reactStamp(React)
 			}
 		},
 		renderTransactions() {
-			if (!_.isEmpty(this.state.transactions)) {
+			if (!_.isEmpty(this.props.transactions)) {
 				// Group transactions by date
 				const lastWeek = new Date();
 				lastWeek.setDate(TODAY.getDate() - 7);
 				lastWeek.setHours(0, 0, 0, 0);
 
-				const groups = _(this.state.transactions)
+				const groups = _(this.props.transactions)
 					.filter(transaction => transaction.date >= lastWeek)
 					.groupBy(transaction => new Date(transaction.date).setHours(0, 0, 0, 0))
 					.value();
@@ -168,17 +158,18 @@ const AccountValidator = reactStamp(React)
 						transactions: groups[key]
 					}))
 					.value();
-				const oldTransactions = _.filter(this.state.transactions, transaction => transaction.date < lastWeek);
+				const oldTransactions = _.filter(this.props.transactions, transaction => transaction.date < lastWeek);
 				if (!_.isEmpty(oldTransactions)) {
 					order.push({
 						caption: 'Before',
 						transactions: oldTransactions
 					});
 				}
-				if (!_.isEmpty(this.state.suspicious)) {
+
+				if (!_.isEmpty(this.props.suspicious)) {
 					order.push({
 						caption: 'Suspicious transactions',
-						transactions: this.state.suspicious
+						transactions: this.props.suspicious
 					});
 				}
 
@@ -226,4 +217,48 @@ const AccountValidator = reactStamp(React)
 		}
 	});
 
-export default AccountValidator;
+const mapStateToProps = (state, props) => {
+	const transactionIds = state.transactionQueries['validator-transactions'];
+	const transactions = _(transactionIds)
+		.map(tId => state.transactions[tId])
+		.filter(transaction => transaction !== undefined)
+		.value();
+	const suspicious = _(state.transactionQueries['validator-suspicious'])
+		.difference(transactionIds)
+		.map(tId => state.transactions[tId])
+		.filter(transaction => transaction !== undefined)
+		.value();
+
+	return {
+		...props,
+		transactions,
+		suspicious
+	};
+};
+
+const mapDispatchToProps = (dispatch) => ({
+	queryTransactions(query) {
+		return dispatch(Object.assign(
+			{
+				type: actions.transactions.query,
+				queryId: 'validator-transactions'
+			},
+			query
+		));
+	},
+	querySuspicious(query) {
+		return dispatch(Object.assign(
+			{
+				type: actions.transactions.query,
+				queryId: 'validator-suspicious'
+			},
+			query
+		));
+	},
+	stopQuery() {}
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(AccountValidator);
+export {
+	AccountValidator
+};

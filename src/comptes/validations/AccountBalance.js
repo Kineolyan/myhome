@@ -16,26 +16,30 @@ const UnvalidatedTransactions = {
 			.fetch()
 			.defaultIfEmpty();
 
-		return lastNth <= 1 ? 
-			feed.map(_.last) : 
+		return lastNth <= 1 ?
+			feed.map(_.last) :
 			feed.map(elements => elements[lastNth - 1]);
 	},
 	fetchUnvalidatedTransactions(account, validation, date) {
-		let stream = this.getTransactionFeed().findAll({account});
+		const query = {
+			conditions: {account}
+		};
 		if (validation) {
-			stream = stream.above({date: nextDay(validation.validationDate)}, 'closed');
+			query.above = [{date: nextDay(validation.validationDate)}, 'closed'];
 		}
 		if (date) {
-			stream = stream.below({date: nextDay(date)});
+			query.below = [{date: nextDay(date)}];
 		}
-		return stream;
+		return query;
 	},
 	fetchNewTransactions(account, validation) {
-		let stream = this.getTransactionFeed().findAll({account});
+		const query = {
+			conditions: {account}
+		};
 		if (validation) {
-			return stream.above({createdAt: validation.validatedAt}, 'open');
+			query.above = [{createdAt: nextDay(validation.validatedAt)}, 'open'];
 		} // TODO else do something bad
-		return stream;
+		return query;
 	}
 };
 
@@ -95,8 +99,16 @@ const AccountBalance = reactStamp(React)
 			this.setState({validation});
 			const date = this.props.date ? this.getBalanceDate() : null;
 			const lastBalance = validation ? validation.balance : 0;
-			const stream = this.fetchUnvalidatedTransactions(this.props.account, validation, date)
-				.watch()
+			const query = this.fetchUnvalidatedTransactions(this.props.account, validation, date);
+			let stream = this.getTransactionFeed().findAll(query.conditions);
+			if (query.above) {
+				stream = stream.above(...query.above);
+			}
+			if (query.below) {
+				stream = stream.below(...query.below);
+			}
+
+			stream = stream.watch()
 				.map(transactions => _.filter(transactions, t => t.type !== Type.MONNAIE))
 				.subscribe(
 					transactions => {
