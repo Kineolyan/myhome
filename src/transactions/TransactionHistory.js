@@ -4,6 +4,7 @@ import _ from 'lodash';
 import TextField from 'material-ui/TextField';
 import TransactionsView from './TransactionsView';
 import AccountPicker from '../comptes/AccountPicker';
+import ReduxTransactions from '../transactions/ReduxTransactions';
 
 class TransactionHistory extends React.Component {
   constructor(props) {
@@ -39,28 +40,33 @@ class TransactionHistory extends React.Component {
 
   filterTransactions(account, needle) {
     if (needle && account) {
+      const conditions = {account};
       const expr = new RegExp(needle, 'i');
-      const selection = this.feed
-        .findAll({account: account})
-        .order('date', 'descending')
-        .fetch()
-        .defaultIfEmpty()
-        .mergeMap(_.identity)
-        .filter(transaction => expr.test(transaction.object))
-        .toArray();
+      const filters = [
+        transaction => expr.test(transaction.object)
+      ];
 
-      this.setState({selection});
-      console.log(`Selection changed to ${account} for ${expr}`);
+      const newQuery = Object.assign(
+        {order: 'date descending'},
+        {
+          conditions,
+          filters,
+          mode: 'fetch'
+        }
+      );
+      this.setState({query: newQuery});
+    } else {
+      this.setState({query: null});
     }
   }
 
-  get feed() {
-    return this.context.horizons.transactions;
-  }
-
   render() {
-    const history = this.state.selection ?
-      <TransactionsView feed={this.state.selection} byGroup={false}/> : null;
+    const history = this.state.query ?
+      <ReduxTransactions viewId="history"
+        query={this.state.query}
+        pagination={30}
+        byGroup={false}/> :
+      null;
 
     return <div>
       <div>

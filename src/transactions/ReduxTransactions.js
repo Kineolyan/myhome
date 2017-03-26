@@ -26,7 +26,8 @@ class ReduxTransactions extends React.Component {
 	render() {
 		return <TransactionsView
 			transactions={this.props.transactions}
-			pagination={this.props.pagination}/>;
+			pagination={this.props.pagination}
+			byGroup={this.props.byGroup}/>;
 	}
 }
 
@@ -35,7 +36,8 @@ ReduxTransactions.propTypes = {
 	transactions: React.PropTypes.array,
 	startQuery: React.PropTypes.func.isRequired,
 	stopQuery: React.PropTypes.func.isRequired,
-	pagination: React.PropTypes.number
+	pagination: React.PropTypes.number,
+	byGroup: React.PropTypes.bool
 };
 
 ReduxTransactions.defaultProps = {
@@ -57,12 +59,13 @@ const mapStateToProps = (state, props) => {
 
 const mapDispatchToProps = (dispatch) => ({
 	startQuery(viewId, query) {
-		return dispatch({
-			type: actions.transactions.query,
-			queryId: viewId,
-			order: query.order,
-			conditions: query.conditions
-		});
+		return dispatch(Object.assign(
+			{
+				type: actions.transactions.query,
+				queryId: viewId
+			},
+			query
+		));
 	},
 	stopQuery() {}
 });
