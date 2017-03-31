@@ -2,7 +2,6 @@ import React from 'react';
 import reactStamp from 'react-stamp';
 
 import ReduxTransactions from './ReduxTransactions';
-import {WithHorizons} from '../core/horizon';
 
 const TODAY = new Date();
 TODAY.setHours(0);
