@@ -12,7 +12,6 @@ import ArrowLeft from 'material-ui/svg-icons/hardware/keyboard-arrow-left';
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right';
 
 import actions from '../../redux/actions';
-import {nextDay} from '../../core/time';
 import {WithHorizons} from '../../core/horizon';
 import {WithStreams} from '../../core/rx';
 import AccountPicker from '../AccountPicker';

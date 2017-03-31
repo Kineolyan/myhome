@@ -2,7 +2,6 @@ import React from 'react';
 import _ from 'lodash';
 
 import TextField from 'material-ui/TextField';
-import TransactionsView from './TransactionsView';
 import AccountPicker from '../comptes/AccountPicker';
 import ReduxTransactions from '../transactions/ReduxTransactions';
 

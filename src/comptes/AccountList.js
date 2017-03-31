@@ -1,35 +1,21 @@
 import React from 'react';
 import _ from 'lodash';
+import {connect} from 'react-redux';
+
+import actions from '../redux/actions';
 
 class AccountList extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      accounts: []
-    };
-  }
-
-  get feed() {
-    return this.context.horizons.accounts;
-  }
-
   componentWillMount() {
-    this.feed
-      .order('name', 'ascending')
-      .watch().subscribe(
-        accounts => this.setState({accounts}),
-        err => console.error('Listing accounts', err)
-      );
+    this.props.listAccounts();
   }
 
   render() {
-    if (_.isEmpty(this.state.accounts)) {
+    if (_.isEmpty(this.props.accounts)) {
       return <p>No account listed</p>;
     }
 
     return <ul>
-      {this.state.accounts.map(account => {
+      {this.props.accounts.map(account => {
         return <li key={account.id}>
           {account.name}
         </li>;
@@ -38,8 +24,30 @@ class AccountList extends React.Component {
   }
 }
 
-AccountList.contextTypes = {
-  horizons: React.PropTypes.object
+const ACCOUNT_QUERY_ID = 'accountList';
+const mapStateToProps = (state, props) => {
+  const accounts = _(state.categoryQueries[ACCOUNT_QUERY_ID])
+    .map(aId => state.accounts[aId])
+    .filter(category => category)
+    .value();
+
+  return {
+    ...props,
+    accounts
+  };
 };
 
-export default AccountList;
+const mapDispatchToProps = (dispatch) => ({
+  listAccounts() {
+    dispatch({
+      type: actions.accounts.query,
+      queryId: ACCOUNT_QUERY_ID,
+      order: 'name ascending'
+    });
+  }
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(AccountList);
+export {
+  AccountList
+};

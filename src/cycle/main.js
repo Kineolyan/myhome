@@ -1,6 +1,15 @@
 import xs from 'xstream';
 import actions from '../redux/actions';
 
+const Streams = {
+  merge(first, ...others) {
+    return others.reduce(
+      (merged, stream) => xs.merge(merged, stream),
+      first
+    );
+  }
+}
+
 function main(sources) {
   const state$ = sources.STATE;
 
@@ -57,6 +66,14 @@ function main(sources) {
     .filter(action => action.type === actions.transactions.query)
     .map(action => Object.assign({store: 'transactions'}, action));
 
+  const categoryQuery$ = sources.ACTION
+    .filter(action => action.type === actions.categories.query)
+    .map(action => Object.assign({store: 'categories'}, action));
+
+  const accountQuery$ = sources.ACTION
+    .filter(action => action.type === actions.accounts.query)
+    .map(action => Object.assign({store: 'accounts'}, action));
+
   const storeTransactions$ = sources.HORIZONS
     .filter(output => output.store === 'transactions')
     .map(response => ({
@@ -65,22 +82,43 @@ function main(sources) {
       transactions: response.values
     }));
 
-  const actions$ = [
+  const storeCategories$ = sources.HORIZONS
+    .filter(output => output.store === 'categories')
+    .map(response => ({
+      type: actions.categories.store,
+      queryId: response.queryId,
+      categories: response.values
+    }));
+
+  const storeAccounts$ = sources.HORIZONS
+    .filter(output => output.store === 'accounts')
+    .map(response => ({
+      type: actions.accounts.store,
+      queryId: response.queryId,
+      accounts: response.values
+    }));
+
+  const actions$ = Streams.merge(
     increment$, decrement$, incrementIfOdd$,
     storeTransactions$,
+    storeCategories$,
+    storeAccounts$,
     loadPage$, loadUrl$
-  ];
-  const mergedActions$ = actions$.reduce((merged, stream) => xs.merge(merged, stream), actions$.pop());
+  );
+
+  const hQueries$ = Streams.merge(
+    transactionQuery$, categoryQuery$, accountQuery$
+  );
 
   const log$ = xs.merge(
-    xs.merge(loadUrl$, mergedActions$),
+    xs.merge(loadUrl$, actions$),
     sources.ACTION
   );
 
   return {
-    ACTION: mergedActions$,
+    ACTION: actions$,
     STATE: state$,
-    HORIZONS: transactionQuery$,
+    HORIZONS: hQueries$,
     LOG: log$,
     ROUTER: changeUrl$
   };

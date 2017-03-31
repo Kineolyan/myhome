@@ -62,7 +62,7 @@ function makeHorizonDriver(horizons) {
 
 		query$.addListener({
 			next(query) {
-				const {store, queryId, order, conditions, filters, mode, limit} = query;
+				const {store, queryId, order, conditions, filters, limit} = query;
 				if (queries.has(queryId)) {
 					// Stop the previous query
 					queries.get(queryId).unsubscribe();

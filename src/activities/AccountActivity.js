@@ -7,7 +7,6 @@ import NavigationClose from 'material-ui/svg-icons/navigation/close';
 import DoneAllIcon from 'material-ui/svg-icons/action/done-all';
 
 import TransactionHistory from '../transactions/TransactionHistory';
-import TransactionsView from '../transactions/TransactionsView';
 import AccountPicker from '../comptes/AccountPicker';
 import AccountEditor from '../comptes/AccountEditor';
 import AccountValidator from '../comptes/validations/AccountValidator';
