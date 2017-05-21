@@ -1,0 +1,13 @@
+[Unit]
+Description=Home-Again App
+
+[Service]
+ExecStart=/usr/share/webapps/home-again/launcher
+Restart=always
+User=root
+Group=users
+Environment=PATH=/usr/bin:/usr/local/bin
+WorkingDirectory=/usr/share/webapps/home-again
+
+[Install]
+WantedBy=multi-user.target

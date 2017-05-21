@@ -47,7 +47,7 @@ deploy_ui() {
 }
 
 deploy_launcher() {
-	cp launcher "$APP_DIR"
+	cp launcher system-unit "$APP_DIR"
 
 	echo -e "\e[34mTools\e[0m        .... \e[32m[DEPLOYED]\e[0m"
 }
