@@ -1,6 +1,7 @@
 import React from 'react';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
+import {connect} from 'react-redux';
 
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -13,6 +14,7 @@ import AutoComplete from 'material-ui/AutoComplete';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
 
+import actions from '../redux/actions';
 import {Type} from './models';
 import CategoryPicker from '../categories/CategoryPicker';
 import CategoryEditor from '../categories/CategoryEditor';
@@ -40,7 +42,8 @@ const TransactionEditor = reactStamp(React)
   .compose(WithHorizons, ElementEditor, HorizonEditor, StateForm)
   .compose({
     propTypes: {
-      transaction: React.PropTypes.object
+      transaction: React.PropTypes.object,
+      editorId: React.PropTypes.string.isRequired
     },
     defaultProps: {
       transaction: {}
@@ -62,6 +65,8 @@ const TransactionEditor = reactStamp(React)
       instance.state.transaction = this.makeStateTransaction(instance.props.transaction);
     },
     componentWillMount() {
+      this.setUp(this.props.transaction);
+
       this.cbks = Object.assign({}, this.cbks, {
         setObject: this.setModelFromInput.bind(this, 'object', null),
         selectCompletedObject: this.defineTransactionObject.bind(this),
@@ -325,4 +330,31 @@ const TransactionEditor = reactStamp(React)
     }
   });
 
-export default TransactionEditor;
+const mapStateToProps = (state: StateType, props) => {
+  return {
+    ...props,
+    transaction: state.editors.transactions[props.editorId] || DEFAULT_TRANSACTION
+  };
+};
+
+const mapDispatchToProps = (dispatch, props) => {
+  setUp(transaction) {
+    dispatch({
+      type: actions.transactions.edit,
+      editorId: props.editorId,
+      transaction
+    });
+  },
+  save(transaction) {
+    dispatch({
+      type: actions.transactions.save,
+      editorId: props.editorId,
+      transaction
+    });
+  }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TransactionEditor);
+export {
+  TransactionEditor
+};

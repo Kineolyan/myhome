@@ -12,7 +12,10 @@ export type StateType = {
   categories: ObjectMappingType,
   categoryQueries: QueryMappingType,
   accounts: ObjectMappingType,
-  accountQueries: QueryMappingType
+  accountQueries: QueryMappingType,
+  editors: {
+    transactions: { [string]: any }
+  }
 }
 
 const initialState: StateType = {
@@ -22,7 +25,10 @@ const initialState: StateType = {
   categories: {},
   categoryQueries: {},
   accounts: {},
-  accountQueries: {}
+  accountQueries: {},
+  editors: {
+    transactions: {}
+  }
 };
 
 /*
@@ -51,6 +57,14 @@ const counter = (state: StateType = initialState, action: any) => {
           {}, state.transactions,
           _.keyBy(action.transactions, t => t.id)
         )
+      });
+    case actions.transactions.edit:
+      return Object.assign({}, state, {
+        editors: Object.assign({}, state.editors, {
+          transactions: Objects.assign({}, state.editors.transactions, {
+            [action.editorId]: action.transaction
+          })
+        })
       });
     case actions.categories.store:
       return Object.assign({}, state, {
