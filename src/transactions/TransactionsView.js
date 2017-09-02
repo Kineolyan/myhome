@@ -140,15 +140,16 @@ const TransactionsView = reactStamp(React)
 
       return rows;
     },
-    highlightRow(rowId) {
-      const row = this.state.transactions[rowId];
+    highlightRow(tableIdx) {
+      const rowIdx = this.state.index * this.props.pagination + tableIdx;
+      const row = this.state.transactions[rowIdx];
       if (row.groupRow) {
         this.setState({
           detailledGroup: row.groupId
         });
       } else {
         this.setState({
-          detailledTransaction: this.state.transactions[rowId],
+          detailledTransaction: this.state.transactions[rowIdx],
           detailViewMode: PanelMode.VIEW
         });
       }
