@@ -8,6 +8,7 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
+import AutoComplete from 'material-ui/AutoComplete';
 
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
@@ -46,6 +47,7 @@ const TransactionEditor = reactStamp(React)
     state: {
       categories: [],
       accounts: [],
+      existingObjects: [],
       openCategoryForm: false,
       openGroupForm: false,
       askTransferAccount: false
@@ -63,7 +65,8 @@ const TransactionEditor = reactStamp(React)
     },
     componentWillMount() {
       this.cbks = Object.assign({}, this.cbks, {
-        setObject: this.setModelFromInput.bind(this, 'object'),
+        setObject: this.setModelFromInput.bind(this, 'object', null),
+        selectCompletedObject: this.setModelFromInput(this, 'object', null),
         setAmount: this.setModelFromInput.bind(this, 'amount'),
         setAccount: this.setModelValue.bind(this, 'account'),
         setType: this.setModelFromChoice.bind(this, 'type'),
@@ -78,6 +81,23 @@ const TransactionEditor = reactStamp(React)
         completeTransfer: this.transfer.bind(this, true),
         cancelTransfer: this.transfer.bind(this, false)
       });
+      const lastestTransactions = this.transactionsFeed
+        .order('updatedAt', 'descending')
+        .limit(100)
+        .watch()
+        .subscribe(
+          transactions => {
+            const objects = _(transactions)
+              .map(t => t.object)
+              .uniq()
+              .value();
+            this.setState({existingObjects: objects});
+          },
+          err => {
+            console.error('Cannot retrieve latest transactions', err);
+            this.setState({existingObjects: []});
+          });
+      this.setStream('latestTransactions', lastestTransactions);
     },
     getElementFeed() {
       return this.transactionsFeed;
@@ -217,9 +237,15 @@ const TransactionEditor = reactStamp(React)
       return <div>
         {this.renderForms()}
         <div>
-          <TextField hintText="Objet de la transaction"
-            value={this.state.transaction.object}
-            onChange={this.cbks.setObject} />
+          <AutoComplete
+            hintText="Objet de la transaction"
+            filter={AutoComplete.fuzzyFilter}
+            searchText={this.state.transaction.object}
+            dataSource={this.state.existingObjects}
+            onUpdateInput={this.cbks.setObject}
+            onNewRequest={this.cbks.selectCompletedObject}
+            maxSearchResults={10}
+          />
         </div>
         <div>
           <TextField hintText="Montant de la transaction" type="number"

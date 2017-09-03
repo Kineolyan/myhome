@@ -18,7 +18,7 @@ const StateForm = reactStamp()
       }
 
       this.setState({[this.formStateKey]: element});
-    },
+    }
   });
 
 export {
