@@ -17,6 +17,7 @@ import TransactionEditor from './transactions/TransactionEditor';
 import TransactionHistory from './transactions/TransactionHistory';
 import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
+import TemplateList from './transactions/TemplateList';
 
 class Messages extends Component {
   constructor(props) {
@@ -106,6 +107,9 @@ class Showcase extends Component {
         </div>
         <div className="block">
           <TransactionHistory />
+        </div>
+        <div className="block">
+          <TemplateList />
         </div>
       </div>
     </div>;

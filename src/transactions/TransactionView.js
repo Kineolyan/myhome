@@ -55,6 +55,14 @@ const TransactionView = reactStamp(React)
         </p>;
       }
     },
+    renderTemplateId() {
+      if (this.transaction.templateId) {
+        return [
+          <br/>,
+          <span>Based on template {this.transaction.templateId}</span>
+        ];
+      }
+    },
     render() {
       return <div>
         <p>{this.transaction.object} le {asDate(this.transaction.date)}<br/>
@@ -72,6 +80,7 @@ const TransactionView = reactStamp(React)
         {this.renderGroup()}
         <p style={{fontStyle: 'italic', fontSize: '0.8em'}}>
           Créée le {asDate(this.transaction.createdAt)}, mise à jour le {asDate(this.transaction.updatedAt)}
+          {this.renderTemplateId()}
         </p>
       </div>;
     }
