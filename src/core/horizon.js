@@ -8,7 +8,8 @@ const FEEDS = {
   categories: 'categories',
   transactions: 'transactions',
   validations: 'account_validations',
-  groups: 'transactions_groups'
+  groups: 'transactions_groups',
+  templates: 'transaction_templates'
 };
 
 const HorizonsShape = React.PropTypes.shape(
@@ -37,7 +38,10 @@ const WithHorizons = reactStamp(React).compose({
 	},
 	getTransactionFeed() {
 		return this.context.horizons.transactions;
-	}
+  },
+  getTemplateFeed() {
+    return this.context.horizons.templates;
+  }
 });
 
 function defineHorizons(hz) {

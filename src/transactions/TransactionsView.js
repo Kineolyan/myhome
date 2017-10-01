@@ -54,7 +54,12 @@ const TransactionsView = reactStamp(React)
         hideTransaction: this.hideTransaction.bind(this),
         hideGroup: this.hideGroup.bind(this),
         goPrevious: () => this.setState({index: this.state.index - 1}),
-        goNext: () => this.setState({index: this.state.index + 1})
+        goNext: () => this.setState({index: this.state.index + 1}),
+        openEditor: () => this.setState({detailViewMode: PanelMode.EDIT}),
+        closeEditor: () => this.setState({detailViewMode: PanelMode.VIEW}),
+        deleteTransaction: this.deleteTransaction.bind(this),
+        associateTemplate: () => this.setState({detailViewMode: PanelMode.SET_TEMPLATE}),
+        makeTemplate: this.makeTemplate.bind(this)
       };
 
       if (this.props.feed) {
@@ -162,6 +167,29 @@ const TransactionsView = reactStamp(React)
       this.transactionsFeed.remove(transaction.id);
       this.hideTransaction();
     },
+    makeTemplate() {
+      const template = {
+        ...this.state.detailledTransaction, 
+        frequency: {
+          type: 'monthly'
+        }
+      };
+      const transaction = {...this.state.detailledTransaction};
+      Reflect.deleteProperty(template, 'id');
+      const addTemplate = this.getTemplateFeed().store(template)
+        .subscribe(
+          ({id}) => {
+            transaction.templateId = id;
+            const transactionUpdate = this.getTransactionFeed().update(transaction)
+              .subscribe(
+                () => console.log('Transaction stamped with tempplate'),
+                err => console.error('Error when stamping transaction', err));
+
+            this.setStream(transactionUpdate);
+          },
+          err => console.error('Failed to create template', err));
+      this.setStream(addTemplate);
+    },
     hideGroup() {
       this.setState({detailledGroup: null});
     },
@@ -254,8 +282,10 @@ const TransactionsView = reactStamp(React)
         const title = <div className="dialog-header">
           <span className="dialog-title">Transaction</span>
           <div className="dialog-actions">
-            <FlatButton label="Edit" onTouchTap={() => this.setState({detailViewMode: PanelMode.EDIT})}/>
-            <FlatButton label="Delete" onTouchTap={() => this.deleteTransaction()}/>
+            <FlatButton label="Edit" onTouchTap={this.cbks.openEditor}/>
+            <FlatButton label="Delete" onTouchTap={this.cbks.deleteTransaction}/>
+            <FlatButton label="Set Template" onTouchTap={this.cbks.associateTemplate}/>
+            <FlatButton label="As Template" onTouchTap={this.cbks.makeTemplate}/>
           </div>
         </div>;
 
@@ -264,7 +294,8 @@ const TransactionsView = reactStamp(React)
             onRequestClose={this.cbks.hideTransaction}
             autoScrollBodyContent={true}>
           <TransactionPanel transaction={this.state.detailledTransaction}
-            mode={this.state.detailViewMode} />
+            mode={this.state.detailViewMode}
+            onSuccess={this.cbks.closeEditor} />
         </Dialog>;
       }
     },

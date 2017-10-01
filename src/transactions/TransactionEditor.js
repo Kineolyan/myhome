@@ -32,6 +32,7 @@ const PAYMENT_TYPES = [
 
 const TODAY = new Date();
 const DEFAULT_TRANSACTION = {
+  object: '',
   type: Type.CARTE
 };
 
@@ -47,7 +48,8 @@ const TransactionEditor = reactStamp(React)
     state: {
       categories: [],
       accounts: [],
-      existingObjects: [],
+      latestObjects: [],
+      templates: [],
       openCategoryForm: false,
       openGroupForm: false,
       askTransferAccount: false
@@ -57,16 +59,12 @@ const TransactionEditor = reactStamp(React)
       instance.elementKey = key;
       instance.formStateKey = key;
 
-      const transaction = _.assign({}, DEFAULT_TRANSACTION, instance.props.transaction);
-      transaction.date = transaction.date !== undefined ?
-        new Date(transaction.date) : new Date();
-
-      instance.state.transaction = transaction;
+      instance.state.transaction = this.makeStateTransaction(instance.props.transaction);
     },
     componentWillMount() {
       this.cbks = Object.assign({}, this.cbks, {
         setObject: this.setModelFromInput.bind(this, 'object', null),
-        selectCompletedObject: this.setModelFromInput(this, 'object', null),
+        selectCompletedObject: this.defineTransactionObject.bind(this),
         setAmount: this.setModelFromInput.bind(this, 'amount'),
         setAccount: this.setModelValue.bind(this, 'account'),
         setType: this.setModelFromChoice.bind(this, 'type'),
@@ -81,6 +79,7 @@ const TransactionEditor = reactStamp(React)
         completeTransfer: this.transfer.bind(this, true),
         cancelTransfer: this.transfer.bind(this, false)
       });
+
       const lastestTransactions = this.transactionsFeed
         .order('updatedAt', 'descending')
         .limit(100)
@@ -91,13 +90,26 @@ const TransactionEditor = reactStamp(React)
               .map(t => t.object)
               .uniq()
               .value();
-            this.setState({existingObjects: objects});
+            this.setState({latestObjects: objects});
           },
           err => {
             console.error('Cannot retrieve latest transactions', err);
             this.setState({existingObjects: []});
           });
       this.setStream('latestTransactions', lastestTransactions);
+
+      const templates = this.getTemplateFeed()
+          .watch()
+          .subscribe(
+              templates => this.setState({templates}),
+              err => console.error('Faied to retrieve templates', err));
+      this.setStream('transactionTemplates', templates);
+    },
+    makeStateTransaction(template) {
+      const transaction = _.assign({}, DEFAULT_TRANSACTION, template);
+      transaction.date = transaction.date !== undefined ?
+        new Date(transaction.date) : new Date();
+      return transaction;
     },
     getElementFeed() {
       return this.transactionsFeed;
@@ -105,6 +117,29 @@ const TransactionEditor = reactStamp(React)
     getValue(key) {
       return this.state.transaction[key]
         || this.props.transaction[key];
+    },
+    defineTransactionObject(chosenObject, idx) {
+      const template = this.state.templates[idx - this.state.latestObjects.length];
+      if (template !== undefined && chosenObject === `${template.object} [t]`) {
+        // Save the transaction id for update
+        const transactionId = this.state.transaction.id;
+        const transaction = this.makeStateTransaction(template);
+        transaction.id = transactionId;
+        transaction.templateId = template.id;
+        // Set the current month and year for the date
+        const now = new Date();
+        transaction.date.setFullYear(now.getFullYear());
+        transaction.date.setMonth(now.getMonth());
+        if (now < transaction.date) {
+          // Set a template for end of month at a beginnning of a month
+          transaction.date.setMonth(transaction.date.getMonth() - 1);
+        }
+        
+        this.setState({transaction});
+      } else {
+        // Just use the value without template
+        this.setModelValue('object', chosenObject);        
+      }
     },
     formatEditedElement(transaction) {
       if (transaction.date !== undefined) {
@@ -172,6 +207,24 @@ const TransactionEditor = reactStamp(React)
             value={value.id} primaryText={value.name} />)}
       </SelectField>;
     },
+    renderObject() {
+      const suggestions = [
+        ...this.state.latestObjects,
+        ...this.state.templates.map(t => `${t.object} [t]`)
+      ];
+
+      return <div>
+        <AutoComplete
+          hintText="Objet de la transaction"
+          filter={AutoComplete.fuzzyFilter}
+          searchText={this.state.transaction.object}
+          dataSource={suggestions}
+          onUpdateInput={this.cbks.setObject}
+          onNewRequest={this.cbks.selectCompletedObject}
+          maxSearchResults={10}
+        />
+      </div>;
+    },
     renderAccount() {
       return <AccountPicker
         value={this.getValue('account')}
@@ -236,17 +289,7 @@ const TransactionEditor = reactStamp(React)
     render() {
       return <div>
         {this.renderForms()}
-        <div>
-          <AutoComplete
-            hintText="Objet de la transaction"
-            filter={AutoComplete.fuzzyFilter}
-            searchText={this.state.transaction.object}
-            dataSource={this.state.existingObjects}
-            onUpdateInput={this.cbks.setObject}
-            onNewRequest={this.cbks.selectCompletedObject}
-            maxSearchResults={10}
-          />
-        </div>
+        {this.renderObject()}
         <div>
           <TextField hintText="Montant de la transaction" type="number"
             value={this.state.transaction.amount}
