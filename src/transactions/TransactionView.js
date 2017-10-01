@@ -58,8 +58,8 @@ const TransactionView = reactStamp(React)
     renderTemplateId() {
       if (this.transaction.templateId) {
         return [
-          <br/>,
-          <span>Based on template {this.transaction.templateId}</span>
+          <br key="template-br"/>,
+          <span key="template-info">Based on template {this.transaction.templateId}</span>
         ];
       }
     },
