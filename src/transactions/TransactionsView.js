@@ -154,7 +154,7 @@ const TransactionsView = reactStamp(React)
         });
       } else {
         this.setState({
-          detailledTransaction: this.state.transactions[rowIdx],
+          detailledTransaction: this.state.transactions[rowIdx].id,
           detailViewMode: PanelMode.VIEW
         });
       }
@@ -168,13 +168,18 @@ const TransactionsView = reactStamp(React)
       this.hideTransaction();
     },
     makeTemplate() {
+      const baseTransaction = this.state.transactions[this.state.detailledTransaction];
+      if (!baseTransaction) {
+        throw new Error('No base transaction for template');
+      }
+
       const template = {
-        ...this.state.detailledTransaction,
+        ...baseTransaction,
         frequency: {
           type: 'monthly'
         }
       };
-      const transaction = {...this.state.detailledTransaction};
+      const transaction = {...baseTransaction};
       Reflect.deleteProperty(template, 'id');
       const addTemplate = this.getTemplateFeed().store(template)
         .subscribe(
@@ -293,7 +298,7 @@ const TransactionsView = reactStamp(React)
             modal={false} open={true}
             onRequestClose={this.cbks.hideTransaction}
             autoScrollBodyContent={true}>
-          <TransactionPanel transaction={this.state.detailledTransaction}
+          <TransactionPanel transactionId={this.state.detailledTransaction}
             mode={this.state.detailViewMode}
             onSuccess={this.cbks.closeEditor} />
         </Dialog>;

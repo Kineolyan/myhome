@@ -70,10 +70,6 @@ function makeHorizonDriver(horizons) {
 				}
 
 				let queryStream = horizons[store];
-				if (order) {
-					const [field, way] = order.split(' ');
-					queryStream = queryStream.order(field, way);
-				}
 				if (_.isObject(conditions) && !_.isEmpty(conditions)) {
 					queryStream = queryStream.findAll(conditions);
 				}
@@ -83,6 +79,11 @@ function makeHorizonDriver(horizons) {
 				}
 				if (query.below) {
 					queryStream = queryStream.below(...query.below);
+				}
+
+				if (order) {
+					const [field, way] = order.split(/\s+/);
+					queryStream = queryStream.order(field, way);
 				}
 
 				if (_.isInteger(limit) && limit > 0) {
@@ -107,7 +108,19 @@ function makeHorizonDriver(horizons) {
 				}
 
 				// Dispatch the result properly
-				queryStream = queryStream.map(values => ({store, queryId, values}));
+				queryStream = queryStream.map(values => {
+					if (order) {
+						// FIXME, reorder, in case it has failed
+						const [field, way] = order.split(/\s+/);
+						let chain = _(values).sortBy(field);
+						if (way === 'descending') {
+							chain = chain.reverse();
+						}
+						values = chain.value();
+					}
+
+					return {store, queryId, values};
+				});
 
 				// Multicasting the result
 				const unsubscribe = queryStream.subscribe(queriesSubject);

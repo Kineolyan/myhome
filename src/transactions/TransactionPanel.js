@@ -1,5 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
+import {connect} from 'react-redux';
 
 import TransactionEditor from './TransactionEditor';
 import TransactionView from './TransactionView';
@@ -37,7 +38,7 @@ class TransactionPanel extends React.Component {
   associateTemplate(template) {
     this.context.horizons.transactions
       .update({
-        id: this.props.transaction.id,
+        id: this.props.transactionId,
         templateId: template.id
       })
       .subscribe(
@@ -80,7 +81,8 @@ class TransactionPanel extends React.Component {
 }
 
 TransactionPanel.propTypes = {
-  transaction: React.PropTypes.object.isRequired,
+  transactionId: React.PropTypes.object.isRequired,
+  transaction: React.PropTypes.object,
   mode: React.PropTypes.oneOf(_.values(Mode)),
   onSuccess: React.PropTypes.func
 };
@@ -93,7 +95,17 @@ TransactionPanel.contextTypes = {
   horizons: React.PropTypes.object
 };
 
-export default TransactionPanel;
+const mapStateToProps = (state, props) => {
+	return {
+		...props,
+		transaction: state.transactions[props.transactionId]
+	};
+};
+
+const mapDispatchToProps = (dispatch) => ({});
+
+export default connect(mapStateToProps, mapDispatchToProps)(TransactionPanel);
 export {
+  TransactionPanel,
   Mode
 };
