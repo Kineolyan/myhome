@@ -43,25 +43,6 @@ function main(sources) {
     .filter(action => action.type === actions.location.goto)
     .map(action => action.url);
 
-  const isOdd$ = state$
-    .map(({value}) => value % 2 === 1)
-    .take(1);
-
-  const incrementIfOdd$ = sources.ACTION
-    .filter(action => action.type === 'INCREMENT_IF_ODD')
-    .map(action => isOdd$)
-    .flatten()
-    .filter(isOdd => isOdd)
-    .mapTo({ type: 'INCREMENT' });
-
-  const increment$ = sources.ACTION
-    .filter(action => action.type === 'INCREMENT_ASYNC')
-    .mapTo({ type: 'INCREMENT' });
-
-  const decrement$ = sources.ACTION
-    .filter(action => action.type === 'DECREMENT_ASYNC')
-    .mapTo({ type: 'DECREMENT' });
-
   const transactionQuery$ = sources.ACTION
     .filter(action => action.type === actions.transactions.query)
     .map(action => Object.assign({store: 'transactions'}, action));
@@ -99,7 +80,6 @@ function main(sources) {
     }));
 
   const actions$ = Streams.merge(
-    increment$, decrement$, incrementIfOdd$,
     storeTransactions$,
     storeCategories$,
     storeAccounts$,

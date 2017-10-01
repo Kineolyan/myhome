@@ -7,6 +7,7 @@ import CategoryEditor from '../categories/CategoryEditor';
 import TransactionList from '../transactions/TransactionList';
 import TransactionEditor from '../transactions/TransactionEditor';
 import TransactionHistory from '../transactions/TransactionHistory';
+import TemplateList from '../transactions/TemplateList';
 
 import Messages from './Messages';
 
@@ -36,6 +37,9 @@ class Showcase extends React.Component {
         </div>
         <div className="block">
           <TransactionHistory />
+        </div>
+        <div className="block">
+          <TemplateList />
         </div>
       </div>
     </div>;

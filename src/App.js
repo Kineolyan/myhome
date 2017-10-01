@@ -10,12 +10,7 @@ import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
 import Showcase from './general/Showcase';
 
-import Counter from './redux/counter';
-
-
 import ReduxTransactions from './transactions/ReduxTransactions';
-
-import Counter from './redux/counter';
 
 class App extends Component {
   constructor(props) {
@@ -57,7 +52,6 @@ class App extends Component {
           Show case
         </MenuItem>
       </a>
-      <Counter/>
     </Drawer>;
   }
 
