@@ -169,7 +169,7 @@ const TransactionsView = reactStamp(React)
     },
     makeTemplate() {
       const template = {
-        ...this.state.detailledTransaction, 
+        ...this.state.detailledTransaction,
         frequency: {
           type: 'monthly'
         }
@@ -185,10 +185,10 @@ const TransactionsView = reactStamp(React)
                 () => console.log('Transaction stamped with tempplate'),
                 err => console.error('Error when stamping transaction', err));
 
-            this.setStream(transactionUpdate);
+            this.setStream('transaction-update-with-template', transactionUpdate);
           },
           err => console.error('Failed to create template', err));
-      this.setStream(addTemplate);
+      this.setStream('template-creation', addTemplate);
     },
     hideGroup() {
       this.setState({detailledGroup: null});

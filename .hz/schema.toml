@@ -1,5 +1,7 @@
 # This is a TOML document
 
+[collections.transaction_templates]
+
 [collections.accounts]
 [[collections.accounts.indexes]]
 fields = [["name"]]
@@ -18,11 +20,11 @@ fields = [["account"],["date"]]
 [[collections.transactions.indexes]]
 fields = [["account"]]
 [[collections.transactions.indexes]]
+fields = [["category"],["date"]]
+[[collections.transactions.indexes]]
 fields = [["date"]]
 [[collections.transactions.indexes]]
 fields = [["updatedAt"]]
-[[collections.transactions.indexes]]
-fields = [["group"],["date"]]
 
 [collections.transactions_groups]
 [[collections.transactions_groups.indexes]]
