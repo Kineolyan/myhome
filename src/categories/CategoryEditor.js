@@ -1,6 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import reactStamp from 'react-stamp';
-import _ from 'lodash';
 
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -13,7 +13,7 @@ const CategoryEditor = reactStamp(React)
   .compose(WithHorizons, ElementEditor, HorizonEditor, StateForm)
   .compose({
     propTypes: {
-      category: React.PropTypes.object
+      category: PropTypes.object
     },
     defaultProps: {
       category: {}

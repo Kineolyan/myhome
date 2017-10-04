@@ -1,6 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import reactStamp from 'react-stamp';
-import _ from 'lodash';
 
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -13,7 +13,7 @@ const GroupEditor = reactStamp(React)
   .compose(WithHorizons, ElementEditor, HorizonEditor, StateForm)
   .compose({
     propTypes: {
-      group: React.PropTypes.object
+      group: PropTypes.object
     },
     defaultProps: {
       group: {}

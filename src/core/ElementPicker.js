@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 
@@ -10,14 +11,14 @@ const ElementPicker = reactStamp(React).compose({
     values: null
   },
   propTypes: {
-    values: React.PropTypes.arrayOf(React.PropTypes.shape({
-      id: React.PropTypes.string,
-      name: React.PropTypes.string
+    values: PropTypes.arrayOf(PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string
     })),
-    value: React.PropTypes.string,
-    onSelect: React.PropTypes.func.isRequired,
-    hintText: React.PropTypes.string,
-    withEmpty: React.PropTypes.bool
+    value: PropTypes.string,
+    onSelect: PropTypes.func.isRequired,
+    hintText: PropTypes.string,
+    withEmpty: PropTypes.bool
   },
   defaultProps: {
     withEmpty: true

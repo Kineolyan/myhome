@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 
@@ -29,12 +30,12 @@ const TransactionsView = reactStamp(React)
   .compose(WithStreams, WithHorizons)
   .compose({
     propTypes: {
-      feed: React.PropTypes.shape({
-        subscribe: React.PropTypes.func.isRequired
+      feed: PropTypes.shape({
+        subscribe: PropTypes.func.isRequired
       }),
-      transactions: React.PropTypes.array,
-      pagination: React.PropTypes.number,
-      byGroup: React.PropTypes.bool
+      transactions: PropTypes.array,
+      pagination: PropTypes.number,
+      byGroup: PropTypes.bool
     },
     defaultProps: {
       transactions: [],
@@ -168,7 +169,7 @@ const TransactionsView = reactStamp(React)
       this.hideTransaction();
     },
     makeTemplate() {
-      const baseTransaction = this.state.transactions[this.state.detailledTransaction];
+      const baseTransaction = _.find(this.state.transactions, {id: this.state.detailledTransaction});
       if (!baseTransaction) {
         throw new Error('No base transaction for template');
       }

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import reactStamp from 'react-stamp';
 
 import {asDate} from '../core/time';
@@ -9,7 +10,7 @@ const TransactionView = reactStamp(React)
   .compose(WithStreams, WithHorizons)
   .compose({
     propTypes: {
-      transaction: React.PropTypes.object.isRequired
+      transaction: PropTypes.object.isRequired
     },
     state: {
       account: {},

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import reactStamp from 'react-stamp';
 import _ from 'lodash';
 
@@ -10,7 +11,7 @@ const GroupView = reactStamp(React)
   .compose(WithStreams, WithHorizons)
   .compose({
     props: {
-      groupId: React.PropTypes.string
+      groupId: PropTypes.string
     },
     state: {
       group: null,

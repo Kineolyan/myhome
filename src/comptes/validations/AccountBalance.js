@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 
@@ -47,12 +48,12 @@ const AccountBalance = reactStamp(React)
 	.compose(WithHorizons, UnvalidatedTransactions, WithStreams)
 	.compose({
 		propTypes: {
-			account: React.PropTypes.string.isRequired,
-			validation: React.PropTypes.object,
-			date: React.PropTypes.oneOfType([
-				React.PropTypes.object,
-				React.PropTypes.string,
-				React.PropTypes.number
+			account: PropTypes.string.isRequired,
+			validation: PropTypes.object,
+			date: PropTypes.oneOfType([
+				PropTypes.object,
+				PropTypes.string,
+				PropTypes.number
 			])
 		},
 		state: {

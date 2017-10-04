@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import reactStamp from 'react-stamp';
 
 import ReduxTransactions from './ReduxTransactions';
@@ -12,7 +13,7 @@ TODAY.setMilliseconds(0);
 const LatestTransactions = reactStamp(React)
   .compose({
     propTypes: {
-      byGroup: React.PropTypes.bool
+      byGroup: PropTypes.bool
     },
     defaultProps: {
       byGroup: true

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -62,7 +63,7 @@ class Messages extends React.Component {
 }
 
 Messages.contextTypes = {
-  horizons: React.PropTypes.object
+  horizons: PropTypes.object
 };
 
 export default Messages;

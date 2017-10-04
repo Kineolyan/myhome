@@ -1,5 +1,4 @@
 import React from 'react';
-import _ from 'lodash';
 import reactStamp from 'react-stamp';
 
 import ElementPicker from '../core/ElementPicker';

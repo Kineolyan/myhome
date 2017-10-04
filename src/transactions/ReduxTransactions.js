@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 
@@ -32,12 +33,12 @@ class ReduxTransactions extends React.Component {
 }
 
 ReduxTransactions.propTypes = {
-	viewId: React.PropTypes.string.isRequired,
-	transactions: React.PropTypes.array,
-	startQuery: React.PropTypes.func.isRequired,
-	stopQuery: React.PropTypes.func.isRequired,
-	pagination: React.PropTypes.number,
-	byGroup: React.PropTypes.bool
+	viewId: PropTypes.string.isRequired,
+	transactions: PropTypes.array,
+	startQuery: PropTypes.func.isRequired,
+	stopQuery: PropTypes.func.isRequired,
+	pagination: PropTypes.number,
+	byGroup: PropTypes.bool
 };
 
 ReduxTransactions.defaultProps = {

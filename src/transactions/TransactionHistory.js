@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 
 import TextField from 'material-ui/TextField';
@@ -80,7 +81,7 @@ class TransactionHistory extends React.Component {
 }
 
 TransactionHistory.contextTypes = {
-  horizons: React.PropTypes.object
+  horizons: PropTypes.object
 };
 
 export default TransactionHistory;

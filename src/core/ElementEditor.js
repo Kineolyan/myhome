@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import reactStamp from 'react-stamp';
 import _ from 'lodash';
 
@@ -7,7 +8,7 @@ import {WithStreams} from './rx';
 
 const ElementEditor = reactStamp(React).compose({
   propTypes: {
-    onSubmit: React.PropTypes.func
+    onSubmit: PropTypes.func
   },
   defaultProps: {
     onSubmit: _.noop

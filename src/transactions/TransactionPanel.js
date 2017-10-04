@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 
@@ -18,7 +19,7 @@ class TransactionPanel extends React.Component {
 
     this.state = {templates: []};
   }
-  
+
   componentWillReceiveProps(nextProps) {
     if (this.props.mode !== nextProps.mode) {
       if (nextProps.mode === Mode.SET_TEMPLATE) {
@@ -81,10 +82,10 @@ class TransactionPanel extends React.Component {
 }
 
 TransactionPanel.propTypes = {
-  transactionId: React.PropTypes.object.isRequired,
-  transaction: React.PropTypes.object,
-  mode: React.PropTypes.oneOf(_.values(Mode)),
-  onSuccess: React.PropTypes.func
+  transactionId: PropTypes.object.isRequired,
+  transaction: PropTypes.object,
+  mode: PropTypes.oneOf(_.values(Mode)),
+  onSuccess: PropTypes.func
 };
 
 TransactionPanel.defaultProps = {
@@ -92,7 +93,7 @@ TransactionPanel.defaultProps = {
 };
 
 TransactionPanel.contextTypes = {
-  horizons: React.PropTypes.object
+  horizons: PropTypes.object
 };
 
 const mapStateToProps = (state, props) => {

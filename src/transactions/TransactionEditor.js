@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 
@@ -40,7 +41,7 @@ const TransactionEditor = reactStamp(React)
   .compose(WithHorizons, ElementEditor, HorizonEditor, StateForm)
   .compose({
     propTypes: {
-      transaction: React.PropTypes.object
+      transaction: PropTypes.object
     },
     defaultProps: {
       transaction: {}
@@ -63,7 +64,7 @@ const TransactionEditor = reactStamp(React)
     },
     componentWillMount() {
       this.cbks = Object.assign({}, this.cbks, {
-        setObject: this.setModelFromInput.bind(this, 'object', null),
+        setObject: value => this.setModelValue('object', value || '', true),
         selectCompletedObject: this.defineTransactionObject.bind(this),
         setAmount: this.setModelFromInput.bind(this, 'amount'),
         setAccount: this.setModelValue.bind(this, 'account'),
@@ -134,11 +135,11 @@ const TransactionEditor = reactStamp(React)
           // Set a template for end of month at a beginnning of a month
           transaction.date.setMonth(transaction.date.getMonth() - 1);
         }
-        
+
         this.setState({transaction});
       } else {
         // Just use the value without template
-        this.setModelValue('object', chosenObject);        
+        this.setModelValue('object', chosenObject);
       }
     },
     formatEditedElement(transaction) {

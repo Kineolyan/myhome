@@ -1,5 +1,5 @@
 import React from 'react';
-import _ from 'lodash';
+import PropTypes from 'prop-types';
 
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ActionSearch from 'material-ui/svg-icons/action/search';
@@ -164,7 +164,7 @@ class AccountActivity extends React.Component {
 }
 
 AccountActivity.contextTypes = {
-  horizons: React.PropTypes.object
+  horizons: PropTypes.object
 };
 
 export default AccountActivity;

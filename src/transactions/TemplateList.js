@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 class TemplateList extends React.Component {
 
@@ -61,7 +62,7 @@ class TemplateList extends React.Component {
 }
 
 TemplateList.contextTypes = {
-  horizons: React.PropTypes.object
+  horizons: PropTypes.object
 };
 
 export default TemplateList;

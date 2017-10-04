@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 
@@ -12,10 +13,10 @@ const FEEDS = {
   templates: 'transaction_templates'
 };
 
-const HorizonsShape = React.PropTypes.shape(
+const HorizonsShape = PropTypes.shape(
   _(FEEDS).keys()
     .reduce((shape, feedName, feed) => {
-      shape[feed] = React.PropTypes.object
+      shape[feed] = PropTypes.object
       return shape;
     }, {})
 );

@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 
@@ -23,8 +24,8 @@ class CategoryList extends React.Component {
 }
 
 CategoryList.propTypes = {
-  categories: React.PropTypes.array,
-  listCategories: React.PropTypes.func.isRequired
+  categories: PropTypes.array,
+  listCategories: PropTypes.func.isRequired
 };
 
 const CATEGORY_QUERY_ID = 'categoryList';
