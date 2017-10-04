@@ -7,7 +7,7 @@ backup() {
 	local readonly bak_ark="$BAK_DIR/ha_$(date +%Y%V).bak.tgz"
 	if [ ! -f "$bak_ark" ]
 	then
-		tar czf "$bak_ark" rethinkdb_data/
+		tar czf "$bak_ark" rethinkdb_data/ VERSION
 		echo -e "\e[32mDatabase backup created\e[0m ($bak_ark)"
 	fi
 }
