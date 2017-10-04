@@ -27,6 +27,8 @@ deploy_server() {
 	local readonly hz_dir=$APP_DIR/.hz
 	[ ! -d "$hz_dir" ] && mkdir "$hz_dir"
 	cp .hz/* "$hz_dir"
+	echo "Applying schema ... (sudo operation)"
+	sudo hz schema apply "$hz_dir/schema.toml" --project-name home --start-rethinkdb yes
 
 	echo -e "\e[34mServer\e[0m       .... \e[32m[DEPLOYED]\e[0m"
 }
