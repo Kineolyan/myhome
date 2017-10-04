@@ -1,6 +1,8 @@
 # This is a TOML document
 
 [collections.transaction_templates]
+[[collections.transaction_templates.indexes]]
+fields = [["date"]]
 
 [collections.accounts]
 [[collections.accounts.indexes]]
