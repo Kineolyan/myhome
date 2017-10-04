@@ -7,9 +7,13 @@ import MenuItem from 'material-ui/MenuItem';
 
 const ElementPicker = reactStamp(React).compose({
   state: {
-    values: []
+    values: null
   },
   propTypes: {
+    values: React.PropTypes.arrayOf(React.PropTypes.shape({
+      id: React.PropTypes.string,
+      name: React.PropTypes.string
+    })),
     value: React.PropTypes.string,
     onSelect: React.PropTypes.func.isRequired,
     hintText: React.PropTypes.string,
@@ -24,7 +28,8 @@ const ElementPicker = reactStamp(React).compose({
     };
   },
   render() {
-    if (_.isEmpty(this.state.values)) {
+    const values = this.state.values || this.props.values;
+    if (_.isEmpty(values)) {
       return this.renderEmpty();
     }
 
@@ -40,7 +45,7 @@ const ElementPicker = reactStamp(React).compose({
         floatingLabelText={hintText}
         floatingLabelFixed={hintText !== null && !this.props.withEmpty}>
       {emptyItem}
-      {this.state.values.map(value => {
+      {values.map(value => {
         return <MenuItem key={value.id}
           value={value.id} primaryText={value.name} />;
       })}

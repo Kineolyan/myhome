@@ -1,8 +1,7 @@
 import React from 'react';
 import reactStamp from 'react-stamp';
 
-import TransactionsView from './TransactionsView';
-import {WithHorizons} from '../core/horizon';
+import ReduxTransactions from './ReduxTransactions';
 
 const TODAY = new Date();
 TODAY.setHours(0);
@@ -11,7 +10,6 @@ TODAY.setSeconds(0);
 TODAY.setMilliseconds(0);
 
 const LatestTransactions = reactStamp(React)
-  .compose(WithHorizons)
   .compose({
     propTypes: {
       byGroup: React.PropTypes.bool
@@ -19,15 +17,15 @@ const LatestTransactions = reactStamp(React)
     defaultProps: {
       byGroup: true
     },
-    componentWillMount() {
-      const selection = this.transactionsFeed
-        .above({updatedAt: TODAY.getTime()}, 'closed')
-        .order('updatedAt', 'descending')
-        .watch();
-      this.setState({selection});
+    state: {
+      query: {
+        above: [{updatedAt: TODAY.getTime()}, 'closed'],
+        order: 'updatedAt descending'
+      }
     },
     render() {
-      return <TransactionsView feed={this.state.selection}
+      return <ReduxTransactions viewId="latest"
+        query={this.state.query}
         byGroup={this.props.byGroup}/>;
     }
   });

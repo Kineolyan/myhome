@@ -5,8 +5,21 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();
 
+import {createStore, applyMiddleware, compose} from 'redux';
+import {Provider} from 'react-redux';
+// Cannot use redux-cycles as it supports only xstream
+import {createCycleMiddleware} from 'redux-cycles';
+// import {createCycleMiddleware} from './redux/middleware';
+import Cycle from '@cycle/xstream-run';
+// import Cycle from '@cycle/rxjs-run';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import {RouterApp} from './App';
+
+import main from './cycle/main';
+import accountApp from './redux/store';
+import {createLogDriver} from './cycle/LogDriver';
+import {makeHorizonDriver} from './cycle/HorizonDriver';
+import {makeRouterDriver} from './cycle/RouterDriver';
+import App from './App';
 import {defineHorizons, HorizonsShape} from './core/horizon';
 import './index.css';
 const {MyHome} = window;
@@ -17,6 +30,19 @@ const horizons = (function() {
   return defineHorizons(horizon);
 })();
 
+const cycleMiddleware = createCycleMiddleware();
+const { makeActionDriver, makeStateDriver } = cycleMiddleware;
+
+const store = createStore(
+  accountApp,
+  compose(
+    applyMiddleware(
+      cycleMiddleware
+      // May add the middleware react-router-redux
+    )
+  )
+);
+
 class MuiApp extends React.Component {
   getChildContext() {
     return {horizons};
@@ -25,7 +51,9 @@ class MuiApp extends React.Component {
   render() {
     return (
       <MuiThemeProvider>
-        <RouterApp />
+        <Provider store={store}>
+          <App />
+        </Provider>
       </MuiThemeProvider>
     );
   }
@@ -34,6 +62,15 @@ class MuiApp extends React.Component {
 MuiApp.childContextTypes = {
   horizons: HorizonsShape
 };
+
+Cycle.run(main, {
+  ACTION: makeActionDriver(),
+  STATE: makeStateDriver(),
+  HORIZONS: makeHorizonDriver(horizons),
+  LOG: createLogDriver(),
+  ROUTER: makeRouterDriver()
+});
+
 
 ReactDOM.render(
   <MuiApp />,
