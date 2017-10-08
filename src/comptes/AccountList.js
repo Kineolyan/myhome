@@ -3,6 +3,7 @@ import _ from 'lodash';
 import {connect} from 'react-redux';
 
 import actions from '../redux/actions';
+import {getStateValues} from '../redux/horizonStore';
 
 class AccountList extends React.Component {
   componentWillMount() {
@@ -26,10 +27,7 @@ class AccountList extends React.Component {
 
 const ACCOUNT_QUERY_ID = 'accountList';
 const mapStateToProps = (state, props) => {
-  const accounts = _(state.categories.queries[ACCOUNT_QUERY_ID])
-    .map(aId => state.accounts.values[aId])
-    .filter(category => category)
-    .value();
+  const accounts = getStateValues(state.categories, ACCOUNT_QUERY_ID);
 
   return {
     ...props,

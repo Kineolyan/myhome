@@ -4,6 +4,7 @@ import _ from 'lodash';
 import {connect} from 'react-redux';
 
 import actions from '../redux/actions';
+import {getStateValues} from '../redux/horizonStore';
 import TransactionsView from './TransactionsView';
 
 class ReduxTransactions extends React.Component {
@@ -46,11 +47,7 @@ ReduxTransactions.defaultProps = {
 };
 
 const mapStateToProps = (state, props) => {
-	const transactionsIds = state.transactions.queries[props.viewId];
-	const transactions = _(transactionsIds)
-		.map(tId => state.transactions.values[tId])
-		.filter(transaction => transaction !== undefined)
-		.value();
+	const transactions = getStateValues(state.transactions, props.viewId);
 
 	return {
 		...props,

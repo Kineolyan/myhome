@@ -12,6 +12,7 @@ import ArrowLeft from 'material-ui/svg-icons/hardware/keyboard-arrow-left';
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right';
 
 import actions from '../../redux/actions';
+import {getStateValues} from '../../redux/horizonStore';
 import {WithHorizons} from '../../core/horizon';
 import {WithStreams} from '../../core/rx';
 import AccountPicker from '../AccountPicker';
@@ -220,16 +221,10 @@ const AccountValidator = reactStamp(React)
 	});
 
 const mapStateToProps = (state, props) => {
-	const transactionIds = state.transactions.queries['validator-transactions'];
-	const transactions = _(transactionIds)
-		.map(tId => state.transactions.values[tId])
-		.filter(transaction => transaction !== undefined)
-		.value();
-	const suspicious = _(state.transactions.queries['validator-suspicious'])
-		.difference(transactionIds)
-		.map(tId => state.transactions.values[tId])
-		.filter(transaction => transaction !== undefined)
-		.value();
+	const transactions = getStateValues(state.transactions, 'validator-transactions');
+	const suspicious = _.difference(
+			getStateValues(state.transactions, 'validator-suspicious'),
+			transactions);
 
 	return {
 		...props,

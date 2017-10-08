@@ -1,6 +1,6 @@
 // @flow
-import _ from 'lodash';
 import actions from './actions';
+import {makeStore, storeState} from './horizonStore';
 
 type HorizonIdType = string;
 type ObjectMappingType = { [HorizonIdType]: any };
@@ -18,36 +18,11 @@ export type StateType = {
 }
 
 const initialState: StateType = {
-  transactions: {
-    values: {}, queries: {}
-  },
-  categories: {
-    values: {}, queries: {}
-  },
-  accounts: {
-    values: {}, queries: {}
-  },
-  templates: {
-    values: {}, queries: {}
-  }
+  transactions: makeStore(),
+  categories: makeStore(),
+  accounts: makeStore(),
+  templates: makeStore()
 };
-
-function storeState(state, storeActions, action) {
-  if (action.type === storeActions.store) {
-    return Object.assign({}, state, {
-      queries: Object.assign(
-        {}, state.queries,
-        {[action.queryId]: action.values.map(c => c.id)}
-      ),
-      values: Object.assign(
-        {}, state.values,
-        _.keyBy(action.values, t => t.id)
-      )
-    });
-  } else {
-    return state;
-  }
-}
 
 /*
  * How is the next application state calculated,

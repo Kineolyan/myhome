@@ -39,7 +39,7 @@ class Showcase extends React.Component {
           <TransactionHistory />
         </div>
         <div className="block">
-          <TemplateList />
+          <TemplateList viewId="showcase" />
         </div>
       </div>
     </div>;

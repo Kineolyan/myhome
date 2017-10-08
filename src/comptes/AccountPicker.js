@@ -7,6 +7,7 @@ import {connect} from 'react-redux';
 
 import ElementPicker from '../core/ElementPicker';
 import actions from '../redux/actions';
+import {getStateValues} from '../redux/horizonStore';
 import type StateType from '../redux/store';
 
 const AccountPicker = reactStamp(React)
@@ -25,10 +26,7 @@ const AccountPicker = reactStamp(React)
 
 const ACCOUNT_QUERY_ID = 'accountPicker';
 const mapStateToProps = (state: StateType, props) => {
-  const accounts = _(state.accounts.queries[ACCOUNT_QUERY_ID])
-    .map(aId => state.accounts.values[aId])
-    .filter(category => category)
-    .value();
+  const accounts = getStateValues(state.accounts, ACCOUNT_QUERY_ID);
 
   return {
     ...props,

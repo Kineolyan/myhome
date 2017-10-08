@@ -64,7 +64,7 @@ function main(sources) {
 
   const transactions$ = hzStoreReader(sources, 'transactions', actions.transactions);
   const categories$ = hzStoreReader(sources, 'categories', actions.categories);
-  const templates$ = hzStoreReader(sources, 'transaction_templates', actions.templates);
+  const templates$ = hzStoreReader(sources, 'templates', actions.templates);
   const accounts$ = hzStoreReader(sources, 'accounts', actions.accounts);
 
   const actions$ = Streams.merge(
