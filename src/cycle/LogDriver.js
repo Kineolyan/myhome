@@ -1,10 +1,12 @@
-function createLogDriver() {
+function createLogDriver(logMessages) {
 	return msg$ => {
-		msg$.addListener({
-			next(msg) {
-				console.log(msg);
-			}
-		});
+		if (logMessages) {
+			msg$.addListener({
+				next(msg) {
+					console.log(msg);
+				}
+			});
+		}
 	};
 }
 

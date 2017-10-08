@@ -220,14 +220,14 @@ const AccountValidator = reactStamp(React)
 	});
 
 const mapStateToProps = (state, props) => {
-	const transactionIds = state.transactionQueries['validator-transactions'];
+	const transactionIds = state.transactions.queries['validator-transactions'];
 	const transactions = _(transactionIds)
-		.map(tId => state.transactions[tId])
+		.map(tId => state.transactions.values[tId])
 		.filter(transaction => transaction !== undefined)
 		.value();
-	const suspicious = _(state.transactionQueries['validator-suspicious'])
+	const suspicious = _(state.transactions.queries['validator-suspicious'])
 		.difference(transactionIds)
-		.map(tId => state.transactions[tId])
+		.map(tId => state.transactions.values[tId])
 		.filter(transaction => transaction !== undefined)
 		.value();
 

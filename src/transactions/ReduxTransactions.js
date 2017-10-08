@@ -46,9 +46,9 @@ ReduxTransactions.defaultProps = {
 };
 
 const mapStateToProps = (state, props) => {
-	const transactionsIds = state.transactionQueries[props.viewId];
+	const transactionsIds = state.transactions.queries[props.viewId];
 	const transactions = _(transactionsIds)
-		.map(tId => state.transactions[tId])
+		.map(tId => state.transactions.values[tId])
 		.filter(transaction => transaction !== undefined)
 		.value();
 

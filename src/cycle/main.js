@@ -10,6 +10,25 @@ const Streams = {
   }
 }
 
+function hzStoreReader(sources, store, actions) {
+  const queries$ = sources.ACTION
+  .filter(action => action.type === actions.query)
+  .map(action => ({store, ...action}));
+
+  const values$ = sources.HORIZONS
+    .filter(output => output.store === store)
+    .map(response => ({
+      type: actions.store,
+      queryId: response.queryId,
+      values: response.values
+    }));
+
+  return {
+    queries: queries$,
+    values: values$
+  };
+}
+
 function main(sources) {
   const state$ = sources.STATE;
 
@@ -43,56 +62,31 @@ function main(sources) {
     .filter(action => action.type === actions.location.goto)
     .map(action => action.url);
 
-  const transactionQuery$ = sources.ACTION
-    .filter(action => action.type === actions.transactions.query)
-    .map(action => Object.assign({store: 'transactions'}, action));
-
-  const categoryQuery$ = sources.ACTION
-    .filter(action => action.type === actions.categories.query)
-    .map(action => Object.assign({store: 'categories'}, action));
-
-  const accountQuery$ = sources.ACTION
-    .filter(action => action.type === actions.accounts.query)
-    .map(action => Object.assign({store: 'accounts'}, action));
-
-  const storeTransactions$ = sources.HORIZONS
-    .filter(output => output.store === 'transactions')
-    .map(response => ({
-      type: actions.transactions.store,
-      queryId: response.queryId,
-      transactions: response.values
-    }));
-
-  const storeCategories$ = sources.HORIZONS
-    .filter(output => output.store === 'categories')
-    .map(response => ({
-      type: actions.categories.store,
-      queryId: response.queryId,
-      categories: response.values
-    }));
-
-  const storeAccounts$ = sources.HORIZONS
-    .filter(output => output.store === 'accounts')
-    .map(response => ({
-      type: actions.accounts.store,
-      queryId: response.queryId,
-      accounts: response.values
-    }));
+  const transactions$ = hzStoreReader(sources, 'transactions', actions.transactions);
+  const categories$ = hzStoreReader(sources, 'categories', actions.categories);
+  const templates$ = hzStoreReader(sources, 'transaction_templates', actions.templates);
+  const accounts$ = hzStoreReader(sources, 'accounts', actions.accounts);
 
   const actions$ = Streams.merge(
-    storeTransactions$,
-    storeCategories$,
-    storeAccounts$,
+    transactions$.values,
+    categories$.values,
+    templates$.values,
+    accounts$.values,
     loadPage$, loadUrl$
   );
 
   const hQueries$ = Streams.merge(
-    transactionQuery$, categoryQuery$, accountQuery$
+    transactions$.queries,
+    categories$.queries,
+    templates$.queries,
+    accounts$.queries
   );
 
-  const log$ = xs.merge(
-    xs.merge(loadUrl$, actions$),
-    sources.ACTION
+  const log$ = Streams.merge(
+    loadUrl$.map(a => ({_stream: 'loadUrl', ...a})),
+    hQueries$.map(a => ({_stream: 'hQuery', ...a})),
+    actions$.map(a => ({_stream: 'sinkActions', ...a})),
+    sources.ACTION.map(a => ({_stream: 'sourceActions', ...a}))
   );
 
   return {

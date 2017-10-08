@@ -26,8 +26,8 @@ class AccountList extends React.Component {
 
 const ACCOUNT_QUERY_ID = 'accountList';
 const mapStateToProps = (state, props) => {
-  const accounts = _(state.categoryQueries[ACCOUNT_QUERY_ID])
-    .map(aId => state.accounts[aId])
+  const accounts = _(state.categories.queries[ACCOUNT_QUERY_ID])
+    .map(aId => state.accounts.values[aId])
     .filter(category => category)
     .value();
 

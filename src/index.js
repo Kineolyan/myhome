@@ -69,7 +69,7 @@ Cycle.run(main, {
   ACTION: makeActionDriver(),
   STATE: makeStateDriver(),
   HORIZONS: makeHorizonDriver(horizons),
-  LOG: createLogDriver(),
+  LOG: createLogDriver(false),
   ROUTER: makeRouterDriver()
 });
 

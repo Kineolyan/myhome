@@ -22,8 +22,8 @@ const CategoryPicker = reactStamp(React)
 
 const CATEGORY_QUERY_ID = 'categoryPicker';
 const mapStateToProps = (state, props) => {
-  const categories = _(state.categoryQueries[CATEGORY_QUERY_ID])
-    .map(cId => state.categories[cId])
+  const categories = _(state.categories.queries[CATEGORY_QUERY_ID])
+    .map(cId => state.categories.values[cId])
     .filter(category => category)
     .value();
 

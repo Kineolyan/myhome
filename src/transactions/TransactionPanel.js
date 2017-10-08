@@ -82,7 +82,7 @@ class TransactionPanel extends React.Component {
 }
 
 TransactionPanel.propTypes = {
-  transactionId: PropTypes.object.isRequired,
+  transactionId: PropTypes.string.isRequired,
   transaction: PropTypes.object,
   mode: PropTypes.oneOf(_.values(Mode)),
   onSuccess: PropTypes.func
@@ -99,7 +99,7 @@ TransactionPanel.contextTypes = {
 const mapStateToProps = (state, props) => {
 	return {
 		...props,
-		transaction: state.transactions[props.transactionId]
+		transaction: state.transactions.values[props.transactionId]
 	};
 };
 

@@ -25,8 +25,8 @@ const AccountPicker = reactStamp(React)
 
 const ACCOUNT_QUERY_ID = 'accountPicker';
 const mapStateToProps = (state: StateType, props) => {
-  const accounts = _(state.accountQueries[ACCOUNT_QUERY_ID])
-    .map(aId => state.accounts[aId])
+  const accounts = _(state.accounts.queries[ACCOUNT_QUERY_ID])
+    .map(aId => state.accounts.values[aId])
     .filter(category => category)
     .value();
 

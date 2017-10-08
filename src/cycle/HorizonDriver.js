@@ -126,7 +126,9 @@ function makeHorizonDriver(horizons) {
 				const unsubscribe = queryStream.subscribe(queriesSubject);
 				queries.set(queryId, unsubscribe);
 			},
-			error() {},
+			error(err) {
+				console.error('Error on query', err);
+			},
 			complete() {}
 		});
 

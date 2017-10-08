@@ -5,74 +5,59 @@ import actions from './actions';
 type HorizonIdType = string;
 type ObjectMappingType = { [HorizonIdType]: any };
 type QueryMappingType = { [HorizonIdType]: string[] };
+type StoreType = {
+  values: ObjectMappingType,
+  queries: QueryMappingType
+}
 export type StateType = {
   value: number,
-  transactions: ObjectMappingType,
-  transactionQueries: QueryMappingType,
-  categories: ObjectMappingType,
-  categoryQueries: QueryMappingType,
-  accounts: ObjectMappingType,
-  accountQueries: QueryMappingType
+  transactions: StoreType,
+  categories: StoreType,
+  accounts: StoreType,
+  templates: StoreType
 }
 
 const initialState: StateType = {
-  value: 0,
-  transactions: {},
-  transactionQueries: {},
-  categories: {},
-  categoryQueries: {},
-  accounts: {},
-  accountQueries: {}
+  transactions: {
+    values: {}, queries: {}
+  },
+  categories: {
+    values: {}, queries: {}
+  },
+  accounts: {
+    values: {}, queries: {}
+  },
+  templates: {
+    values: {}, queries: {}
+  }
 };
+
+function storeState(state, storeActions, action) {
+  if (action.type === storeActions.store) {
+    return Object.assign({}, state, {
+      queries: Object.assign(
+        {}, state.queries,
+        {[action.queryId]: action.values.map(c => c.id)}
+      ),
+      values: Object.assign(
+        {}, state.values,
+        _.keyBy(action.values, t => t.id)
+      )
+    });
+  } else {
+    return state;
+  }
+}
 
 /*
  * How is the next application state calculated,
  * given the current state and the action?
  */
-const counter = (state: StateType = initialState, action: any) => {
+const appState = (state: StateType = initialState, action: any) => {
   switch (action.type) {
     case actions.location.load:
       return Object.assign({}, state, {
         url: action.url
-      });
-    case 'INCREMENT':
-      return Object.assign({}, state, {value: state.value + 1});
-    case 'DECREMENT':
-      return Object.assign({}, state, {value: state.value - 1});
-    case actions.transactions.store:
-      return Object.assign({}, state, {
-        transactionQueries: Object.assign(
-          {}, state.transactionQueries,
-          {
-            [action.queryId]: action.transactions.map(t => t.id)
-          }
-        ),
-        transactions: Object.assign(
-          {}, state.transactions,
-          _.keyBy(action.transactions, t => t.id)
-        )
-      });
-    case actions.categories.store:
-      return Object.assign({}, state, {
-        categoryQueries: Object.assign(
-          {}, state.categoryQueries,
-          {[action.queryId]: action.categories.map(c => c.id)}
-        ),
-        categories: Object.assign(
-          {}, state.categories,
-          _.keyBy(action.categories, t => t.id)
-        )
-      });
-    case actions.accounts.store:
-      return Object.assign({}, state, {
-        accountQueries: Object.assign(
-          {}, state.accountQueries,
-          {[action.queryId]: action.accounts.map(c => c.id)}
-        ),
-        accounts: Object.assign(
-          {}, state.accounts,
-          _.keyBy(action.accounts, t => t.id)
-        )
       });
     case actions.activities.transactions:
       return Object.assign({}, state, {
@@ -87,8 +72,14 @@ const counter = (state: StateType = initialState, action: any) => {
         view: 'showcase'
       });
     default:
-      return state;
+      return {
+        ...state,
+        accounts: storeState(state.accounts, actions.accounts, action),
+        transactions: storeState(state.transactions, actions.transactions, action),
+        templates: storeState(state.templates, actions.templates, action),
+        categories: storeState(state.categories, actions.categories, action)
+      };
   }
 }
 
-export default counter;
+export default appState;

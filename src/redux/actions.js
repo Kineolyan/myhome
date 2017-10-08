@@ -5,17 +5,21 @@ export default {
 	},
 	accounts: {
 		query: 'QUERY_ACCOUNTS',
-		store: 'STORE_QUERY_ACCOUNTS',
+		store: 'STORE_ACCOUNTS',
 		add: 'ADD_ACCOUNT'
 	},
 	categories: {
 		query: 'QUERY_CATEGORIES',
-		store: 'STORE_QUERY_CATEGORIES',
+		store: 'STORE_CATEGORIES',
 		add: 'ADD_CATEGORY'
 	},
 	transactions: {
 		query: 'QUERY_TRANSACTIONS',
-		store: 'STORE_QUERY_TRANSACTIONS'
+		store: 'STORE_TRANSACTIONS'
+	},
+	templates: {
+		query: 'QUERY_TEMPLATES',
+		store: 'STORE_TEMPLATES'
 	},
 	activities: {
 		transactions: 'LOAD_TRANSACTION_ACTIVITY',
