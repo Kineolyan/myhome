@@ -56,7 +56,7 @@ class TransactionActivity extends React.Component {
 
   renderEditorView() {
     return <div className="block" style={{maxWidth: this.getRatio(true)}}>
-      <TransactionEditor />
+      <TransactionEditor editorId="activity-editor"/>
       <LatestTransactions byGroup={false}/>
     </div>;
   }

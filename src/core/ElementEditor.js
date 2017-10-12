@@ -33,8 +33,11 @@ const ElementEditor = reactStamp(React).compose({
 const HorizonEditor = reactStamp(React)
   .compose(WithStreams)
   .compose({
+    readEditedElement() {
+      return this.state[this.elementKey];
+    },
     getEditedElement() {
-      const element = _.clone(this.state[this.elementKey]);
+      const element = _.clone(this.readEditedElement());
       const propElt = this.props[this.elementKey];
       if (propElt.id !== undefined) {
         element.id = propElt.id;

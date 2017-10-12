@@ -1,6 +1,7 @@
 // @flow
 import actions from './actions';
-import {makeStore, storeState} from './horizonStore';
+import * as horizonStore from './horizonStore';
+import * as editorStore from './editorStore';
 
 type HorizonIdType = string;
 type ObjectMappingType = { [HorizonIdType]: any };
@@ -18,10 +19,11 @@ export type StateType = {
 }
 
 const initialState: StateType = {
-  transactions: makeStore(),
-  categories: makeStore(),
-  accounts: makeStore(),
-  templates: makeStore()
+  transactions: horizonStore.makeStore(),
+  categories: horizonStore.makeStore(),
+  accounts: horizonStore.makeStore(),
+  templates: horizonStore.makeStore(),
+  editors: editorStore.makeStore()
 };
 
 /*
@@ -49,10 +51,11 @@ const appState = (state: StateType = initialState, action: any) => {
     default:
       return {
         ...state,
-        accounts: storeState(state.accounts, actions.accounts, action),
-        transactions: storeState(state.transactions, actions.transactions, action),
-        templates: storeState(state.templates, actions.templates, action),
-        categories: storeState(state.categories, actions.categories, action)
+        accounts: horizonStore.storeState(state.accounts, actions.accounts, action),
+        transactions: horizonStore.storeState(state.transactions, actions.transactions, action),
+        templates: horizonStore.storeState(state.templates, actions.templates, action),
+        categories: horizonStore.storeState(state.categories, actions.categories, action),
+        editors: editorStore.storeState(state.editors, action)
       };
   }
 }

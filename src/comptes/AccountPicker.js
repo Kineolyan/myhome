@@ -1,7 +1,6 @@
 // @flow
 
 import React from 'react';
-import _ from 'lodash';
 import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
 

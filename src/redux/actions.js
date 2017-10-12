@@ -25,5 +25,10 @@ export default {
 		transactions: 'LOAD_TRANSACTION_ACTIVITY',
 		accounts: 'LOAD_ACCOUNT_ACTIVITY',
 		showcase: 'LOAD_SHOWCASE_ACTIVITY'
+	},
+	editors: {
+		setup: 'EDITOR_SETUP',
+		edit: 'EDITOR_EDIT',
+		submit: 'EDITOR_SUBMIT'
 	}
 };

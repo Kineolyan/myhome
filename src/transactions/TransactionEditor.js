@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
+import {connect} from 'react-redux';
 
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -14,6 +15,8 @@ import AutoComplete from 'material-ui/AutoComplete';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
 
+import actions from '../redux/actions';
+import {getEditedValue} from '../redux/editorStore';
 import {Type} from './models';
 import CategoryPicker from '../categories/CategoryPicker';
 import CategoryEditor from '../categories/CategoryEditor';
@@ -59,10 +62,31 @@ const TransactionEditor = reactStamp(React)
       const key = 'transaction';
       instance.elementKey = key;
       instance.formStateKey = key;
+      instance.setModelValue = function(key, value, acceptEmpty = false) {
+        const element = {...this.props.editedTransaction};
+        if (!_.isEmpty(value) || acceptEmpty || value instanceof Date) {
+          element[key] = value;
+        } else {
+          Reflect.deleteProperty(element, key);
+        }
+  
+        this.props.edit(element);
+      };
+      instance.readEditedElement = function() {
+        return this.props.editedTransaction;
+      };
 
       instance.state.transaction = this.makeStateTransaction(instance.props.transaction);
     },
     componentWillMount() {
+      if (this.props.transaction) {
+        const t = {
+          ...this.props.transaction,
+          date: new Date(this.props.transaction.date)
+        };
+        this.props.setUp(t);
+      }
+
       this.cbks = Object.assign({}, this.cbks, {
         setObject: value => this.setModelValue('object', value || '', true),
         selectCompletedObject: this.defineTransactionObject.bind(this),
@@ -116,14 +140,14 @@ const TransactionEditor = reactStamp(React)
       return this.transactionsFeed;
     },
     getValue(key) {
-      return this.state.transaction[key]
+      return this.props.editedTransaction[key]
         || this.props.transaction[key];
     },
     defineTransactionObject(chosenObject, idx) {
       const template = this.state.templates[idx - this.state.latestObjects.length];
       if (template !== undefined && chosenObject === `${template.object} [t]`) {
         // Save the transaction id for update
-        const transactionId = this.state.transaction.id;
+        const transactionId = this.props.editedTransaction.id;
         const transaction = this.makeStateTransaction(template);
         transaction.id = transactionId;
         transaction.templateId = template.id;
@@ -151,12 +175,13 @@ const TransactionEditor = reactStamp(React)
       }
     },
     reset() { // Override from HorizonEditor
-      const transaction = this.state.transaction;
+      const transaction = {
+        ...DEFAULT_TRANSACTION,
+        ...this.props.editedTransaction
+      };
       // Remove changing props
       ['object', 'amount', 'group'].forEach(prop => { transaction[prop] = '';});
-      // Reset to default props
-      const newValue = _.assign({}, transaction, DEFAULT_TRANSACTION);
-      this.setState({transaction: newValue});
+      this.props.edit(transaction);
     },
     canSubmit() {
       const transaction = this.getEditedElement();
@@ -218,7 +243,7 @@ const TransactionEditor = reactStamp(React)
         <AutoComplete
           hintText="Objet de la transaction"
           filter={AutoComplete.fuzzyFilter}
-          searchText={this.state.transaction.object}
+          searchText={this.props.editedTransaction.object}
           dataSource={suggestions}
           onUpdateInput={this.cbks.setObject}
           onNewRequest={this.cbks.selectCompletedObject}
@@ -293,13 +318,13 @@ const TransactionEditor = reactStamp(React)
         {this.renderObject()}
         <div>
           <TextField hintText="Montant de la transaction" type="number"
-            value={this.state.transaction.amount}
+            value={this.props.editedTransaction.amount}
             onChange={this.cbks.setAmount} />
         </div>
         <div>
           <DatePicker
             hintText="Date de la transaction"
-            value={this.state.transaction.date}
+            value={this.props.editedTransaction.date}
             maxDate={TODAY}
             onChange={this.cbks.setDate} autoOk={true}/>
         </div>
@@ -326,4 +351,33 @@ const TransactionEditor = reactStamp(React)
     }
   });
 
-export default TransactionEditor;
+function mapStateToProps(state, props) {
+  const editedTransaction = getEditedValue(
+    state.editors, 
+    props.editorId, 
+    DEFAULT_TRANSACTION);
+  return {
+    ...props,
+    editedTransaction
+  };
+}
+
+function mapDispatchToProps(dispatch, props) {
+  return {
+    setUp: transaction => dispatch({
+      type: actions.editors.setup,
+      editorId: props.editorId,
+      value: transaction
+    }),
+    edit: transaction => dispatch({
+      type: actions.editors.edit,
+      editorId: props.editorId,
+      value: transaction
+    })
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(TransactionEditor);
+export {
+  TransactionEditor
+};
