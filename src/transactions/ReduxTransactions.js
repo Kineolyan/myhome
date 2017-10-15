@@ -56,15 +56,11 @@ const mapStateToProps = (state, props) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-	startQuery(viewId, query) {
-		return dispatch(Object.assign(
-			{
-				type: actions.transactions.query,
-				queryId: viewId
-			},
-			query
-		));
-	},
+	startQuery: (viewId, query) => dispatch({
+		type: actions.transactions.query,
+		queryId: viewId,
+		...query
+	}),
 	stopQuery() {}
 });
 

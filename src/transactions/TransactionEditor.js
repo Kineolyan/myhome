@@ -17,6 +17,7 @@ import ContentAdd from 'material-ui/svg-icons/content/add';
 
 import actions from '../redux/actions';
 import {getEditedValue} from '../redux/editorStore';
+import {getStateValues} from '../redux/horizonStore';
 import {Type} from './models';
 import CategoryPicker from '../categories/CategoryPicker';
 import CategoryEditor from '../categories/CategoryEditor';
@@ -37,7 +38,8 @@ const PAYMENT_TYPES = [
 const TODAY = new Date();
 const DEFAULT_TRANSACTION = {
   object: '',
-  type: Type.CARTE
+  type: Type.CARTE,
+  date: TODAY
 };
 
 const TransactionEditor = reactStamp(React)
@@ -79,13 +81,17 @@ const TransactionEditor = reactStamp(React)
       instance.state.transaction = this.makeStateTransaction(instance.props.transaction);
     },
     componentWillMount() {
-      if (this.props.transaction) {
+      if (!_.isEmpty(this.props.transaction)) {
         const t = {
           ...this.props.transaction,
           date: new Date(this.props.transaction.date)
         };
         this.props.setUp(t);
+      } else {
+        this.props.setUp(DEFAULT_TRANSACTION);
       }
+      this.props.loadLatestTransactions();
+      this.props.loadTemplates();
 
       this.cbks = Object.assign({}, this.cbks, {
         setObject: value => this.setModelValue('object', value || '', true),
@@ -104,31 +110,6 @@ const TransactionEditor = reactStamp(React)
         completeTransfer: this.transfer.bind(this, true),
         cancelTransfer: this.transfer.bind(this, false)
       });
-
-      const lastestTransactions = this.transactionsFeed
-        .order('updatedAt', 'descending')
-        .limit(100)
-        .watch()
-        .subscribe(
-          transactions => {
-            const objects = _(transactions)
-              .map(t => t.object)
-              .uniq()
-              .value();
-            this.setState({latestObjects: objects});
-          },
-          err => {
-            console.error('Cannot retrieve latest transactions', err);
-            this.setState({existingObjects: []});
-          });
-      this.setStream('latestTransactions', lastestTransactions);
-
-      const templates = this.getTemplateFeed()
-          .watch()
-          .subscribe(
-              templates => this.setState({templates}),
-              err => console.error('Faied to retrieve templates', err));
-      this.setStream('transactionTemplates', templates);
     },
     makeStateTransaction(template) {
       const transaction = _.assign({}, DEFAULT_TRANSACTION, template);
@@ -144,7 +125,7 @@ const TransactionEditor = reactStamp(React)
         || this.props.transaction[key];
     },
     defineTransactionObject(chosenObject, idx) {
-      const template = this.state.templates[idx - this.state.latestObjects.length];
+      const template = this.props.templates[idx - this.props.latestObjects.length];
       if (template !== undefined && chosenObject === `${template.object} [t]`) {
         // Save the transaction id for update
         const transactionId = this.props.editedTransaction.id;
@@ -160,7 +141,7 @@ const TransactionEditor = reactStamp(React)
           transaction.date.setMonth(transaction.date.getMonth() - 1);
         }
 
-        this.setState({transaction});
+        this.props.edit(transaction);
       } else {
         // Just use the value without template
         this.setModelValue('object', chosenObject);
@@ -235,8 +216,8 @@ const TransactionEditor = reactStamp(React)
     },
     renderObject() {
       const suggestions = [
-        ...this.state.latestObjects,
-        ...this.state.templates.map(t => `${t.object} [t]`)
+        ...this.props.latestObjects,
+        ...this.props.templates.map(t => `${t.object} [t]`)
       ];
 
       return <div>
@@ -313,6 +294,10 @@ const TransactionEditor = reactStamp(React)
       return btns;
     },
     render() {
+      if (!this.props.editedTransaction) {
+        return <p><i>Loading...</i></p>;
+      }
+
       return <div>
         {this.renderForms()}
         {this.renderObject()}
@@ -351,14 +336,24 @@ const TransactionEditor = reactStamp(React)
     }
   });
 
+const LATEST_TRANSACTIONS_KEY = 'transaction-editor-lastest-transactions';
+const TEMPLATES_KEY = 'transaction-editor-templates';
 function mapStateToProps(state, props) {
   const editedTransaction = getEditedValue(
     state.editors, 
     props.editorId, 
-    DEFAULT_TRANSACTION);
+    undefined);
+  const latestObjects = _(getStateValues(state.transactions, LATEST_TRANSACTIONS_KEY))
+    .map(t => t.object)
+    .uniq()
+    .value();
+  const templates = getStateValues(state.templates, TEMPLATES_KEY);
+
   return {
     ...props,
-    editedTransaction
+    editedTransaction,
+    latestObjects,
+    templates
   };
 }
 
@@ -373,6 +368,16 @@ function mapDispatchToProps(dispatch, props) {
       type: actions.editors.edit,
       editorId: props.editorId,
       value: transaction
+    }),
+    loadLatestTransactions: () => dispatch({
+      type: actions.transactions.query,
+      queryId: LATEST_TRANSACTIONS_KEY,
+      order: 'updatedAt descending',
+      limit: 100
+    }),
+    loadTemplates: () => dispatch({
+      type: actions.templates.query,
+      queryId: TEMPLATES_KEY
     })
   }
 }
