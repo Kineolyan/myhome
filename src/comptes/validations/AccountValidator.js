@@ -157,7 +157,10 @@ const AccountValidator = reactStamp(React)
 						transactions: groups[key]
 					}))
 					.value();
-				const oldTransactions = _.filter(this.props.transactions, transaction => transaction.date < lastWeek);
+				const oldTransactions = _(this.props.transactions)
+					.filter(transaction => transaction.date < lastWeek)
+					.sortBy(t => -t.date)
+					.value();
 				if (!_.isEmpty(oldTransactions)) {
 					order.push({
 						caption: 'Before',

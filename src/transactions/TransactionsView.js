@@ -164,9 +164,10 @@ const TransactionsView = reactStamp(React)
       this.setState({detailledTransaction: null});
     },
     deleteTransaction() {
-      const transaction = this.state.detailledTransaction;
-      this.transactionsFeed.remove(transaction.id);
-      this.hideTransaction();
+      if (this.state.detailledTransaction) {
+        this.transactionsFeed.remove(this.state.detailledTransaction);
+        this.hideTransaction();
+      }
     },
     makeTemplate() {
       const baseTransaction = _.find(this.state.transactions, {id: this.state.detailledTransaction});
