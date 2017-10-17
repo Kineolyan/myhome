@@ -55,6 +55,113 @@ const storeTransactions$ = sources.HORIZONS
 	}));
 */
 
+const Operations = {
+	FETCH: 'fetch',
+	STORE: 'store',
+	UPDATE: 'update',
+	DELETE: 'delete'
+};
+
+function fetchValues(query) {
+	const {store, queryId, order, conditions, filters, limit} = query;
+	if (queries.has(queryId)) {
+		// Stop the previous query
+		queries.get(queryId).unsubscribe();
+		queries.delete(queryId);
+	}
+
+	let queryStream = horizons[store];
+	if (_.isObject(conditions) && !_.isEmpty(conditions)) {
+		queryStream = queryStream.findAll(conditions);
+	}
+
+	if (query.above) {
+		queryStream = queryStream.above(...query.above);
+	}
+	if (query.below) {
+		queryStream = queryStream.below(...query.below);
+	}
+
+	if (order) {
+		const [field, way] = order.split(/\s+/);
+		queryStream = queryStream.order(field, way);
+	}
+
+	if (_.isInteger(limit) && limit > 0) {
+		queryStream = queryStream.limit(limit);
+	}
+
+	// if (mode === 'fetch') {
+	// 	queryStream = queryStream.fetch()
+	// 		.defaultIfEmpty();
+	// } else {
+		queryStream = queryStream.watch();
+	// }
+
+	if (_.isArray(filters)) {
+		queryStream = filters.filter(_.isFunction)
+			.reduce(
+				(stream, filter) => stream.map(
+					values => values.filter(filter)
+				),
+				queryStream
+			);
+	}
+
+	// Dispatch the result properly
+	return queryStream.map(values => {
+		if (order) {
+			// FIXME, reorder, in case it has failed
+			const [field, way] = order.split(/\s+/);
+			let chain = _(values).sortBy(field);
+			if (way === 'descending') {
+				chain = chain.reverse();
+			}
+			values = chain.value();
+		}
+
+		return {store, queryId, values};
+	});
+}
+
+function storeValue({queryId, store, value}) {
+	return horizons[store].store(value)
+		.map(({id}) => ({
+			store,
+			queryId,
+			value: {
+				...value,
+				id
+			}
+		}));
+}
+
+function udpateValues({queryId, store, value, values}) {
+	const payload = value || values;
+	return horizons[store].update(payload)
+		.map(() => ({
+			store,
+			queryId,
+			success: true
+		}));
+}
+
+function deleteValues(query) {
+	const {queryId, store} = query;
+	let stream = horizons[store];
+	if (Reflect.has(query, 'value')) {
+		stream = stream.remove(query.value);
+	} else {
+		stream = stream.removeAll(query.values);
+	}
+		
+	return stream.map(() => ({
+		store,
+		queryId,
+		success: true
+	}));
+}
+
 function makeHorizonDriver(horizons) {
 	return query$ => {
 		const queries = new Map();
@@ -62,65 +169,21 @@ function makeHorizonDriver(horizons) {
 
 		query$.addListener({
 			next(query) {
-				const {store, queryId, order, conditions, filters, limit} = query;
-				if (queries.has(queryId)) {
-					// Stop the previous query
-					queries.get(queryId).unsubscribe();
-					queries.delete(queryId);
+				let queryStream;
+				switch (query.mode) {
+				case Operations.STORE:
+					queryStream = storeValue(query);
+					break;
+				case Operations.UPDATE:
+					queryStream = updateValues(query);
+					break;
+				case Operations.DELETE:
+					queryStream = deleteValues(query);
+					break;
+				case Operations.FETCH:
+				default:
+					queryStream = fetchValues(query);
 				}
-
-				let queryStream = horizons[store];
-				if (_.isObject(conditions) && !_.isEmpty(conditions)) {
-					queryStream = queryStream.findAll(conditions);
-				}
-
-				if (query.above) {
-					queryStream = queryStream.above(...query.above);
-				}
-				if (query.below) {
-					queryStream = queryStream.below(...query.below);
-				}
-
-				if (order) {
-					const [field, way] = order.split(/\s+/);
-					queryStream = queryStream.order(field, way);
-				}
-
-				if (_.isInteger(limit) && limit > 0) {
-					queryStream = queryStream.limit(limit);
-				}
-
-				// if (mode === 'fetch') {
-				// 	queryStream = queryStream.fetch()
-				// 		.defaultIfEmpty();
-				// } else {
-					queryStream = queryStream.watch();
-				// }
-
-				if (_.isArray(filters)) {
-					queryStream = filters.filter(_.isFunction)
-						.reduce(
-							(stream, filter) => stream.map(
-								values => values.filter(filter)
-							),
-							queryStream
-						);
-				}
-
-				// Dispatch the result properly
-				queryStream = queryStream.map(values => {
-					if (order) {
-						// FIXME, reorder, in case it has failed
-						const [field, way] = order.split(/\s+/);
-						let chain = _(values).sortBy(field);
-						if (way === 'descending') {
-							chain = chain.reverse();
-						}
-						values = chain.value();
-					}
-
-					return {store, queryId, values};
-				});
 
 				// Multicasting the result
 				const unsubscribe = queryStream.subscribe(queriesSubject);
