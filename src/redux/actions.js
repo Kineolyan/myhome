@@ -29,6 +29,7 @@ export default {
 	editors: {
 		setup: 'EDITOR_SETUP',
 		edit: 'EDITOR_EDIT',
-		submit: 'EDITOR_SUBMIT'
+		submit: 'EDITOR_SUBMIT',
+		clear: 'EDITOR_CLEAR'
 	}
 };

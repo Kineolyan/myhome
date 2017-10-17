@@ -52,8 +52,8 @@ class TemplateList extends React.Component {
       return <ul>
         {this.props.templates.map(t => (
           <li key={t.id}>
+            <span onClick={() => this.deleteTemplate(t)}>(x)&nbsp;</span>
             {t.id} -> {t.object} ({JSON.stringify(t.frequency)})
-            <span onClick={() => this.deleteTemplate(t)}>&nbsp;(x)</span>
           </li>))}
       </ul>;
     } else {

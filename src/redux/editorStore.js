@@ -15,6 +15,10 @@ function storeState(state, action) {
         value: action.value
       }
     };
+  case actions.editors.clear:
+    const newState = {...state};
+    Reflect.deleteProperty(newState, action.editorId);
+    return newState;
   default:
     return state;
   }

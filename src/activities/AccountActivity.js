@@ -152,7 +152,7 @@ class AccountActivity extends React.Component {
             <DoneAllIcon />
           </FloatingActionButton>
         </div>
-        <AccountEditor />
+        <AccountEditor editorId="account-activity-account-editor"/>
       </div>
       <div className="panel">
         {this.renderList()}

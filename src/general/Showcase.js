@@ -20,7 +20,7 @@ class Showcase extends React.Component {
           <Messages />
         </div>
         <div className="block">
-          <AccountEditor />
+          <AccountEditor editorId="showcase-account-editor"/>
         </div>
         <div className="block">
           <AccountList />
