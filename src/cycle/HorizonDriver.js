@@ -62,13 +62,8 @@ const Operations = {
 	DELETE: 'delete'
 };
 
-function fetchValues(query) {
+function fetchValues(horizons, query) {
 	const {store, queryId, order, conditions, filters, limit} = query;
-	if (queries.has(queryId)) {
-		// Stop the previous query
-		queries.get(queryId).unsubscribe();
-		queries.delete(queryId);
-	}
 
 	let queryStream = horizons[store];
 	if (_.isObject(conditions) && !_.isEmpty(conditions)) {
@@ -124,7 +119,7 @@ function fetchValues(query) {
 	});
 }
 
-function storeValue({queryId, store, value}) {
+function storeValue(horizons, {queryId, store, value}) {
 	return horizons[store].store(value)
 		.map(({id}) => ({
 			store,
@@ -136,7 +131,7 @@ function storeValue({queryId, store, value}) {
 		}));
 }
 
-function udpateValues({queryId, store, value, values}) {
+function updateValues(horizons, {queryId, store, value, values}) {
 	const payload = value || values;
 	return horizons[store].update(payload)
 		.map(() => ({
@@ -146,7 +141,7 @@ function udpateValues({queryId, store, value, values}) {
 		}));
 }
 
-function deleteValues(query) {
+function deleteValues(horizons, query) {
 	const {queryId, store} = query;
 	let stream = horizons[store];
 	if (Reflect.has(query, 'value')) {
@@ -169,25 +164,31 @@ function makeHorizonDriver(horizons) {
 
 		query$.addListener({
 			next(query) {
+				if (queries.has(query.queryId)) {
+					// Stop the previous query
+					queries.get(query.queryId).unsubscribe();
+					queries.delete(query.queryId);
+				}
+
 				let queryStream;
 				switch (query.mode) {
 				case Operations.STORE:
-					queryStream = storeValue(query);
+					queryStream = storeValue(horizons, query);
 					break;
 				case Operations.UPDATE:
-					queryStream = updateValues(query);
+					queryStream = updateValues(horizons, query);
 					break;
 				case Operations.DELETE:
-					queryStream = deleteValues(query);
+					queryStream = deleteValues(horizons, query);
 					break;
 				case Operations.FETCH:
 				default:
-					queryStream = fetchValues(query);
+					queryStream = fetchValues(horizons, query);
 				}
 
 				// Multicasting the result
 				const unsubscribe = queryStream.subscribe(queriesSubject);
-				queries.set(queryId, unsubscribe);
+				queries.set(query.queryId, unsubscribe);
 			},
 			error(err) {
 				console.error('Error on query', err);
