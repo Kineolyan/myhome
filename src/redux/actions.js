@@ -6,7 +6,8 @@ export default {
 	accounts: {
 		query: 'QUERY_ACCOUNTS',
 		store: 'STORE_ACCOUNTS',
-		add: 'ADD_ACCOUNT'
+		add: 'ADD_ACCOUNT',
+		delete: 'DELETE_ACCOUNT'
 	},
 	categories: {
 		query: 'QUERY_CATEGORIES',

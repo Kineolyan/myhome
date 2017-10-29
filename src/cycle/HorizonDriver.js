@@ -62,6 +62,11 @@ const Operations = {
 	DELETE: 'delete'
 };
 
+function getPayload(query) {
+	const key = Reflect.has(query, 'value') ? 'value' : 'values'; 
+	return {key, payload: query[key]};
+}
+
 function fetchValues(horizons, query) {
 	const {store, queryId, order, conditions, filters, limit} = query;
 
@@ -131,12 +136,14 @@ function storeValue(horizons, {queryId, store, value}) {
 		}));
 }
 
-function updateValues(horizons, {queryId, store, value, values}) {
-	const payload = value || values;
-	return horizons[store].update(payload)
+function updateValues(horizons, query) {
+	const {queryId, store} = query;
+	const payload = getPayload(query);
+	return horizons[store].update(payload.value)
 		.map(() => ({
 			store,
 			queryId,
+			[payload.key]: payload.value,
 			success: true
 		}));
 }
@@ -144,7 +151,8 @@ function updateValues(horizons, {queryId, store, value, values}) {
 function deleteValues(horizons, query) {
 	const {queryId, store} = query;
 	let stream = horizons[store];
-	if (Reflect.has(query, 'value')) {
+	const payload = getPayload(query);
+	if (payload.key === 'value') {
 		stream = stream.remove(query.value);
 	} else {
 		stream = stream.removeAll(query.values);
@@ -153,6 +161,7 @@ function deleteValues(horizons, query) {
 	return stream.map(() => ({
 		store,
 		queryId,
+		[payload.key]: payload.value,
 		success: true
 	}));
 }
@@ -186,6 +195,13 @@ function makeHorizonDriver(horizons) {
 					queryStream = fetchValues(horizons, query);
 				}
 
+				// Complete each response with the default information
+				queryStream = queryStream.map(response => ({
+					...response,
+					category: query.category,
+					context: query.context || {}
+				}));
+
 				// Multicasting the result
 				const unsubscribe = queryStream.subscribe(queriesSubject);
 				queries.set(query.queryId, unsubscribe);
@@ -209,5 +225,6 @@ function makeHorizonDriver(horizons) {
 }
 
 export {
-	makeHorizonDriver
+	makeHorizonDriver,
+	Operations
 };

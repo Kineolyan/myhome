@@ -1,5 +1,6 @@
 import xs from 'xstream';
 import actions from '../redux/actions';
+import {Operations} from '../cycle/HorizonDriver';
 
 const Streams = {
   merge(first, ...others) {
@@ -12,8 +13,8 @@ const Streams = {
 
 function hzStoreReader(sources, store, actions) {
   const queries$ = sources.ACTION
-  .filter(action => action.type === actions.query)
-  .map(action => ({store, ...action}));
+    .filter(action => action.type === actions.query)
+    .map(action => ({store, ...action}));
 
   const values$ = sources.HORIZONS
     .filter(output => output.store === store)
@@ -26,6 +27,53 @@ function hzStoreReader(sources, store, actions) {
   return {
     queries: queries$,
     values: values$
+  };
+}
+
+function deleteAccount(sources) {
+  const DELETED_ACCOUNT = 'deleted_account';
+  const deleteRequest$ = sources.ACTION
+    .filter(action => action.type === actions.accounts.delete);
+
+  const deleteQuery$ = deleteRequest$.map(action => ({
+    store: 'accounts',
+    mode: Operations.DELETE,
+    queryId: action.queryId,
+    value: action.accountId,
+    category: DELETED_ACCOUNT,
+    context: {accountId: action.accountId} 
+  }));
+
+  const listAccountTransactions$ = sources.HORIZONS
+    .filter(operation => operation.category === DELETED_ACCOUNT
+        && operation.mode)
+    .map(operation => {
+      console.log('Account removed');
+      return {
+        store: 'transactions',
+        mode: Operations.FETCH,
+        queryId: `listing-transactions-to-delete-for-${operation.context.accountId}`,
+        conditions: {accountId: operation.context.accountId},
+        category: DELETED_ACCOUNT,
+        context: operation.context
+      };
+    });
+
+  const deleteAccountTransactions$ = sources.HORIZONS
+    .filter(response => response.category === DELETED_ACCOUNT)
+    .map(response => ({
+      store: 'transactions',
+      mode: Operations.DELETE,
+      queryId: `deleting-account-transactions-for-${response.context.accountId}`,
+      values: response.values,
+      category: DELETED_ACCOUNT
+    }));
+
+  return {
+    HORIZONS: Streams.merge(
+      deleteQuery$,
+      listAccountTransactions$,
+      deleteAccountTransactions$)
   };
 }
 
@@ -66,6 +114,7 @@ function main(sources) {
   const categories$ = hzStoreReader(sources, 'categories', actions.categories);
   const templates$ = hzStoreReader(sources, 'templates', actions.templates);
   const accounts$ = hzStoreReader(sources, 'accounts', actions.accounts);
+  const opsOnDeletedAccounts$ = deleteAccount(sources);
 
   const actions$ = Streams.merge(
     transactions$.values,
@@ -79,7 +128,8 @@ function main(sources) {
     transactions$.queries,
     categories$.queries,
     templates$.queries,
-    accounts$.queries
+    accounts$.queries,
+    opsOnDeletedAccounts$.HORIZONS
   );
 
   const log$ = Streams.merge(
