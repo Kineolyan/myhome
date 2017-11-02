@@ -30,7 +30,7 @@ class Showcase extends React.Component {
           <CategoryList />
         </div>
         <div className="block">
-          <TransactionEditor />
+          <TransactionEditor editorId="showcase-tx-editor"/>
         </div>
         <div className="block">
           <TransactionList />

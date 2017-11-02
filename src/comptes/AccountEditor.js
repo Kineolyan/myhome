@@ -10,11 +10,12 @@ import RaisedButton from 'material-ui/RaisedButton';
 import actions from '../redux/actions';
 import {getEditedValue} from '../redux/editorStore';
 import ElementEditor, {HorizonEditor} from '../core/ElementEditor';
-import {StateForm} from '../core/muiForm';
+import {setModelFromInput} from '../core/muiForm';
 import {WithHorizons} from '../core/horizon';
 
+const ELEMENT_KEY = 'account';
 const AccountEditor = reactStamp(React)
-  .compose(WithHorizons, ElementEditor, HorizonEditor, StateForm)
+  .compose(WithHorizons, ElementEditor, HorizonEditor)
   .compose({
     propTypes: {
       account: PropTypes.object,
@@ -28,27 +29,20 @@ const AccountEditor = reactStamp(React)
       account: {}
     },
     init(props, {instance}) {
-      const elementKey = 'account';
-      instance.elementKey = elementKey;
-      instance.formStateKey = elementKey;
+      instance.elementKey = ELEMENT_KEY;
 
-      instance.setModelValue = function(key, value, acceptEmpty = false) {
-        const element = {...this.props.editedAccount};
-        if (!_.isEmpty(value) || acceptEmpty || value instanceof Date) {
-          element[key] = value;
-        } else {
-          Reflect.deleteProperty(element, key);
-        }
-  
-        this.props.edit(element);
-      };
       instance.readEditedElement = function() {
         return this.props.editedAccount;
       };
     },
     componentWillMount() {
       this.props.setUp({});
-      this.cbks.setName = this.setModelFromInput.bind(this, 'name');
+      this.cbks.setName = setModelFromInput.bind(
+        null,
+        this.props,
+        ELEMENT_KEY,
+        newState => this.props.edit(newState[ELEMENT_KEY]), 
+        'name');
     },
     componentWillUnmount() {
       this.props.clear();

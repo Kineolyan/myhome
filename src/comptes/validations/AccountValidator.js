@@ -109,7 +109,7 @@ const AccountValidator = reactStamp(React)
 		renderNextValidation() {
 			const enabled = this.state.balanceIdx > 1;
 			return <FloatingActionButton primary={true} mini={true}
-				onTouchTap={this.cbks.nextValidation}
+				onTouchTap={enabled ? this.cbks.nextValidation : _.noop}
 				disabled={!enabled}>
 					<ArrowRight/>
 			</FloatingActionButton>;

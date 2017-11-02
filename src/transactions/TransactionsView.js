@@ -65,10 +65,21 @@ const TransactionsView = reactStamp(React)
 
       if (this.props.feed) {
         this.subscribeToFeed();
+      } else {
+        const rows = this.computeRows(this.props.transactions);
+        const maxIdx = this.getMaxIndex(rows);
+        if (maxIdx <= this.state.index) {
+          this.setState({index: maxIdx - 1});
+        }
       }
     },
     componentWillReceiveProps(nextProps) {
-      this.setState({transactions: nextProps.transactions});
+      const rows = this.computeRows(nextProps.transactions);
+      const maxIdx = this.getMaxIndex(rows);
+      if (maxIdx <= this.state.index) {
+        this.setState({index: maxIdx - 1});
+      }
+
     },
     componentDidUpdate(prevProps) {
       if (this.props.feed !== prevProps.feed) {
@@ -253,8 +264,10 @@ const TransactionsView = reactStamp(React)
     renderPrevious() {
       const enabled = this.state.index > 0;
 
-      return <FloatingActionButton onTouchTap={this.cbks.goPrevious}
-          mini={true} disabled={!enabled}>
+      return <FloatingActionButton 
+          onTouchTap={enabled ? this.cbks.goPrevious : _.noop}
+          mini={true}
+          disabled={!enabled}>
         <ArrowUp/>
       </FloatingActionButton>;
     },
@@ -262,8 +275,10 @@ const TransactionsView = reactStamp(React)
       const lastIndex = (this.state.index + 1) * this.props.pagination;
       const enabled = lastIndex < this.state.transactions.length;
 
-      return <FloatingActionButton onTouchTap={this.cbks.goNext}
-          mini={true} disabled={!enabled}>
+      return <FloatingActionButton 
+          onTouchTap={enabled ? this.cbks.goNext : _.noop}
+          mini={true}
+          disabled={!enabled}>
         <ArrowDown/>
       </FloatingActionButton>;
     },

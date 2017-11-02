@@ -6,11 +6,12 @@ import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 
 import ElementEditor, {HorizonEditor} from '../core/ElementEditor';
-import {StateForm} from '../core/muiForm';
+import {setModelFromInput} from '../core/muiForm';
 import {WithHorizons} from '../core/horizon';
 
+const ELEMENT_KEY = 'group';
 const GroupEditor = reactStamp(React)
-  .compose(WithHorizons, ElementEditor, HorizonEditor, StateForm)
+  .compose(WithHorizons, ElementEditor, HorizonEditor)
   .compose({
     propTypes: {
       group: PropTypes.object
@@ -19,18 +20,19 @@ const GroupEditor = reactStamp(React)
       group: {}
     },
     state: {
-      group: {}
+      [ELEMENT_KEY]: {}
     },
     init(props, {instance}) {
-      const elementKey = 'group';
-      instance.elementKey = elementKey;
-      instance.formStateKey = elementKey;
+      instance.elementKey = ELEMENT_KEY;
     },
     getElementFeed() {
       return this.groupsFeed;
     },
     componentWillMount() {
-      this.cbks.setName = this.setModelFromInput.bind(this, 'name');
+      this.cbks.setName = setModelFromInput.bind(
+        null, 
+        this.state, ELEMENT_KEY, newState => this.setState(newState),
+       'name');
     },
     render() {
       return <div>

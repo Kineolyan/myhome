@@ -25,7 +25,7 @@ import AccountPicker from '../comptes/AccountPicker';
 import GroupPicker from '../groups/GroupPicker';
 import GroupEditor from '../groups/GroupEditor';
 import {WithHorizons} from '../core/horizon';
-import {StateForm} from '../core/muiForm';
+import * as muiForm from '../core/muiForm';
 import ElementEditor, {HorizonEditor} from '../core/ElementEditor';
 
 const PAYMENT_TYPES = [
@@ -42,8 +42,9 @@ const DEFAULT_TRANSACTION = {
   date: TODAY
 };
 
+const ELEMENT_KEY = 'transaction';
 const TransactionEditor = reactStamp(React)
-  .compose(WithHorizons, ElementEditor, HorizonEditor, StateForm)
+  .compose(WithHorizons, ElementEditor, HorizonEditor)
   .compose({
     propTypes: {
       transaction: PropTypes.object
@@ -61,24 +62,23 @@ const TransactionEditor = reactStamp(React)
       askTransferAccount: false
     },
     init(props, {instance}) {
-      const key = 'transaction';
-      instance.elementKey = key;
-      instance.formStateKey = key;
-      instance.setModelValue = function(key, value, acceptEmpty = false) {
-        const element = {...this.props.editedTransaction};
-        if (!_.isEmpty(value) || acceptEmpty || value instanceof Date) {
-          element[key] = value;
-        } else {
-          Reflect.deleteProperty(element, key);
-        }
-  
-        this.props.edit(element);
-      };
+      instance.elementKey = ELEMENT_KEY;
+      const ELEMENT_PROP = 'editedTransaction';
       instance.readEditedElement = function() {
-        return this.props.editedTransaction;
+        return this.props[ELEMENT_PROP];
       };
 
-      instance.state.transaction = this.makeStateTransaction(instance.props.transaction);
+      const updater = newState => instance.props.edit(newState[ELEMENT_PROP]);
+      instance.setModelValue = (...args) => muiForm.setModelValue(
+        instance.props, ELEMENT_PROP, updater,
+        ...args);
+      instance.setModelFromInput = (...args) => muiForm.setModelFromInput(
+        instance.props, ELEMENT_PROP, updater,
+        ...args);
+      instance.setModelFromChoice = (...args) => muiForm.setModelFromChoice(
+        instance.props, ELEMENT_PROP, updater,
+        ...args);
+
     },
     componentWillMount() {
       if (!_.isEmpty(this.props.transaction)) {
@@ -204,16 +204,6 @@ const TransactionEditor = reactStamp(React)
     toggleGroupForm(open) {
       this.setState({openGroupForm: open});
     },
-    renderChoices(values, valueFn, cbk, hintText) {
-      return <SelectField
-          value={valueFn(this.state) || valueFn(this.props) || null}
-          onChange={cbk}
-          floatingLabelText={hintText}
-          floatingLabelFixed={true}>
-        {values.map(value => <MenuItem key={value.id}
-            value={value.id} primaryText={value.name} />)}
-      </SelectField>;
-    },
     renderObject() {
       const suggestions = [
         ...this.props.latestObjects,
@@ -224,7 +214,7 @@ const TransactionEditor = reactStamp(React)
         <AutoComplete
           hintText="Objet de la transaction"
           filter={AutoComplete.fuzzyFilter}
-          searchText={this.props.editedTransaction.object}
+          searchText={this.props.editedTransaction.object || ''}
           dataSource={suggestions}
           onUpdateInput={this.cbks.setObject}
           onNewRequest={this.cbks.selectCompletedObject}
@@ -238,12 +228,14 @@ const TransactionEditor = reactStamp(React)
         onSelect={this.cbks.setAccount} />;
     },
     renderType() {
-      return this.renderChoices(
-        PAYMENT_TYPES,
-        store => store.transaction.type,
-        this.cbks.setType,
-        'Moyen de payement'
-      );
+      return <SelectField
+          value={this.props.editedTransaction.type || null}
+          onChange={this.cbks.setType}
+          floatingLabelText={'Moyen de payement'}
+          floatingLabelFixed={true}>
+        {PAYMENT_TYPES.map(value => <MenuItem key={value.id}
+            value={value.id} primaryText={value.name} />)}
+      </SelectField>;
     },
     renderCategories() {
       return <CategoryPicker
