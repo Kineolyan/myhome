@@ -11,40 +11,10 @@ class TemplateList extends React.Component {
     this.props.startQuery({
       order: "date descending"
     });
-    this.selection = this.feed.order('date', 'descending')
-      .watch()
-      .subscribe(
-        templates => this.setState({templates}),
-        err => {
-          console.error('Cannot get templates', err);
-          this.setState({templates: []});
-        });
   }
 
   deleteTemplate(template) {
-    const tId = template.id;
-    this.feed.remove(tId)
-      .subscribe(
-        () => {
-          console.log('Template removed');
-          const transactionFeed = this.context.horizons.transactions;
-          transactionFeed
-            .findAll({templateId: tId})
-            .fetch()
-            .mergeMap(transactions => transactionFeed.update(
-              transactions.map(transaction => ({
-                id: transaction.id,
-                templateId: null
-              }))))
-            .subscribe(
-              () => console.log('Transactions unlinked from deleted template'),
-              err => console.error('Failed to unlink transactions', err));
-        },
-        err => console.error('Failed to delete template', template, err));
-  }
-
-  get feed() {
-    return this.context.horizons.templates;
+    this.props.deleteTemplate(template.id);
   }
 
   render() {
@@ -61,10 +31,6 @@ class TemplateList extends React.Component {
     }
   }
 }
-
-TemplateList.contextTypes = {
-  horizons: PropTypes.object
-};
 
 const mapStateToProps = (state, props) => {
 	const templates = getStateValues(state.templates, props.viewId);
@@ -83,7 +49,12 @@ const mapDispatchToProps = (dispatch, props) => ({
       ...query
     });
 	},
-	stopQuery() {}
+  stopQuery() {},
+  deleteTemplate: (templateId) => dispatch({
+    type: actions.templates.delete,
+    queryId: `TemplateList-delete-${templateId}`,
+    templateId 
+  })
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(TemplateList);

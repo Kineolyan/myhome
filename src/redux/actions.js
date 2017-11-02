@@ -20,7 +20,8 @@ export default {
 	},
 	templates: {
 		query: 'QUERY_TEMPLATES',
-		store: 'STORE_TEMPLATES'
+		store: 'STORE_TEMPLATES',
+		delete: 'DELETE_TEMPLATE'
 	},
 	activities: {
 		transactions: 'LOAD_TRANSACTION_ACTIVITY',

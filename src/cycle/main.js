@@ -82,6 +82,60 @@ function deleteAccount(sources) {
   };
 }
 
+function deleteTemplate(sources) {
+  const DELETED_TEMPLATE = 'deleted_template';
+
+  const deleteQuery$ = sources.ACTION
+    .filter(action => action.type === actions.templates.delete)
+    .map(action => ({
+      store: 'templates',
+      mode: Operations.DELETE,
+      queryId: action.queryId,
+      value: action.templateId,
+      category: DELETED_TEMPLATE
+    }));
+
+  const listTransactions$ = sources.HORIZONS
+    .filter(response => {
+      return response.category === DELETED_TEMPLATE
+        && response.mode === Operations.DELETE;
+    })
+    .map(response => {
+      console.log('Template removed');
+      return {
+        store: 'transactions',
+        mode: Operations.FETCH,
+        queryId: `listing-transactions-with-template-${response.value}`,
+        conditions: {templateId: response.value},
+        category: DELETED_TEMPLATE,
+        context: {templateId: response.value}
+      };
+    });
+
+  const updateTransactions$ = sources.HORIZONS
+    .filter(response => {
+      return response.category === DELETED_TEMPLATE
+        && response.mode === Operations.FETCH;
+    })
+    .map(response => ({
+      store: 'transactions',
+      mode: Operations.UPDATE,
+      queryId: `untemplate-transactions-for-${response.context.templateId}`,
+      values: response.values.map(transaction => ({
+        id: transaction.id,
+        templateId: null
+      })),
+      category: DELETED_TEMPLATE
+    }));
+
+  return {
+    HORIZONS: Streams.merge(
+      deleteQuery$,
+      listTransactions$,
+      updateTransactions$)
+  };
+}
+
 function main(sources) {
   const state$ = sources.STATE;
 
@@ -120,6 +174,7 @@ function main(sources) {
   const templates$ = hzStoreReader(sources, 'templates', actions.templates);
   const accounts$ = hzStoreReader(sources, 'accounts', actions.accounts);
   const opsOnDeletedAccounts$ = deleteAccount(sources);
+  const opsOnDeletedTemplate$ = deleteTemplate(sources);
 
   const actions$ = Streams.merge(
     transactions$.values,
@@ -134,7 +189,8 @@ function main(sources) {
     categories$.queries,
     templates$.queries,
     accounts$.queries,
-    opsOnDeletedAccounts$.HORIZONS
+    opsOnDeletedAccounts$.HORIZONS,
+    opsOnDeletedTemplate$.HORIZONS
   );
 
   const log$ = Streams.merge(
