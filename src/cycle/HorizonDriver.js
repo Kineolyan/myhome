@@ -198,9 +198,11 @@ function makeHorizonDriver(horizons) {
 				// Complete each response with the default information
 				queryStream = queryStream.map(response => ({
 					...response,
+					mode: query.mode || Operations.FETCH,
 					category: query.category,
 					context: query.context || {}
 				}));
+				// FIXME Error with delete operation as we receive a completion event, stopping the subject
 
 				// Multicasting the result
 				const unsubscribe = queryStream.subscribe(queriesSubject);

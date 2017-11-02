@@ -32,35 +32,40 @@ function hzStoreReader(sources, store, actions) {
 
 function deleteAccount(sources) {
   const DELETED_ACCOUNT = 'deleted_account';
-  const deleteRequest$ = sources.ACTION
-    .filter(action => action.type === actions.accounts.delete);
 
-  const deleteQuery$ = deleteRequest$.map(action => ({
-    store: 'accounts',
-    mode: Operations.DELETE,
-    queryId: action.queryId,
-    value: action.accountId,
-    category: DELETED_ACCOUNT,
-    context: {accountId: action.accountId} 
-  }));
+  const deleteQuery$ = sources.ACTION
+    .filter(action => action.type === actions.accounts.delete)
+    .map(action => ({
+      store: 'accounts',
+      mode: Operations.DELETE,
+      queryId: action.queryId,
+      value: action.accountId,
+      category: DELETED_ACCOUNT,
+      context: {accountId: action.accountId} 
+    }));
 
   const listAccountTransactions$ = sources.HORIZONS
-    .filter(operation => operation.category === DELETED_ACCOUNT
-        && operation.mode)
-    .map(operation => {
+    .filter(response => {
+      return response.category === DELETED_ACCOUNT
+        && response.mode === Operations.DELETE;
+    })
+    .map(response => {
       console.log('Account removed');
       return {
         store: 'transactions',
         mode: Operations.FETCH,
-        queryId: `listing-transactions-to-delete-for-${operation.context.accountId}`,
-        conditions: {accountId: operation.context.accountId},
+        queryId: `listing-transactions-to-delete-for-${response.context.accountId}`,
+        conditions: {accountId: response.context.accountId},
         category: DELETED_ACCOUNT,
-        context: operation.context
+        context: response.context
       };
     });
 
   const deleteAccountTransactions$ = sources.HORIZONS
-    .filter(response => response.category === DELETED_ACCOUNT)
+    .filter(response => {
+      return response.category === DELETED_ACCOUNT
+        && response.mode === Operations.FETCH;
+    })
     .map(response => ({
       store: 'transactions',
       mode: Operations.DELETE,
@@ -133,10 +138,11 @@ function main(sources) {
   );
 
   const log$ = Streams.merge(
-    loadUrl$.map(a => ({_stream: 'loadUrl', ...a})),
+    // loadUrl$.map(a => ({_stream: 'loadUrl', ...a})),
     hQueries$.map(a => ({_stream: 'hQuery', ...a})),
-    actions$.map(a => ({_stream: 'sinkActions', ...a})),
-    sources.ACTION.map(a => ({_stream: 'sourceActions', ...a}))
+    // actions$.map(a => ({_stream: 'sinkActions', ...a})),
+    // sources.ACTION.map(a => ({_stream: 'sourceActions', ...a}))
+    sources.HORIZONS.map(a => ({_stream: 'hResponse', ...a}))
   );
 
   return {
