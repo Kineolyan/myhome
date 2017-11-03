@@ -63,7 +63,7 @@ const Operations = {
 };
 
 function getPayload(query) {
-	const key = Reflect.has(query, 'value') ? 'value' : 'values'; 
+	const key = Reflect.has(query, 'value') ? 'value' : 'values';
 	return {key, payload: query[key]};
 }
 
@@ -157,13 +157,22 @@ function deleteValues(horizons, query) {
 	} else {
 		stream = stream.removeAll(query.values);
 	}
-		
+
 	return stream.map(() => ({
 		store,
 		queryId,
 		[payload.key]: payload.value,
 		success: true
 	}));
+}
+
+function contextifyStream(stream, query) {
+	return stream.map(response => ({
+			...response,
+			mode: query.mode || Operations.FETCH,
+			category: query.category,
+			context: query.context || {}
+		}));
 }
 
 function makeHorizonDriver(horizons) {
@@ -173,40 +182,42 @@ function makeHorizonDriver(horizons) {
 
 		query$.addListener({
 			next(query) {
-				if (queries.has(query.queryId)) {
-					// Stop the previous query
-					queries.get(query.queryId).unsubscribe();
-					queries.delete(query.queryId);
+				if (query.mode === Operations.FETCH || query.mode === undefined) {
+					if (queries.has(query.queryId)) {
+						// Stop the previous query
+						queries.get(query.queryId).unsubscribe();
+						queries.delete(query.queryId);
+					}
+
+					let queryStream = fetchValues(horizons, query);
+					queryStream = contextifyStream(queryStream, query);
+					const unsubscribe = queryStream.subscribe(queriesSubject);
+					queries.set(query.queryId, unsubscribe);
+				} else {
+					let operationStream;
+					switch (query.mode) {
+					case Operations.STORE:
+						operationStream = storeValue(horizons, query);
+						break;
+					case Operations.UPDATE:
+						operationStream = updateValues(horizons, query);
+						break;
+					case Operations.DELETE:
+						operationStream = deleteValues(horizons, query);
+						break;
+					case Operations.FETCH:
+						throw new Error('Should not go through this branch');
+					default:
+						throw new Error(`Unsupported operation ${query.mode}. Query: ${query}`);
+					}
+
+					operationStream = contextifyStream(operationStream, query);
+					const unsubscribe = operationStream.subscribe({
+						next: (value) => queriesSubject.next(value),
+						complete: () => unsubscribe(),
+						onError: () => unsubscribe()
+					});
 				}
-
-				let queryStream;
-				switch (query.mode) {
-				case Operations.STORE:
-					queryStream = storeValue(horizons, query);
-					break;
-				case Operations.UPDATE:
-					queryStream = updateValues(horizons, query);
-					break;
-				case Operations.DELETE:
-					queryStream = deleteValues(horizons, query);
-					break;
-				case Operations.FETCH:
-				default:
-					queryStream = fetchValues(horizons, query);
-				}
-
-				// Complete each response with the default information
-				queryStream = queryStream.map(response => ({
-					...response,
-					mode: query.mode || Operations.FETCH,
-					category: query.category,
-					context: query.context || {}
-				}));
-				// FIXME Error with delete operation as we receive a completion event, stopping the subject
-
-				// Multicasting the result
-				const unsubscribe = queryStream.subscribe(queriesSubject);
-				queries.set(query.queryId, unsubscribe);
 			},
 			error(err) {
 				console.error('Error on query', err);

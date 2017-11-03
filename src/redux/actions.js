@@ -6,13 +6,13 @@ export default {
 	accounts: {
 		query: 'QUERY_ACCOUNTS',
 		store: 'STORE_ACCOUNTS',
-		add: 'ADD_ACCOUNT',
+		save: 'SAVE_ACCOUNT',
 		delete: 'DELETE_ACCOUNT'
 	},
 	categories: {
 		query: 'QUERY_CATEGORIES',
 		store: 'STORE_CATEGORIES',
-		add: 'ADD_CATEGORY'
+		save: 'SAVE_CATEGORY'
 	},
 	transactions: {
 		query: 'QUERY_TRANSACTIONS',

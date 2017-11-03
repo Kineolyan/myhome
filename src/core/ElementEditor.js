@@ -6,6 +6,8 @@ import _ from 'lodash';
 import {auditItem} from './auditActions';
 import {WithStreams} from './rx';
 
+// Old part to delete
+
 const ElementEditor = reactStamp(React).compose({
   propTypes: {
     onSubmit: PropTypes.func
@@ -67,7 +69,37 @@ const HorizonEditor = reactStamp(React)
     }
   });
 
+// Old part above to delete
+
+function identity(value) {
+  return value;
+}
+
+function prepareElement(editedElement, originalElement, format = identity) {
+  const element = _.clone(editedElement);
+  if (originalElement.id !== undefined) {
+    element.id = originalElement.id;
+  }
+
+  const formatedElement = format(element);
+  return auditItem(formatedElement);
+}
+
+function logFailedSubmit(error, element) {
+  console.error('Cannot save', element, error);
+}
+
+function submitElement(editedElement, doSave, onElementSaved, afterSave, onFailure = logFailedSubmit) {
+  return doSave(editedElement)
+    .then(result => onElementSaved(result))
+    .then(result => afterSave(result))
+    .catch(err => onFailure(err, editedElement));
+}
+
 export default ElementEditor;
 export {
-  HorizonEditor
+  HorizonEditor,
+  prepareElement,
+  submitElement,
+  logFailedSubmit
 };

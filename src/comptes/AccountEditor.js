@@ -9,13 +9,13 @@ import RaisedButton from 'material-ui/RaisedButton';
 
 import actions from '../redux/actions';
 import {getEditedValue} from '../redux/editorStore';
-import ElementEditor, {HorizonEditor} from '../core/ElementEditor';
+import {prepareElement, submitElement} from '../core/ElementEditor';
 import {setModelFromInput} from '../core/muiForm';
 import {WithHorizons} from '../core/horizon';
 
 const ELEMENT_KEY = 'account';
 const AccountEditor = reactStamp(React)
-  .compose(WithHorizons, ElementEditor, HorizonEditor)
+  .compose(WithHorizons)
   .compose({
     propTypes: {
       account: PropTypes.object,
@@ -23,26 +23,29 @@ const AccountEditor = reactStamp(React)
       editorId: PropTypes.string.isRequired,
       setUp: PropTypes.func.isRequired,
       edit: PropTypes.func.isRequired,
-      clear: PropTypes.func.isRequired
+      clear: PropTypes.func.isRequired,
+      onSubmit: PropTypes.func
     },
     defaultProps: {
-      account: {}
-    },
-    init(props, {instance}) {
-      instance.elementKey = ELEMENT_KEY;
-
-      instance.readEditedElement = function() {
-        return this.props.editedAccount;
-      };
+      account: {},
+      onSubmit: _.noop
     },
     componentWillMount() {
       this.props.setUp({});
-      this.cbks.setName = setModelFromInput.bind(
-        null,
-        this.props,
-        ELEMENT_KEY,
-        newState => this.props.edit(newState[ELEMENT_KEY]), 
-        'name');
+      this.cbks = {
+        setName: setModelFromInput.bind(
+          null,
+          this.props,
+          ELEMENT_KEY,
+          newState => this.props.edit(newState[ELEMENT_KEY]),
+          'name'),
+        submit: () => submitElement(
+            prepareElement(this.props[ELEMENT_KEY], {}),
+            (account) => this.props.saveAccount(account),
+            () => this.props.clear(),
+            (account) => this.props.onSubmit(account)
+          )
+      };
     },
     componentWillUnmount() {
       this.props.clear();
@@ -90,6 +93,11 @@ function mapDispatchToProps(dispatch, props) {
     clear: () => dispatch({
       type: actions.editors.clear,
       editorId: props.editorId
+    }),
+    saveAccount: (account) => dispatch({
+      type: actions.accounts.store,
+      queryId: 'save-account',
+      values: account
     })
   }
 }

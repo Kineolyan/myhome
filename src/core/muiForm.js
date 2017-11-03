@@ -1,4 +1,3 @@
-import reactStamp from 'react-stamp';
 import _ from 'lodash';
 
 function setModelFromInput(state, formStateKey, udpater, key, event, value) {

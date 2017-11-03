@@ -24,9 +24,21 @@ function hzStoreReader(sources, store, actions) {
       values: response.values
     }));
 
+  const updates$ = actions.save === undefined
+    ? xs.empty()
+    : sources.ACTION
+      .filter(action => action.type === actions.save)
+      .map(action => ({
+        mode: Operations.STORE,
+        store,
+        queryId: action.queryId,
+        values: action.values
+      }));
+
   return {
     queries: queries$,
-    values: values$
+    values: values$,
+    updates: updates$
   };
 }
 
@@ -41,7 +53,7 @@ function deleteAccount(sources) {
       queryId: action.queryId,
       value: action.accountId,
       category: DELETED_ACCOUNT,
-      context: {accountId: action.accountId} 
+      context: {accountId: action.accountId}
     }));
 
   const listAccountTransactions$ = sources.HORIZONS
@@ -185,10 +197,10 @@ function main(sources) {
   );
 
   const hQueries$ = Streams.merge(
-    transactions$.queries,
-    categories$.queries,
-    templates$.queries,
-    accounts$.queries,
+    transactions$.queries,/* transactions$.updates,*/
+    categories$.queries, categories$.updates,
+    templates$.queries, /*templates$.updates,*/
+    accounts$.queries, accounts$.updates,
     opsOnDeletedAccounts$.HORIZONS,
     opsOnDeletedTemplate$.HORIZONS
   );

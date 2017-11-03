@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
 
@@ -51,7 +50,7 @@ const mapDispatchToProps = (dispatch) => ({
   deleteAccount: accountId => dispatch({
     type: actions.accounts.delete,
     queryId: `AccountList-delete-${accountId}`,
-    accountId 
+    accountId
   })
 });
 

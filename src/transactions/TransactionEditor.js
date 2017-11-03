@@ -253,7 +253,7 @@ const TransactionEditor = reactStamp(React)
           title="Ajouter une catégorie"
           modal={false} open={this.state.openCategoryForm}
           onRequestClose={this.cbks.closeCategoryForm}>
-          <CategoryEditor onSubmit={_.noop} />
+          <CategoryEditor onSubmit={newCategory => this.cbks.setCategory(newCategory.id)} />
         </Dialog>,
         <Dialog key="group"
           title="Ajouter un group"
@@ -332,8 +332,8 @@ const LATEST_TRANSACTIONS_KEY = 'transaction-editor-lastest-transactions';
 const TEMPLATES_KEY = 'transaction-editor-templates';
 function mapStateToProps(state, props) {
   const editedTransaction = getEditedValue(
-    state.editors, 
-    props.editorId, 
+    state.editors,
+    props.editorId,
     undefined);
   const latestObjects = _(getStateValues(state.transactions, LATEST_TRANSACTIONS_KEY))
     .map(t => t.object)
