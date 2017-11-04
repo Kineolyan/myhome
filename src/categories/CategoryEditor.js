@@ -65,9 +65,9 @@ function mapStateToProps(state, props) {
 function mapDispatchToProps(dispatch) {
   return {
     saveCategory: (category) => dispatch({
-      type: actions.categories.store,
+      type: actions.categories.save,
       queryId: 'save-category',
-      values: category
+      value: category
     })
   };
 }

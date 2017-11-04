@@ -14,10 +14,10 @@ const Streams = {
 function hzStoreReader(sources, store, actions) {
   const queries$ = sources.ACTION
     .filter(action => action.type === actions.query)
-    .map(action => ({store, ...action}));
+    .map(action => ({...action, store}));
 
   const values$ = sources.HORIZONS
-    .filter(output => output.store === store)
+    .filter(output => output.store === store && output.mode === Operations.FETCH)
     .map(response => ({
       type: actions.store,
       queryId: response.queryId,
@@ -29,10 +29,9 @@ function hzStoreReader(sources, store, actions) {
     : sources.ACTION
       .filter(action => action.type === actions.save)
       .map(action => ({
+        ...action,
         mode: Operations.STORE,
-        store,
-        queryId: action.queryId,
-        values: action.values
+        store
       }));
 
   return {
@@ -58,16 +57,18 @@ function deleteAccount(sources) {
 
   const listAccountTransactions$ = sources.HORIZONS
     .filter(response => {
+      // Filter on every deleted account
       return response.category === DELETED_ACCOUNT
-        && response.mode === Operations.DELETE;
+        && response.mode === Operations.DELETE
+        && response.store === 'accounts';
     })
     .map(response => {
       console.log('Account removed');
       return {
         store: 'transactions',
-        mode: Operations.FETCH,
+        mode: Operations.SELECT,
         queryId: `listing-transactions-to-delete-for-${response.context.accountId}`,
-        conditions: {accountId: response.context.accountId},
+        conditions: {account: response.context.accountId},
         category: DELETED_ACCOUNT,
         context: response.context
       };
@@ -76,7 +77,8 @@ function deleteAccount(sources) {
   const deleteAccountTransactions$ = sources.HORIZONS
     .filter(response => {
       return response.category === DELETED_ACCOUNT
-        && response.mode === Operations.FETCH;
+        && response.mode === Operations.SELECT
+        && response.store === 'transactions';
     })
     .map(response => ({
       store: 'transactions',
@@ -110,13 +112,14 @@ function deleteTemplate(sources) {
   const listTransactions$ = sources.HORIZONS
     .filter(response => {
       return response.category === DELETED_TEMPLATE
+        && response.store === 'templates'
         && response.mode === Operations.DELETE;
     })
     .map(response => {
       console.log('Template removed');
       return {
         store: 'transactions',
-        mode: Operations.FETCH,
+        mode: Operations.SELECT,
         queryId: `listing-transactions-with-template-${response.value}`,
         conditions: {templateId: response.value},
         category: DELETED_TEMPLATE,
@@ -127,7 +130,8 @@ function deleteTemplate(sources) {
   const updateTransactions$ = sources.HORIZONS
     .filter(response => {
       return response.category === DELETED_TEMPLATE
-        && response.mode === Operations.FETCH;
+        && response.store === 'transactions'
+        && response.mode === Operations.SELECT;
     })
     .map(response => ({
       store: 'transactions',
@@ -207,10 +211,10 @@ function main(sources) {
 
   const log$ = Streams.merge(
     // loadUrl$.map(a => ({_stream: 'loadUrl', ...a})),
-    // hQueries$.map(a => ({_stream: 'hQuery', ...a})),
-    actions$.map(a => ({_stream: 'sinkActions', ...a})),
-    sources.ACTION.map(a => ({_stream: 'sourceActions', ...a}))
-    // sources.HORIZONS.map(a => ({_stream: 'hResponse', ...a}))
+    hQueries$.map(a => ({_stream: 'hQuery', ...a})),
+    sources.HORIZONS.map(a => ({_stream: 'hResponse', ...a})),
+    // actions$.map(a => ({_stream: 'sinkActions', ...a})),
+    // sources.ACTION.map(a => ({_stream: 'sourceActions', ...a}))
   );
 
   return {

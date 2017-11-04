@@ -40,7 +40,7 @@ const AccountEditor = reactStamp(React)
           newState => this.props.edit(newState[ELEMENT_KEY]),
           'name'),
         submit: () => submitElement(
-            prepareElement(this.props[ELEMENT_KEY], {}),
+            prepareElement(this.props.editedAccount, {}),
             (account) => this.props.saveAccount(account),
             () => this.props.clear(),
             (account) => this.props.onSubmit(account)
@@ -95,9 +95,9 @@ function mapDispatchToProps(dispatch, props) {
       editorId: props.editorId
     }),
     saveAccount: (account) => dispatch({
-      type: actions.accounts.store,
+      type: actions.accounts.save,
       queryId: 'save-account',
-      values: account
+      value: account
     })
   }
 }
