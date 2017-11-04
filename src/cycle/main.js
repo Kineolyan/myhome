@@ -11,7 +11,7 @@ const Streams = {
   }
 }
 
-function hzStoreReader(sources, store, actions) {
+function hzStore(sources, store, actions) {
   const queries$ = sources.ACTION
     .filter(action => action.type === actions.query)
     .map(action => ({...action, store}));
@@ -185,10 +185,11 @@ function main(sources) {
     .filter(action => action.type === actions.location.goto)
     .map(action => action.url);
 
-  const transactions$ = hzStoreReader(sources, 'transactions', actions.transactions);
-  const categories$ = hzStoreReader(sources, 'categories', actions.categories);
-  const templates$ = hzStoreReader(sources, 'templates', actions.templates);
-  const accounts$ = hzStoreReader(sources, 'accounts', actions.accounts);
+  const transactions$ = hzStore(sources, 'transactions', actions.transactions);
+  const categories$ = hzStore(sources, 'categories', actions.categories);
+  const templates$ = hzStore(sources, 'templates', actions.templates);
+  const accounts$ = hzStore(sources, 'accounts', actions.accounts);
+  const groups$ = hzStore(sources, 'groups', actions.groups);
   const opsOnDeletedAccounts$ = deleteAccount(sources);
   const opsOnDeletedTemplate$ = deleteTemplate(sources);
 
@@ -197,14 +198,16 @@ function main(sources) {
     categories$.values,
     templates$.values,
     accounts$.values,
+    groups$.values,
     loadPage$, loadUrl$
   );
 
   const hQueries$ = Streams.merge(
-    transactions$.queries,/* transactions$.updates,*/
+    transactions$.queries, transactions$.updates,
     categories$.queries, categories$.updates,
-    templates$.queries, /*templates$.updates,*/
+    templates$.queries, templates$.updates,
     accounts$.queries, accounts$.updates,
+    groups$.queries, groups$.updates,
     opsOnDeletedAccounts$.HORIZONS,
     opsOnDeletedTemplate$.HORIZONS
   );

@@ -16,12 +16,18 @@ export default {
 	},
 	transactions: {
 		query: 'QUERY_TRANSACTIONS',
-		store: 'STORE_TRANSACTIONS'
+		store: 'STORE_TRANSACTIONS',
+		save: 'SAVE_TRANSACTION'
 	},
 	templates: {
 		query: 'QUERY_TEMPLATES',
 		store: 'STORE_TEMPLATES',
 		delete: 'DELETE_TEMPLATE'
+	},
+	groups: {
+		query: 'QUERY_GROUPS',
+		store: 'STORE_GROUPS',
+		save: 'SAVE_GROUP'
 	},
 	activities: {
 		transactions: 'LOAD_TRANSACTION_ACTIVITY',

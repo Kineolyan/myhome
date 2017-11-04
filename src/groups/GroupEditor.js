@@ -1,38 +1,38 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import reactStamp from 'react-stamp';
+import {connect} from 'react-redux';
 
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 
-import ElementEditor, {HorizonEditor} from '../core/ElementEditor';
+import {prepareElement, submitElement} from '../core/ElementEditor';
 import {setModelFromInput} from '../core/muiForm';
 import {WithHorizons} from '../core/horizon';
+import {getEditedValue} from '../redux/editorStore';
+import actions from '../redux/actions';
 
-const ELEMENT_KEY = 'group';
 const GroupEditor = reactStamp(React)
-  .compose(WithHorizons, ElementEditor, HorizonEditor)
+  .compose(WithHorizons)
   .compose({
     propTypes: {
+      editorId: PropTypes.string.isRequired,
       group: PropTypes.object
     },
     defaultProps: {
       group: {}
     },
-    state: {
-      [ELEMENT_KEY]: {}
-    },
-    init(props, {instance}) {
-      instance.elementKey = ELEMENT_KEY;
-    },
-    getElementFeed() {
-      return this.groupsFeed;
-    },
     componentWillMount() {
-      this.cbks.setName = setModelFromInput.bind(
-        null, 
-        this.state, ELEMENT_KEY, newState => this.setState(newState),
-       'name');
+      this.cbks = {
+        setName: (...args) => setModelFromInput(
+          this.props, 'editedGroup',
+          newState => this.props.edit(newState.editedGroup),
+          'name', ...args),
+        submit: () => submitElement(
+          prepareElement(this.props.editedGroup, {}),
+          group => this.props.submit(group),
+          null, null)
+      };
     },
     render() {
       return <div>
@@ -45,4 +45,34 @@ const GroupEditor = reactStamp(React)
     }
   });
 
-export default GroupEditor;
+function mapStateToProps(state, props) {
+  const editedGroup = getEditedValue(state.editors, props.editorId, {});
+
+  return {
+    editedGroup
+  };
+}
+
+function mapDispatchToProps(dispatch, props) {
+  return {
+    setUp: (group) => dispatch({
+      type: actions.editors.setup,
+      editorId: props.editorId,
+      value: group
+    }),
+    edit: (group) => dispatch({
+      type: actions.editors.edit,
+      editorId: props.editorId,
+      value: group
+    }),
+    submit: (group) => dispatch({
+      type: actions.groups.save,
+      value: group
+    })
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(GroupEditor);
+export {
+  GroupEditor
+};

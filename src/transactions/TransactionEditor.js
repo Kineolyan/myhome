@@ -26,7 +26,7 @@ import GroupPicker from '../groups/GroupPicker';
 import GroupEditor from '../groups/GroupEditor';
 import {WithHorizons} from '../core/horizon';
 import * as muiForm from '../core/muiForm';
-import ElementEditor, {HorizonEditor} from '../core/ElementEditor';
+import {prepareElement, submitElement} from '../core/ElementEditor';
 
 const PAYMENT_TYPES = [
   {id: Type.CARTE, name: 'Carte'},
@@ -42,15 +42,17 @@ const DEFAULT_TRANSACTION = {
   date: TODAY
 };
 
-const ELEMENT_KEY = 'transaction';
 const TransactionEditor = reactStamp(React)
-  .compose(WithHorizons, ElementEditor, HorizonEditor)
+  .compose(WithHorizons)
   .compose({
     propTypes: {
-      transaction: PropTypes.object
+      transaction: PropTypes.object,
+      editorId: PropTypes.string.isRequired,
+      onSubmit: PropTypes.func
     },
     defaultProps: {
-      transaction: {}
+      transaction: {},
+      onSubmit: _.noop
     },
     state: {
       categories: [],
@@ -62,7 +64,6 @@ const TransactionEditor = reactStamp(React)
       askTransferAccount: false
     },
     init(props, {instance}) {
-      instance.elementKey = ELEMENT_KEY;
       const ELEMENT_PROP = 'editedTransaction';
       instance.readEditedElement = function() {
         return this.props[ELEMENT_PROP];
@@ -106,6 +107,7 @@ const TransactionEditor = reactStamp(React)
         closeCategoryForm: this.toggleCategoryForm.bind(this, false),
         addGroup: this.toggleGroupForm.bind(this, true),
         closeGroupForm: this.toggleGroupForm.bind(this, false),
+        submit: this.submit.bind(this),
         startTransfer: this.transfer.bind(this),
         completeTransfer: this.transfer.bind(this, true),
         cancelTransfer: this.transfer.bind(this, false)
@@ -116,9 +118,6 @@ const TransactionEditor = reactStamp(React)
       transaction.date = transaction.date !== undefined ?
         new Date(transaction.date) : new Date();
       return transaction;
-    },
-    getElementFeed() {
-      return this.transactionsFeed;
     },
     getValue(key) {
       return this.props.editedTransaction[key]
@@ -147,6 +146,12 @@ const TransactionEditor = reactStamp(React)
         this.setModelValue('object', chosenObject);
       }
     },
+    getEditedElement() {
+      return prepareElement(
+        this.props.editedTransaction,
+        this.props.transaction,
+        (t) => this.formatEditedElement(t));
+    },
     formatEditedElement(transaction) {
       if (transaction.date !== undefined) {
         transaction.date = transaction.date.getTime();
@@ -154,6 +159,8 @@ const TransactionEditor = reactStamp(React)
       if (transaction.amount !== undefined) {
         transaction.amount = parseFloat(transaction.amount);
       }
+
+      return transaction;
     },
     reset() { // Override from HorizonEditor
       const transaction = {
@@ -173,6 +180,16 @@ const TransactionEditor = reactStamp(React)
         && transaction.type
         && transaction.category;
     },
+    submit() {
+      submitElement(
+        this.getEditedElement(),
+        (transaction) => this.props.save(transaction),
+        null,
+        null);
+      // TODO move this out of the editor
+      this.props.onSubmit();
+      this.reset();
+    },
     transfer(execute, toAccount) {
       if (execute === true) {
         const transaction = this.getEditedElement();
@@ -180,13 +197,11 @@ const TransactionEditor = reactStamp(React)
           const oppositeTransaction = Object.assign(
             {}, transaction, {amount: -transaction.amount, account: toAccount}
           );
-          Promise.all([
-            this.save(transaction, 'transferFrom'),
-            this.save(oppositeTransaction, 'transferTo')
-          ]).then(([original]) => this.onElementSaved(original))
-            // Do not call the submit callback as it is a special case
-            .catch(err => this.onFailedSubmit(err, transaction))
-            .then(() => this.setState({askTransferAccount: false}));
+
+          this.props.save(transaction);
+          this.props.save(oppositeTransaction);
+          this.setState({askTransferAccount: false});
+          this.reset();
         } else {
           console.error('Cannot transfer to the same account', toAccount);
           this.setState({askTransferAccount: false});
@@ -259,7 +274,8 @@ const TransactionEditor = reactStamp(React)
           title="Ajouter un group"
           modal={false} open={this.state.openGroupForm}
           onRequestClose={this.cbks.closeGroupForm}>
-          <GroupEditor onSubmit={_.noop} />
+          <GroupEditor onSubmit={_.noop}
+              editorId={`TransactioEditor-${this.props.editorId}-group-editor`}/>
         </Dialog>,
         <Dialog key="transfer"
           title="Choisir le compte pour le transfert"
@@ -359,6 +375,10 @@ function mapDispatchToProps(dispatch, props) {
     edit: transaction => dispatch({
       type: actions.editors.edit,
       editorId: props.editorId,
+      value: transaction
+    }),
+    save: (transaction) => dispatch({
+      type: actions.transactions.save,
       value: transaction
     }),
     loadLatestTransactions: () => dispatch({
