@@ -11,12 +11,12 @@ type StoreType = {
   queries: QueryMappingType
 }
 export type StateType = {
-  value: number,
   transactions: StoreType,
   categories: StoreType,
   accounts: StoreType,
   groups: StoreType,
-  templates: StoreType
+  templates: StoreType,
+  editors: any
 }
 
 const initialState: StateType = {

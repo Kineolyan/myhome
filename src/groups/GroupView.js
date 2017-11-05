@@ -60,7 +60,10 @@ const GroupView = reactStamp(React)
       if (_.isEmpty(this.state.transactions)) {
         return <p>No transactions</p>;
       } else {
-        return <TransactionsView transactions={this.state.transactions} byGroup={false} />;
+        return <TransactionsView
+          viewId={`GroupView-${this.props.groupId}-transactions`}
+          transactions={this.state.transactions}
+          byGroup={false} />;
       }
     },
     render() {

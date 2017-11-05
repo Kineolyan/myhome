@@ -17,11 +17,14 @@ export default {
 	transactions: {
 		query: 'QUERY_TRANSACTIONS',
 		store: 'STORE_TRANSACTIONS',
-		save: 'SAVE_TRANSACTION'
+		save: 'SAVE_TRANSACTION',
+		delete: 'DELETE_TRANSACTIONS',
+		toTemplate: 'TRANSACTION_TO_TEMPLATE'
 	},
 	templates: {
 		query: 'QUERY_TEMPLATES',
 		store: 'STORE_TEMPLATES',
+		save: 'SAVE_TEMPLATES',
 		delete: 'DELETE_TEMPLATE'
 	},
 	groups: {

@@ -88,17 +88,17 @@ function dispatchToProps(dispatch, props) {
     getAccount: () => dispatch({
       type: actions.accounts.query,
       queryId: accountQueryId(props),
-      conditions: {id: props.transaction.account}
+      element: props.transaction.account
     }),
     getCategory: () => dispatch({
       type: actions.categories.query,
       queryId: categoryQueryId(props),
-      conditions: {id: props.transaction.category}
+      element: props.transaction.category
     }),
     getGroup: () => dispatch({
       type: actions.groups.query,
       queryId: groupQueryId(props),
-      conditions: {id: props.transaction.group}
+      element: props.transaction.group
     })
   };
 }

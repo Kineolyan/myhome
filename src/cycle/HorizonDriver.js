@@ -16,59 +16,74 @@ function getPayload(query) {
 }
 
 function fetchValues(horizons, query, watch = true) {
-	const {store, queryId, order, conditions, filters, limit} = query;
+	const {store, queryId, element, order, conditions, filters, limit} = query;
 
 	let queryStream = horizons[store];
-	if (_.isObject(conditions) && !_.isEmpty(conditions)) {
-		queryStream = queryStream.findAll(conditions);
-	}
-
-	if (query.above) {
-		queryStream = queryStream.above(...query.above);
-	}
-	if (query.below) {
-		queryStream = queryStream.below(...query.below);
-	}
-
-	if (order) {
-		const [field, way] = order.split(/\s+/);
-		queryStream = queryStream.order(field, way);
-	}
-
-	if (_.isInteger(limit) && limit > 0) {
-		queryStream = queryStream.limit(limit);
-	}
-
-	if (watch) {
-		queryStream = queryStream.watch();
-	} else {
-		queryStream = queryStream.fetch().defaultIfEmpty();
-	}
-
-	if (_.isArray(filters)) {
-		queryStream = filters.filter(_.isFunction)
-			.reduce(
-				(stream, filter) => stream.map(
-					values => values.filter(filter)
-				),
-				queryStream
-			);
-	}
-
-	// Dispatch the result properly
-	return queryStream.map(values => {
-		if (order) {
-			// FIXME, reorder, in case it has failed
-			const [field, way] = order.split(/\s+/);
-			let chain = _(values).sortBy(field);
-			if (way === 'descending') {
-				chain = chain.reverse();
-			}
-			values = chain.value();
+	if (element) {
+		queryStream = queryStream.find(element);
+		if (watch) {
+			queryStream = queryStream.watch();
+		} else {
+			queryStream = queryStream.fetch().defaultIfEmpty();
 		}
 
-		return {store, queryId, values};
-	});
+		return queryStream.map(value => ({
+			store,
+			queryId,
+			values: [value]
+		}));
+	} else {
+		if (_.isObject(conditions) && !_.isEmpty(conditions)) {
+			queryStream = queryStream.findAll(conditions);
+		}
+
+		if (query.above) {
+			queryStream = queryStream.above(...query.above);
+		}
+		if (query.below) {
+			queryStream = queryStream.below(...query.below);
+		}
+
+		if (order) {
+			const [field, way] = order.split(/\s+/);
+			queryStream = queryStream.order(field, way);
+		}
+
+		if (_.isInteger(limit) && limit > 0) {
+			queryStream = queryStream.limit(limit);
+		}
+
+		if (watch) {
+			queryStream = queryStream.watch();
+		} else {
+			queryStream = queryStream.fetch().defaultIfEmpty();
+		}
+
+		if (_.isArray(filters)) {
+			queryStream = filters.filter(_.isFunction)
+				.reduce(
+					(stream, filter) => stream.map(
+						values => values.filter(filter)
+					),
+					queryStream
+				);
+		}
+
+		// Dispatch the result properly
+		return queryStream.map(values => {
+			if (order) {
+				// FIXME, reorder, in case it has failed
+				const [field, way] = order.split(/\s+/);
+				let chain = _(values).sortBy(field);
+				if (way === 'descending') {
+					chain = chain.reverse();
+				}
+				values = chain.value();
+			}
+
+			return {store, queryId, values};
+		});
+	}
 }
 
 function storeValue(horizons, query) {

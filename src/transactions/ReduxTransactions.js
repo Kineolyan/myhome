@@ -27,6 +27,7 @@ class ReduxTransactions extends React.Component {
 
 	render() {
 		return <TransactionsView
+			viewId={this.props.viewId}
 			transactions={this.props.transactions}
 			pagination={this.props.pagination}
 			byGroup={this.props.byGroup}/>;

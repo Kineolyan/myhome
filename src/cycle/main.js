@@ -14,7 +14,11 @@ const Streams = {
 function hzStore(sources, store, actions) {
   const queries$ = sources.ACTION
     .filter(action => action.type === actions.query)
-    .map(action => ({...action, store}));
+    .map(action => ({
+      ...action,
+      store,
+      mode: Operations.FETCH
+    }));
 
   const values$ = sources.HORIZONS
     .filter(output => output.store === store && output.mode === Operations.FETCH)
@@ -34,10 +38,23 @@ function hzStore(sources, store, actions) {
         store
       }));
 
+  const deletions$ = actions.delete === undefined
+      ? xs.empty()
+      : sources.ACTION
+        .filter(action => action.type === action.delete)
+        .map(action => ({
+          ...action,
+          mode: Operations.DELETE,
+          store
+        }));
+
   return {
     queries: queries$,
     values: values$,
-    updates: updates$
+    updates: updates$,
+    deletions: deletions$,
+    HORIZONS: Streams.merge(queries$, updates$, deletions$),
+    ACTION: values$
   };
 }
 
@@ -68,7 +85,7 @@ function deleteAccount(sources) {
         store: 'transactions',
         mode: Operations.SELECT,
         queryId: `listing-transactions-to-delete-for-${response.context.accountId}`,
-        conditions: {account: response.context.accountId},
+        element: response.context.accountId,
         category: DELETED_ACCOUNT,
         context: response.context
       };
@@ -121,7 +138,7 @@ function deleteTemplate(sources) {
         store: 'transactions',
         mode: Operations.SELECT,
         queryId: `listing-transactions-with-template-${response.value}`,
-        conditions: {templateId: response.value},
+        element: response.value,
         category: DELETED_TEMPLATE,
         context: {templateId: response.value}
       };
@@ -149,6 +166,54 @@ function deleteTemplate(sources) {
       deleteQuery$,
       listTransactions$,
       updateTransactions$)
+  };
+}
+
+function makeTemplate(sources) {
+  const MAKE_TEMPLATE = 'make-template-from-transaction';
+
+  const createTemplate$ = sources.ACTION
+    .filter(action => action.type === actions.transactions.toTemplate)
+    .map(action => {
+      const transaction = {...action.transaction};
+      const template = {
+        ...transaction,
+        frequency: {
+          type: 'monthly'
+        }
+      };
+      Reflect.deleteProperty(template, 'id');
+
+      return {
+        store: 'templates',
+        mode: Operations.STORE,
+        value: template,
+        category: MAKE_TEMPLATE,
+        context: {
+          transaction
+        }
+      };
+    });
+
+  const updateTrasaction$ = sources.HORIZONS
+    .filter(operation => operation.category === MAKE_TEMPLATE
+        && operation.store === 'templates'
+        && operation.mode === Operations.STORE
+        && operation.success)
+    .map(operation => {
+      const transaction = operation.context.transaction;
+      transaction.templateId = operation.value.id;
+
+      return {
+        store: 'transactions',
+        mode: Operations.UPDATE,
+        value: transaction,
+        category: MAKE_TEMPLATE
+      };
+    });
+
+  return {
+    HORIZONS: Streams.merge(createTemplate$, updateTrasaction$)
   };
 }
 
@@ -192,32 +257,34 @@ function main(sources) {
   const groups$ = hzStore(sources, 'groups', actions.groups);
   const opsOnDeletedAccounts$ = deleteAccount(sources);
   const opsOnDeletedTemplate$ = deleteTemplate(sources);
+  const opsToMakeTemplate$ = makeTemplate(sources);
 
   const actions$ = Streams.merge(
-    transactions$.values,
-    categories$.values,
-    templates$.values,
-    accounts$.values,
-    groups$.values,
+    transactions$.ACTION,
+    categories$.ACTION,
+    templates$.ACTION,
+    accounts$.ACTION,
+    groups$.ACTION,
     loadPage$, loadUrl$
   );
 
   const hQueries$ = Streams.merge(
-    transactions$.queries, transactions$.updates,
-    categories$.queries, categories$.updates,
-    templates$.queries, templates$.updates,
-    accounts$.queries, accounts$.updates,
-    groups$.queries, groups$.updates,
+    transactions$.HORIZONS,
+    categories$.HORIZONS,
+    templates$.HORIZONS,
+    accounts$.HORIZONS,
+    groups$.HORIZONS,
     opsOnDeletedAccounts$.HORIZONS,
-    opsOnDeletedTemplate$.HORIZONS
+    opsOnDeletedTemplate$.HORIZONS,
+    opsToMakeTemplate$.HORIZONS
   );
 
   const log$ = Streams.merge(
     // loadUrl$.map(a => ({_stream: 'loadUrl', ...a})),
     hQueries$.map(a => ({_stream: 'hQuery', ...a})),
     sources.HORIZONS.map(a => ({_stream: 'hResponse', ...a})),
-    // actions$.map(a => ({_stream: 'sinkActions', ...a})),
-    // sources.ACTION.map(a => ({_stream: 'sourceActions', ...a}))
+    actions$.map(a => ({_stream: 'sinkActions', ...a})),
+    sources.ACTION.map(a => ({_stream: 'sourceActions', ...a}))
   );
 
   return {

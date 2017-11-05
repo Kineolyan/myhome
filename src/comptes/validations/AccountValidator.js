@@ -189,7 +189,10 @@ const AccountValidator = reactStamp(React)
 									null
 								}
 							</div>
-							<TransactionsView transactions={entry.transactions} pagination={10}/>
+							<TransactionsView
+									viewId="AccountValidator"
+									transactions={entry.transactions}
+									pagination={10}/>
 						</div>;
 					})}
 				</div>;
