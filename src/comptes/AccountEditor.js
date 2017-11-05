@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
 import _ from 'lodash';
 
@@ -11,65 +10,64 @@ import actions from '../redux/actions';
 import {getEditedValue} from '../redux/editorStore';
 import {prepareElement, submitElement} from '../core/ElementEditor';
 import {setModelFromInput} from '../core/muiForm';
-import {WithHorizons} from '../core/horizon';
 
 const ELEMENT_KEY = 'account';
-const AccountEditor = reactStamp(React)
-  .compose(WithHorizons)
-  .compose({
-    propTypes: {
-      account: PropTypes.object,
-      editedAccount: PropTypes.object,
-      editorId: PropTypes.string.isRequired,
-      setUp: PropTypes.func.isRequired,
-      edit: PropTypes.func.isRequired,
-      clear: PropTypes.func.isRequired,
-      onSubmit: PropTypes.func
-    },
-    defaultProps: {
-      account: {},
-      onSubmit: _.noop
-    },
-    componentWillMount() {
-      this.props.setUp({});
-      this.cbks = {
-        setName: setModelFromInput.bind(
-          null,
-          this.props,
-          ELEMENT_KEY,
-          newState => this.props.edit(newState[ELEMENT_KEY]),
-          'name'),
-        submit: () => submitElement(
-            prepareElement(this.props.editedAccount, {}),
-            (account) => this.props.saveAccount(account),
-            () => this.props.clear(),
-            (account) => this.props.onSubmit(account)
-          )
-      };
-    },
-    componentWillUnmount() {
-      this.props.clear();
-    },
-    getElementFeed() {
-      return this.accountsFeed;
-    },
-    reset() { // Override from HorizonEditor
-      this.props.edit({});
-    },
-    render() {
-      return <div>
-        <div>
-          <TextField defaultValue={this.props.account.name}
-            hintText="Nom du compte"
-            onChange={this.cbks.setName}/>
-        </div>
-        <div>
-          <RaisedButton label="Enregistrer" primary={true}
-            onClick={this.cbks.submit} />
-        </div>
-      </div>;
-    }
-  });
+class AccountEditor extends React.Component {
+  componentWillMount() {
+    this.props.setUp({});
+    this.cbks = {
+      setName: setModelFromInput.bind(
+        null,
+        this.props,
+        ELEMENT_KEY,
+        newState => this.props.edit(newState[ELEMENT_KEY]),
+        'name'),
+      submit: this.submit.bind(this)
+    };
+  }
+
+  componentWillUnmount() {
+    this.props.clear();
+  }
+
+  submit() {
+    submitElement(
+      prepareElement(this.props.editedAccount, {}),
+      (account) => this.props.saveAccount(account),
+      () => this.props.clear(),
+      (account) => this.props.onSubmit(account));
+    this.props.edit({});
+  }
+
+  render() {
+    return <div>
+      <div>
+        <TextField defaultValue={this.props.account.name}
+          hintText="Nom du compte"
+          onChange={this.cbks.setName}/>
+      </div>
+      <div>
+        <RaisedButton label="Enregistrer" primary={true}
+          onClick={this.cbks.submit} />
+      </div>
+    </div>;
+  }
+}
+
+AccountEditor.propTypes = {
+  account: PropTypes.object,
+  editedAccount: PropTypes.object,
+  editorId: PropTypes.string.isRequired,
+  setUp: PropTypes.func.isRequired,
+  edit: PropTypes.func.isRequired,
+  clear: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func
+};
+
+AccountEditor.defaultProps = {
+  account: {},
+  onSubmit: _.noop
+};
 
 function mapStateToProps(state, props) {
   return {

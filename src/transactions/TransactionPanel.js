@@ -76,7 +76,9 @@ class TransactionPanel extends React.Component {
     } else if (this.props.mode === Mode.SET_TEMPLATE) {
       return this.renderTemplateSetter();
     } else {
-      return <TransactionView transaction={this.props.transaction} />;
+      return <TransactionView
+        transaction={this.props.transaction}
+        viewId={`TransactionPanel-${this.props.transaction.id}`}/>;
     }
   }
 }

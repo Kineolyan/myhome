@@ -15,6 +15,7 @@ export type StateType = {
   transactions: StoreType,
   categories: StoreType,
   accounts: StoreType,
+  groups: StoreType,
   templates: StoreType
 }
 
@@ -23,6 +24,7 @@ const initialState: StateType = {
   categories: horizonStore.makeStore(),
   accounts: horizonStore.makeStore(),
   templates: horizonStore.makeStore(),
+  groups: horizonStore.makeStore(),
   editors: editorStore.makeStore()
 };
 
