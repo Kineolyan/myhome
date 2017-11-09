@@ -33,8 +33,12 @@ function fetchValues(horizons, query, watch = true) {
 			values: [value]
 		}));
 	} else {
-		if (_.isObject(conditions) && !_.isEmpty(conditions)) {
-			queryStream = queryStream.findAll(conditions);
+		if (!_.isEmpty(conditions)) {
+			if (_.isArray(conditions)) {
+				queryStream = queryStream.findAll(...conditions);
+			} else if (_.isObject(conditions)) {
+				queryStream = queryStream.findAll(conditions);
+			}
 		}
 
 		if (query.above) {

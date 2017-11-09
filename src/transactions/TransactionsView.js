@@ -58,11 +58,27 @@ class TransactionsView extends React.Component {
     }
   }
 
+  componentDidMount() {
+    if (!_.isEmpty(this.state.groups)) {
+      this.props.loadGroups(_.keys(this.state.groups));
+    }
+  }
+
   componentWillReceiveProps(nextProps) {
     const rows = this.computeRows(nextProps.transactions);
     const maxIdx = this.getMaxIndex(rows);
     if (maxIdx <= this.state.index) {
       this.setState({index: maxIdx - 1});
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const newGroupIds = _.difference(
+      _.keys(this.state.groups),
+      _.keys(prevState.groups));
+    if (!_.isEmpty(newGroupIds)) {
+      debugger;
+      this.props.loadGroups(newGroupIds);
     }
   }
 
@@ -106,10 +122,6 @@ class TransactionsView extends React.Component {
     }
 
     this.setState({transactions: rows, groups});
-
-    if (!_.isEmpty(groups)) {
-      this.props.loadGroups(_(groups).keys());
-    }
 
     return rows;
   }
@@ -183,7 +195,10 @@ class TransactionsView extends React.Component {
   }
 
   renderGroup({groupId, count}) {
-    const group = this.state.groups[groupId];
+    const group = {
+      ...this.state.groups[groupId],
+      ...this.props.groups[groupId] 
+    };
     return <TableRow key={group.id}>
       <TableRowColumn style={TYPE_COLUMN_STYLE}>{count}+</TableRowColumn>
       <TableRowColumn>{group.name || group.id}</TableRowColumn>
