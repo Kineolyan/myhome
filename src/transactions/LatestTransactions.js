@@ -17,7 +17,7 @@ const QUERY = {
 const LatestTransactions = (props) =>
   <ReduxTransactions viewId="latest"
     query={QUERY}
-    byGroup={this.props.byGroup}/>;
+    byGroup={props.byGroup}/>;
 
 LatestTransactions.propTypes = {
   byGroup: PropTypes.bool

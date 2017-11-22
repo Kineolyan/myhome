@@ -4,7 +4,6 @@ import {connect} from 'react-redux';
 
 import {asDate} from '../core/time';
 import actions from '../redux/actions';
-import {getStateValues} from '../redux/horizonStore';
 
 class TransactionView extends React.Component {
   get transaction() {
@@ -77,9 +76,9 @@ const groupQueryId = props => getQueryId(props.viewId, 'group');
 
 function stateToProps(state, props) {
   return {
-    account: getStateValues(state.accounts, accountQueryId(props))[0],
-    category: getStateValues(state.categories, categoryQueryId(props))[0],
-    group: getStateValues(state.groups, groupQueryId(props))[0]
+    account: state.accounts.values[props.transaction.account],
+    category: state.categories.values[props.transaction.category],
+    group: state.groups.values[props.transaction.group]
   };
 }
 

@@ -57,6 +57,7 @@ const appState = (state: StateType = initialState, action: any) => {
         transactions: horizonStore.storeState(state.transactions, actions.transactions, action),
         templates: horizonStore.storeState(state.templates, actions.templates, action),
         categories: horizonStore.storeState(state.categories, actions.categories, action),
+        groups: horizonStore.storeState(state.groups, actions.groups, action),
         editors: editorStore.storeState(state.editors, action)
       };
   }

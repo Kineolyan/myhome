@@ -77,7 +77,6 @@ class TransactionsView extends React.Component {
       _.keys(this.state.groups),
       _.keys(prevState.groups));
     if (!_.isEmpty(newGroupIds)) {
-      debugger;
       this.props.loadGroups(newGroupIds);
     }
   }
