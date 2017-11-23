@@ -1,31 +1,44 @@
 import React from 'react';
-import reactStamp from 'react-stamp';
+import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 
 import ElementPicker from '../core/ElementPicker';
 import actions from '../redux/actions';
 import {getStateValues} from '../redux/horizonStore';
 
-const CategoryPicker = reactStamp(React)
-  .compose(ElementPicker)
-  .compose({
-    defaultProps: {
-      hintText: 'Catégorie de la transaction'
-    },
-    componentWillMount() {
-      this.props.listCategories();
-    },
-    renderEmpty() {
-      return <div>No categories</div>;
-    }
-  });
+class CategoryPicker extends React.Component {
+  componentWillMount() {
+    this.props.listCategories();
+  }
+
+  render() {
+    return <ElementPicker
+      emptyElement={<div>No categories</div>}
+      {...this.props} />;
+  }
+
+}
+
+CategoryPicker.propTypes = {
+  values: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string
+  })),
+  value: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
+  hintText: PropTypes.string,
+  withEmpty: PropTypes.bool
+};
+
+CategoryPicker.defaultProps = {
+  hintText: 'Catégorie de la transaction'
+};
 
 const CATEGORY_QUERY_ID = 'categoryPicker';
 const mapStateToProps = (state, props) => {
   const categories = getStateValues(state.categories, CATEGORY_QUERY_ID);
 
   return {
-    ...props,
     values: categories
   };
 };

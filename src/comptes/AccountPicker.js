@@ -1,34 +1,44 @@
-// @flow
-
 import React from 'react';
-import reactStamp from 'react-stamp';
+import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 
 import ElementPicker from '../core/ElementPicker';
 import actions from '../redux/actions';
 import {getStateValues} from '../redux/horizonStore';
-import type StateType from '../redux/store';
 
-const AccountPicker = reactStamp(React)
-  .compose(ElementPicker)
-  .compose({
-    defaultProps:   {
-      hintText: 'Compte'
-    },
-    componentWillMount() {
-      this.props.listAccounts();
-    },
-    renderEmpty() {
-      return <div>No account</div>;
-    }
-  });
+class AccountPicker extends React.Component {
+  componentWillMount() {
+    this.props.listAccounts();
+  }
+
+  render() {
+    return <ElementPicker
+      emptyElement={<div>No account</div>}
+      {...this.props} />;
+  }
+
+}
+
+AccountPicker.propTypes = {
+  values: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string
+  })),
+  value: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
+  hintText: PropTypes.string,
+  withEmpty: PropTypes.bool
+};
+
+AccountPicker.defaultProps = {
+  hintText: 'Account'
+};
 
 const ACCOUNT_QUERY_ID = 'accountPicker';
-const mapStateToProps = (state: StateType, props) => {
+const mapStateToProps = (state, props) => {
   const accounts = getStateValues(state.accounts, ACCOUNT_QUERY_ID);
 
   return {
-    ...props,
     values: accounts
   };
 };

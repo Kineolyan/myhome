@@ -1,32 +1,61 @@
 import React from 'react';
-import reactStamp from 'react-stamp';
+import PropTypes from 'prop-types';
+import { connect } from "react-redux";
 
 import ElementPicker from '../core/ElementPicker';
-import {WithStreams} from '../core/rx';
-import {WithHorizons} from '../core/horizon';
+import actions from '../redux/actions';
+import {getStateValues} from '../redux/horizonStore';
 
-const GroupPicker = reactStamp(React)
-  .compose(WithStreams, WithHorizons, ElementPicker)
-  .compose({
-    defaultProps:   {
-      hintText: 'Group'
-    },
-    componentWillMount() {
-      const lastMonth = new Date();
-      lastMonth.setMonth(lastMonth.getMonth() - 1);
+class GroupPicker extends React.Component {
+  componentWillMount() {
+    this.props.loadGroups();
+  }
 
-      const stream = this.groupsFeed
-        .above({createdAt: lastMonth.getTime()}, 'closed')
-        .order('createdAt', 'descending')
-        .watch().subscribe(
-          groups => this.setState({values: groups}),
-          err => console.error('Can\'t retrieve groups', err)
-        );
-      this.setStream('groups', stream);
-    },
-    renderEmpty() {
-      return <div>No groups</div>;
-    }
-  });
+  render() {
+    return <ElementPicker
+      emptyElement={<p>No groups</p>}
+      {...this.props}/>;
+  }
 
-export default GroupPicker;
+}
+
+GroupPicker.propTypes = {
+  values: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string
+  })),
+  value: PropTypes.string,
+  onSelect: PropTypes.func.isRequired,
+  hintText: PropTypes.string,
+  withEmpty: PropTypes.bool
+};
+
+GroupPicker.defaultProps = {
+  hintText: 'Group'
+};
+
+const PICKER_QUERY_ID = 'group-picker';
+
+function stateToProps(state, props) {
+  return {
+    values: getStateValues(state.groups, PICKER_QUERY_ID)
+  };
+}
+
+const lastMonth = new Date();
+lastMonth.setMonth(lastMonth.getMonth() - 1);
+
+function dispatchToProps(dispatch, props) {
+  return {
+    loadGroups: () => dispatch({
+      type: actions.groups.query,
+      queryId: PICKER_QUERY_ID,
+      query: {
+        above: [{createdAt: lastMonth.getTime()}, 'closed'],
+        order: 'createdAt descending'
+      }
+    })
+  };
+}
+
+export default connect(stateToProps, dispatchToProps)(GroupPicker);
