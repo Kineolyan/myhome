@@ -5,21 +5,42 @@ export default {
 	},
 	accounts: {
 		query: 'QUERY_ACCOUNTS',
-		store: 'STORE_QUERY_ACCOUNTS',
-		add: 'ADD_ACCOUNT'
+		store: 'STORE_ACCOUNTS',
+		save: 'SAVE_ACCOUNT',
+		delete: 'DELETE_ACCOUNT'
 	},
 	categories: {
 		query: 'QUERY_CATEGORIES',
-		store: 'STORE_QUERY_CATEGORIES',
-		add: 'ADD_CATEGORY'
+		store: 'STORE_CATEGORIES',
+		save: 'SAVE_CATEGORY'
 	},
 	transactions: {
 		query: 'QUERY_TRANSACTIONS',
-		store: 'STORE_QUERY_TRANSACTIONS'
+		store: 'STORE_TRANSACTIONS',
+		save: 'SAVE_TRANSACTION',
+		delete: 'DELETE_TRANSACTIONS',
+		toTemplate: 'TRANSACTION_TO_TEMPLATE'
+	},
+	templates: {
+		query: 'QUERY_TEMPLATES',
+		store: 'STORE_TEMPLATES',
+		save: 'SAVE_TEMPLATES',
+		delete: 'DELETE_TEMPLATE'
+	},
+	groups: {
+		query: 'QUERY_GROUPS',
+		store: 'STORE_GROUPS',
+		save: 'SAVE_GROUP'
 	},
 	activities: {
 		transactions: 'LOAD_TRANSACTION_ACTIVITY',
 		accounts: 'LOAD_ACCOUNT_ACTIVITY',
 		showcase: 'LOAD_SHOWCASE_ACTIVITY'
+	},
+	editors: {
+		setup: 'EDITOR_SETUP',
+		edit: 'EDITOR_EDIT',
+		submit: 'EDITOR_SUBMIT',
+		clear: 'EDITOR_CLEAR'
 	}
 };

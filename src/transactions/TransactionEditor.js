@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
+import {connect} from 'react-redux';
 
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
@@ -14,6 +15,9 @@ import AutoComplete from 'material-ui/AutoComplete';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
 
+import actions from '../redux/actions';
+import {getEditedValue} from '../redux/editorStore';
+import {getStateValues} from '../redux/horizonStore';
 import {Type} from './models';
 import CategoryPicker from '../categories/CategoryPicker';
 import CategoryEditor from '../categories/CategoryEditor';
@@ -21,8 +25,8 @@ import AccountPicker from '../comptes/AccountPicker';
 import GroupPicker from '../groups/GroupPicker';
 import GroupEditor from '../groups/GroupEditor';
 import {WithHorizons} from '../core/horizon';
-import {StateForm} from '../core/muiForm';
-import ElementEditor, {HorizonEditor} from '../core/ElementEditor';
+import * as muiForm from '../core/muiForm';
+import {prepareElement, submitElement} from '../core/ElementEditor';
 
 const PAYMENT_TYPES = [
   {id: Type.CARTE, name: 'Carte'},
@@ -34,17 +38,21 @@ const PAYMENT_TYPES = [
 const TODAY = new Date();
 const DEFAULT_TRANSACTION = {
   object: '',
-  type: Type.CARTE
+  type: Type.CARTE,
+  date: TODAY
 };
 
 const TransactionEditor = reactStamp(React)
-  .compose(WithHorizons, ElementEditor, HorizonEditor, StateForm)
+  .compose(WithHorizons)
   .compose({
     propTypes: {
-      transaction: PropTypes.object
+      transaction: PropTypes.object,
+      editorId: PropTypes.string.isRequired,
+      onSubmit: PropTypes.func
     },
     defaultProps: {
-      transaction: {}
+      transaction: {},
+      onSubmit: _.noop
     },
     state: {
       categories: [],
@@ -56,13 +64,36 @@ const TransactionEditor = reactStamp(React)
       askTransferAccount: false
     },
     init(props, {instance}) {
-      const key = 'transaction';
-      instance.elementKey = key;
-      instance.formStateKey = key;
+      const ELEMENT_PROP = 'editedTransaction';
+      instance.readEditedElement = function() {
+        return this.props[ELEMENT_PROP];
+      };
 
-      instance.state.transaction = this.makeStateTransaction(instance.props.transaction);
+      const updater = newState => instance.props.edit(newState[ELEMENT_PROP]);
+      instance.setModelValue = (...args) => muiForm.setModelValue(
+        instance.props, ELEMENT_PROP, updater,
+        ...args);
+      instance.setModelFromInput = (...args) => muiForm.setModelFromInput(
+        instance.props, ELEMENT_PROP, updater,
+        ...args);
+      instance.setModelFromChoice = (...args) => muiForm.setModelFromChoice(
+        instance.props, ELEMENT_PROP, updater,
+        ...args);
+
     },
     componentWillMount() {
+      if (!_.isEmpty(this.props.transaction)) {
+        const t = {
+          ...this.props.transaction,
+          date: new Date(this.props.transaction.date)
+        };
+        this.props.setUp(t);
+      } else {
+        this.props.setUp(DEFAULT_TRANSACTION);
+      }
+      this.props.loadLatestTransactions();
+      this.props.loadTemplates();
+
       this.cbks = Object.assign({}, this.cbks, {
         setObject: value => this.setModelValue('object', value || '', true),
         selectCompletedObject: this.defineTransactionObject.bind(this),
@@ -76,35 +107,11 @@ const TransactionEditor = reactStamp(React)
         closeCategoryForm: this.toggleCategoryForm.bind(this, false),
         addGroup: this.toggleGroupForm.bind(this, true),
         closeGroupForm: this.toggleGroupForm.bind(this, false),
+        submit: this.submit.bind(this),
         startTransfer: this.transfer.bind(this),
         completeTransfer: this.transfer.bind(this, true),
         cancelTransfer: this.transfer.bind(this, false)
       });
-
-      const lastestTransactions = this.transactionsFeed
-        .order('updatedAt', 'descending')
-        .limit(100)
-        .watch()
-        .subscribe(
-          transactions => {
-            const objects = _(transactions)
-              .map(t => t.object)
-              .uniq()
-              .value();
-            this.setState({latestObjects: objects});
-          },
-          err => {
-            console.error('Cannot retrieve latest transactions', err);
-            this.setState({existingObjects: []});
-          });
-      this.setStream('latestTransactions', lastestTransactions);
-
-      const templates = this.getTemplateFeed()
-          .watch()
-          .subscribe(
-              templates => this.setState({templates}),
-              err => console.error('Faied to retrieve templates', err));
-      this.setStream('transactionTemplates', templates);
     },
     makeStateTransaction(template) {
       const transaction = _.assign({}, DEFAULT_TRANSACTION, template);
@@ -112,18 +119,15 @@ const TransactionEditor = reactStamp(React)
         new Date(transaction.date) : new Date();
       return transaction;
     },
-    getElementFeed() {
-      return this.transactionsFeed;
-    },
     getValue(key) {
-      return this.state.transaction[key]
+      return this.props.editedTransaction[key]
         || this.props.transaction[key];
     },
     defineTransactionObject(chosenObject, idx) {
-      const template = this.state.templates[idx - this.state.latestObjects.length];
+      const template = this.props.templates[idx - this.props.latestObjects.length];
       if (template !== undefined && chosenObject === `${template.object} [t]`) {
         // Save the transaction id for update
-        const transactionId = this.state.transaction.id;
+        const transactionId = this.props.editedTransaction.id;
         const transaction = this.makeStateTransaction(template);
         transaction.id = transactionId;
         transaction.templateId = template.id;
@@ -136,11 +140,17 @@ const TransactionEditor = reactStamp(React)
           transaction.date.setMonth(transaction.date.getMonth() - 1);
         }
 
-        this.setState({transaction});
+        this.props.edit(transaction);
       } else {
         // Just use the value without template
         this.setModelValue('object', chosenObject);
       }
+    },
+    getEditedElement() {
+      return prepareElement(
+        this.props.editedTransaction,
+        this.props.transaction,
+        (t) => this.formatEditedElement(t));
     },
     formatEditedElement(transaction) {
       if (transaction.date !== undefined) {
@@ -149,14 +159,17 @@ const TransactionEditor = reactStamp(React)
       if (transaction.amount !== undefined) {
         transaction.amount = parseFloat(transaction.amount);
       }
+
+      return transaction;
     },
     reset() { // Override from HorizonEditor
-      const transaction = this.state.transaction;
+      const transaction = {
+        ...DEFAULT_TRANSACTION,
+        ...this.props.editedTransaction
+      };
       // Remove changing props
       ['object', 'amount', 'group'].forEach(prop => { transaction[prop] = '';});
-      // Reset to default props
-      const newValue = _.assign({}, transaction, DEFAULT_TRANSACTION);
-      this.setState({transaction: newValue});
+      this.props.edit(transaction);
     },
     canSubmit() {
       const transaction = this.getEditedElement();
@@ -167,6 +180,16 @@ const TransactionEditor = reactStamp(React)
         && transaction.type
         && transaction.category;
     },
+    submit() {
+      submitElement(
+        this.getEditedElement(),
+        (transaction) => this.props.save(transaction),
+        null,
+        null);
+      // TODO move this out of the editor
+      this.props.onSubmit();
+      this.reset();
+    },
     transfer(execute, toAccount) {
       if (execute === true) {
         const transaction = this.getEditedElement();
@@ -174,13 +197,11 @@ const TransactionEditor = reactStamp(React)
           const oppositeTransaction = Object.assign(
             {}, transaction, {amount: -transaction.amount, account: toAccount}
           );
-          Promise.all([
-            this.save(transaction, 'transferFrom'),
-            this.save(oppositeTransaction, 'transferTo')
-          ]).then(([original]) => this.onElementSaved(original))
-            // Do not call the submit callback as it is a special case
-            .catch(err => this.onFailedSubmit(err, transaction))
-            .then(() => this.setState({askTransferAccount: false}));
+
+          this.props.save(transaction);
+          this.props.save(oppositeTransaction);
+          this.setState({askTransferAccount: false});
+          this.reset();
         } else {
           console.error('Cannot transfer to the same account', toAccount);
           this.setState({askTransferAccount: false});
@@ -198,27 +219,17 @@ const TransactionEditor = reactStamp(React)
     toggleGroupForm(open) {
       this.setState({openGroupForm: open});
     },
-    renderChoices(values, valueFn, cbk, hintText) {
-      return <SelectField
-          value={valueFn(this.state) || valueFn(this.props) || null}
-          onChange={cbk}
-          floatingLabelText={hintText}
-          floatingLabelFixed={true}>
-        {values.map(value => <MenuItem key={value.id}
-            value={value.id} primaryText={value.name} />)}
-      </SelectField>;
-    },
     renderObject() {
       const suggestions = [
-        ...this.state.latestObjects,
-        ...this.state.templates.map(t => `${t.object} [t]`)
+        ...this.props.latestObjects,
+        ...this.props.templates.map(t => `${t.object} [t]`)
       ];
 
       return <div>
         <AutoComplete
           hintText="Objet de la transaction"
           filter={AutoComplete.fuzzyFilter}
-          searchText={this.state.transaction.object}
+          searchText={this.props.editedTransaction.object || ''}
           dataSource={suggestions}
           onUpdateInput={this.cbks.setObject}
           onNewRequest={this.cbks.selectCompletedObject}
@@ -232,12 +243,14 @@ const TransactionEditor = reactStamp(React)
         onSelect={this.cbks.setAccount} />;
     },
     renderType() {
-      return this.renderChoices(
-        PAYMENT_TYPES,
-        store => store.transaction.type,
-        this.cbks.setType,
-        'Moyen de payement'
-      );
+      return <SelectField
+          value={this.props.editedTransaction.type || null}
+          onChange={this.cbks.setType}
+          floatingLabelText={'Moyen de payement'}
+          floatingLabelFixed={true}>
+        {PAYMENT_TYPES.map(value => <MenuItem key={value.id}
+            value={value.id} primaryText={value.name} />)}
+      </SelectField>;
     },
     renderCategories() {
       return <CategoryPicker
@@ -255,13 +268,14 @@ const TransactionEditor = reactStamp(React)
           title="Ajouter une catégorie"
           modal={false} open={this.state.openCategoryForm}
           onRequestClose={this.cbks.closeCategoryForm}>
-          <CategoryEditor onSubmit={_.noop} />
+          <CategoryEditor onSubmit={newCategory => this.cbks.setCategory(newCategory.id)} />
         </Dialog>,
         <Dialog key="group"
           title="Ajouter un group"
           modal={false} open={this.state.openGroupForm}
           onRequestClose={this.cbks.closeGroupForm}>
-          <GroupEditor onSubmit={_.noop} />
+          <GroupEditor onSubmit={_.noop}
+              editorId={`TransactioEditor-${this.props.editorId}-group-editor`}/>
         </Dialog>,
         <Dialog key="transfer"
           title="Choisir le compte pour le transfert"
@@ -288,18 +302,22 @@ const TransactionEditor = reactStamp(React)
       return btns;
     },
     render() {
+      if (!this.props.editedTransaction) {
+        return <p><i>Loading...</i></p>;
+      }
+
       return <div>
         {this.renderForms()}
         {this.renderObject()}
         <div>
           <TextField hintText="Montant de la transaction" type="number"
-            value={this.state.transaction.amount}
+            value={this.props.editedTransaction.amount}
             onChange={this.cbks.setAmount} />
         </div>
         <div>
           <DatePicker
             hintText="Date de la transaction"
-            value={this.state.transaction.date}
+            value={this.props.editedTransaction.date}
             maxDate={TODAY}
             onChange={this.cbks.setDate} autoOk={true}/>
         </div>
@@ -326,4 +344,57 @@ const TransactionEditor = reactStamp(React)
     }
   });
 
-export default TransactionEditor;
+const LATEST_TRANSACTIONS_KEY = 'transaction-editor-lastest-transactions';
+const TEMPLATES_KEY = 'transaction-editor-templates';
+function mapStateToProps(state, props) {
+  const editedTransaction = getEditedValue(
+    state.editors,
+    props.editorId,
+    undefined);
+  const latestObjects = _(getStateValues(state.transactions, LATEST_TRANSACTIONS_KEY))
+    .map(t => t.object)
+    .uniq()
+    .value();
+  const templates = getStateValues(state.templates, TEMPLATES_KEY);
+
+  return {
+    ...props,
+    editedTransaction,
+    latestObjects,
+    templates
+  };
+}
+
+function mapDispatchToProps(dispatch, props) {
+  return {
+    setUp: transaction => dispatch({
+      type: actions.editors.setup,
+      editorId: props.editorId,
+      value: transaction
+    }),
+    edit: transaction => dispatch({
+      type: actions.editors.edit,
+      editorId: props.editorId,
+      value: transaction
+    }),
+    save: (transaction) => dispatch({
+      type: actions.transactions.save,
+      value: transaction
+    }),
+    loadLatestTransactions: () => dispatch({
+      type: actions.transactions.query,
+      queryId: LATEST_TRANSACTIONS_KEY,
+      order: 'updatedAt descending',
+      limit: 100
+    }),
+    loadTemplates: () => dispatch({
+      type: actions.templates.query,
+      queryId: TEMPLATES_KEY
+    })
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(TransactionEditor);
+export {
+  TransactionEditor
+};

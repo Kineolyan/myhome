@@ -1,10 +1,10 @@
 import React from 'react';
-import _ from 'lodash';
 import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
 
 import ElementPicker from '../core/ElementPicker';
 import actions from '../redux/actions';
+import {getStateValues} from '../redux/horizonStore';
 
 const CategoryPicker = reactStamp(React)
   .compose(ElementPicker)
@@ -22,10 +22,7 @@ const CategoryPicker = reactStamp(React)
 
 const CATEGORY_QUERY_ID = 'categoryPicker';
 const mapStateToProps = (state, props) => {
-  const categories = _(state.categoryQueries[CATEGORY_QUERY_ID])
-    .map(cId => state.categories[cId])
-    .filter(category => category)
-    .value();
+  const categories = getStateValues(state.categories, CATEGORY_QUERY_ID);
 
   return {
     ...props,

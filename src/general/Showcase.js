@@ -20,7 +20,7 @@ class Showcase extends React.Component {
           <Messages />
         </div>
         <div className="block">
-          <AccountEditor />
+          <AccountEditor editorId="showcase-account-editor"/>
         </div>
         <div className="block">
           <AccountList />
@@ -30,7 +30,7 @@ class Showcase extends React.Component {
           <CategoryList />
         </div>
         <div className="block">
-          <TransactionEditor />
+          <TransactionEditor editorId="showcase-tx-editor"/>
         </div>
         <div className="block">
           <TransactionList />
@@ -39,7 +39,7 @@ class Showcase extends React.Component {
           <TransactionHistory />
         </div>
         <div className="block">
-          <TemplateList />
+          <TemplateList viewId="showcase" />
         </div>
       </div>
     </div>;

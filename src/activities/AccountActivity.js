@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ActionSearch from 'material-ui/svg-icons/action/search';
@@ -44,10 +43,6 @@ class AccountActivity extends React.Component {
 
   componentWillMount() {
     this.filterTransactions();
-  }
-
-  get feed() {
-    return this.context.horizons.transactions;
   }
 
   togglePanel(panel) {
@@ -152,7 +147,7 @@ class AccountActivity extends React.Component {
             <DoneAllIcon />
           </FloatingActionButton>
         </div>
-        <AccountEditor />
+        <AccountEditor editorId="account-activity-account-editor"/>
       </div>
       <div className="panel">
         {this.renderList()}
@@ -162,9 +157,5 @@ class AccountActivity extends React.Component {
   }
 
 }
-
-AccountActivity.contextTypes = {
-  horizons: PropTypes.object
-};
 
 export default AccountActivity;

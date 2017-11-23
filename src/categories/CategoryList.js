@@ -4,6 +4,7 @@ import _ from 'lodash';
 import {connect} from 'react-redux';
 
 import actions from '../redux/actions';
+import {getStateValues} from '../redux/horizonStore';
 
 class CategoryList extends React.Component {
   componentWillMount() {
@@ -30,10 +31,7 @@ CategoryList.propTypes = {
 
 const CATEGORY_QUERY_ID = 'categoryList';
 const mapStateToProps = (state, props) => {
-  const categories = _(state.categoryQueries[CATEGORY_QUERY_ID])
-    .map(cId => state.categories[cId])
-    .filter(category => category)
-    .value();
+  const categories = getStateValues(state.categories, CATEGORY_QUERY_ID);
 
   return {
     ...props,

@@ -12,6 +12,7 @@ import ArrowLeft from 'material-ui/svg-icons/hardware/keyboard-arrow-left';
 import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right';
 
 import actions from '../../redux/actions';
+import {getStateValues} from '../../redux/horizonStore';
 import {WithHorizons} from '../../core/horizon';
 import {WithStreams} from '../../core/rx';
 import AccountPicker from '../AccountPicker';
@@ -108,7 +109,7 @@ const AccountValidator = reactStamp(React)
 		renderNextValidation() {
 			const enabled = this.state.balanceIdx > 1;
 			return <FloatingActionButton primary={true} mini={true}
-				onTouchTap={this.cbks.nextValidation}
+				onTouchTap={enabled ? this.cbks.nextValidation : _.noop}
 				disabled={!enabled}>
 					<ArrowRight/>
 			</FloatingActionButton>;
@@ -188,7 +189,10 @@ const AccountValidator = reactStamp(React)
 									null
 								}
 							</div>
-							<TransactionsView transactions={entry.transactions} pagination={10}/>
+							<TransactionsView
+									viewId="AccountValidator"
+									transactions={entry.transactions}
+									pagination={10}/>
 						</div>;
 					})}
 				</div>;
@@ -220,16 +224,10 @@ const AccountValidator = reactStamp(React)
 	});
 
 const mapStateToProps = (state, props) => {
-	const transactionIds = state.transactionQueries['validator-transactions'];
-	const transactions = _(transactionIds)
-		.map(tId => state.transactions[tId])
-		.filter(transaction => transaction !== undefined)
-		.value();
-	const suspicious = _(state.transactionQueries['validator-suspicious'])
-		.difference(transactionIds)
-		.map(tId => state.transactions[tId])
-		.filter(transaction => transaction !== undefined)
-		.value();
+	const transactions = getStateValues(state.transactions, 'validator-transactions');
+	const suspicious = _.difference(
+			getStateValues(state.transactions, 'validator-suspicious'),
+			transactions);
 
 	return {
 		...props,

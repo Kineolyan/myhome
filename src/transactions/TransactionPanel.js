@@ -76,13 +76,15 @@ class TransactionPanel extends React.Component {
     } else if (this.props.mode === Mode.SET_TEMPLATE) {
       return this.renderTemplateSetter();
     } else {
-      return <TransactionView transaction={this.props.transaction} />;
+      return <TransactionView
+        transaction={this.props.transaction}
+        viewId={`TransactionPanel-${this.props.transaction.id}`}/>;
     }
   }
 }
 
 TransactionPanel.propTypes = {
-  transactionId: PropTypes.object.isRequired,
+  transactionId: PropTypes.string.isRequired,
   transaction: PropTypes.object,
   mode: PropTypes.oneOf(_.values(Mode)),
   onSuccess: PropTypes.func
@@ -99,7 +101,7 @@ TransactionPanel.contextTypes = {
 const mapStateToProps = (state, props) => {
 	return {
 		...props,
-		transaction: state.transactions[props.transactionId]
+		transaction: state.transactions.values[props.transactionId]
 	};
 };
 

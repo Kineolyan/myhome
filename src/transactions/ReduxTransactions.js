@@ -4,6 +4,7 @@ import _ from 'lodash';
 import {connect} from 'react-redux';
 
 import actions from '../redux/actions';
+import {getStateValues} from '../redux/horizonStore';
 import TransactionsView from './TransactionsView';
 
 class ReduxTransactions extends React.Component {
@@ -26,6 +27,7 @@ class ReduxTransactions extends React.Component {
 
 	render() {
 		return <TransactionsView
+			viewId={this.props.viewId}
 			transactions={this.props.transactions}
 			pagination={this.props.pagination}
 			byGroup={this.props.byGroup}/>;
@@ -46,11 +48,7 @@ ReduxTransactions.defaultProps = {
 };
 
 const mapStateToProps = (state, props) => {
-	const transactionsIds = state.transactionQueries[props.viewId];
-	const transactions = _(transactionsIds)
-		.map(tId => state.transactions[tId])
-		.filter(transaction => transaction !== undefined)
-		.value();
+	const transactions = getStateValues(state.transactions, props.viewId);
 
 	return {
 		...props,
@@ -59,15 +57,11 @@ const mapStateToProps = (state, props) => {
 };
 
 const mapDispatchToProps = (dispatch) => ({
-	startQuery(viewId, query) {
-		return dispatch(Object.assign(
-			{
-				type: actions.transactions.query,
-				queryId: viewId
-			},
-			query
-		));
-	},
+	startQuery: (viewId, query) => dispatch({
+		type: actions.transactions.query,
+		queryId: viewId,
+		...query
+	}),
 	stopQuery() {}
 });
 

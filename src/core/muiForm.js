@@ -1,26 +1,26 @@
-import reactStamp from 'react-stamp';
 import _ from 'lodash';
 
-const StateForm = reactStamp()
-  .compose({
-    setModelFromInput(key, event, value) {
-      this.setModelValue(key, value);
-    },
-    setModelFromChoice(key, event, index, value) {
-      return this.setModelValue(key, value);
-    },
-    setModelValue(key, value, acceptEmpty = false) {
-      const element = this.state[this.formStateKey];
-      if (!_.isEmpty(value) || acceptEmpty || value instanceof Date) {
-        element[key] = value;
-      } else {
-        Reflect.deleteProperty(element, key);
-      }
+function setModelFromInput(state, formStateKey, udpater, key, event, value) {
+  return setModelValue(state, formStateKey, udpater, key, value);
+}
 
-      this.setState({[this.formStateKey]: element});
-    }
-  });
+function setModelFromChoice(state, formStateKey, udpater, key, event, index, value) {
+  return setModelValue(state, formStateKey, udpater, key, value);
+}
+
+function setModelValue(state, formStateKey, updater, key, value, acceptEmpty = false) {
+  const element = {...state[formStateKey]};
+  if (!_.isEmpty(value) || acceptEmpty || value instanceof Date) {
+    element[key] = value;
+  } else {
+    Reflect.deleteProperty(element, key);
+  }
+
+  return updater({[formStateKey]: element});
+}
 
 export {
-  StateForm
+  setModelFromInput,
+  setModelFromChoice,
+  setModelValue
 };
