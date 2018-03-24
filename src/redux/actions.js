@@ -35,6 +35,7 @@ export default {
 	activities: {
 		transactions: 'LOAD_TRANSACTION_ACTIVITY',
 		accounts: 'LOAD_ACCOUNT_ACTIVITY',
+		export: 'LOAD_ACCOUNT_EXPORT',
 		showcase: 'LOAD_SHOWCASE_ACTIVITY'
 	},
 	editors: {

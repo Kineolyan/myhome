@@ -11,6 +11,7 @@ type StoreType = {
   queries: QueryMappingType
 }
 export type StateType = {
+  view: string,
   transactions: StoreType,
   categories: StoreType,
   accounts: StoreType,
@@ -20,12 +21,22 @@ export type StateType = {
 }
 
 const initialState: StateType = {
+  view: 'showcase',
   transactions: horizonStore.makeStore(),
   categories: horizonStore.makeStore(),
   accounts: horizonStore.makeStore(),
   templates: horizonStore.makeStore(),
   groups: horizonStore.makeStore(),
   editors: editorStore.makeStore()
+};
+
+const selectView = (state, action) => {
+  for (const activity in actions.activities) {
+    if (actions.activities[activity] === action.type) {
+      return activity;
+    }
+  }
+  return state;
 };
 
 /*
@@ -38,21 +49,10 @@ const appState = (state: StateType = initialState, action: any) => {
       return Object.assign({}, state, {
         url: action.url
       });
-    case actions.activities.transactions:
-      return Object.assign({}, state, {
-        view: 'transactions'
-      });
-    case actions.activities.accounts:
-      return Object.assign({}, state, {
-        view: 'accounts'
-      });
-    case actions.activities.showcase:
-      return Object.assign({}, state, {
-        view: 'showcase'
-      });
     default:
       return {
         ...state,
+        view: selectView(state.view, action),
         accounts: horizonStore.storeState(state.accounts, actions.accounts, action),
         transactions: horizonStore.storeState(state.transactions, actions.transactions, action),
         templates: horizonStore.storeState(state.templates, actions.templates, action),

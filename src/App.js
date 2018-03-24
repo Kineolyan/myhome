@@ -8,8 +8,15 @@ import MenuItem from 'material-ui/MenuItem';
 
 import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
+import AccountExportActivity from './activities/AccountExportActivity';
 import Showcase from './general/Showcase';
 
+const menuLinks = [
+  {target: `#/comptes`, label: 'Comptes'},
+  {target: `#/comptes/edit`, label: 'Ajouter'},
+  {target: `#/comptes/export`, label: 'Export'},
+  {target: `#/showcase`, label: 'Showcase'}
+];
 class App extends Component {
   constructor(props) {
     super(props);
@@ -35,29 +42,32 @@ class App extends Component {
         width={200}
         open={this.state.openMenu}
         onRequestChange={this.cbks.toggleMenu}>
-      <a href={`#/comptes`}>
+      {menuLinks.map(link => <a href={link.target}>
         <MenuItem onTouchTap={this.cbks.closeMenu}>
-          Comptes
+          {link.label}
         </MenuItem>
-      </a>
-      <a href={`#/comptes/edit`}>
-        <MenuItem onTouchTap={this.cbks.closeMenu}>
-          Ajouter
-        </MenuItem>
-      </a>
-      <a href={`#/showcase`}>
-        <MenuItem onTouchTap={this.cbks.closeMenu}>
-          Show case
-        </MenuItem>
-      </a>
+      </a>)}
     </Drawer>;
+  }
+
+  renderTitle(viewName) {
+    if (!viewName) {
+      return 'My Home'
+    } else {
+      switch(viewName) {
+        case 'accounts': return 'My Home | Accounts';
+        case 'transactions': return 'My Home | Transactions';
+        case 'export': return 'My Home | Account Export';
+        default: return `My Home | [${viewName}]`;
+      }
+    }
   }
 
   render() {
     return (
       <div className="App">
         <AppBar
-          title="My Home"
+          title={this.renderTitle(this.props.view)}
           iconClassNameRight="muidocs-icon-navigation-expand-more"
           onLeftIconButtonTouchTap={this.cbks.openMenu}/>
         {this.renderMenu()}
@@ -72,12 +82,13 @@ class RouterApp extends Component {
     switch(this.props.view) {
       case 'accounts': return <AccountActivity />;
       case 'transactions': return <TransactionActivity/>;
+      case 'export': return <AccountExportActivity />;
       default: return <Showcase />;
     }
   }
 
   render() {
-    return <App>
+    return <App view={this.props.view}>
       {this.renderView()}
     </App>;
   }

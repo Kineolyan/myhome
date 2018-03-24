@@ -231,6 +231,10 @@ function main(sources) {
         return {
           type: actions.activities.accounts
         };
+      case '/comptes/export':
+        return {
+          type: actions.activities.export
+        };
       default:
         return {
           type: actions.activities.showcase
