@@ -13,10 +13,10 @@ import {asDate} from '../core/time';
 
 const TODAY = new Date();
 const toCsv = (transactions, categories) => {
-	return 'Objet,Montant,Date,Categorie\n' // Headers
+	return 'Objet,Montant,Date,Categorie,Type\n' // Headers
 		+ _(transactions)
-			.map(t => `${t.object},${t.amount.toFixed(2)},${asDate(t.date)},${categories[t.category].name}\n`)
-			.join('');
+			.map(t => `${t.object},${t.amount.toFixed(2)},${asDate(t.date)},${categories[t.category].name},${t.type}`)
+			.join('\n');
 };
 
 class AccountExportActivity extends React.Component {
