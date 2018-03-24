@@ -41,7 +41,7 @@ function hzStore(sources, store, actions) {
   const deletions$ = actions.delete === undefined
       ? xs.empty()
       : sources.ACTION
-        .filter(action => action.type === action.delete)
+        .filter(action => action.type === actions.delete)
         .map(action => ({
           ...action,
           mode: Operations.DELETE,
