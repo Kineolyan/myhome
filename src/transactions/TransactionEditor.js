@@ -168,7 +168,13 @@ const TransactionEditor = reactStamp(React)
         ...this.props.editedTransaction
       };
       // Remove changing props
-      ['object', 'amount', 'group'].forEach(prop => { transaction[prop] = '';});
+      [
+        'object',
+        'amount',
+        'group',
+        'templateId'
+      ].forEach(prop => { transaction[prop] = '';});
+
       this.props.edit(transaction);
     },
     canSubmit() {
