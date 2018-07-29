@@ -221,21 +221,16 @@ function main(sources) {
   const state$ = sources.STATE;
 
   const loadPage$ = sources.ROUTER
-    .map(url => {
-      switch(url) {
-      case '/comptes/edit':
-        return {
-          type: actions.activities.transactions
-        };
-      case '/comptes':
-        return {
-          type: actions.activities.accounts
-        };
-      case '/comptes/export':
-        return {
-          type: actions.activities.export
-        };
-      default:
+    .map((url = '') => {
+      if (url === '/comptes/edit') {
+        return {type: actions.activities.transactions};
+      } else if (url === '/comptes/export') {
+        return {type: actions.activities.export};
+      } else if (url === '/comptes/templates') {
+        return {type: actions.activities.templates};
+      } else if (url.startsWith('/comptes')) {
+        return {type: actions.activities.accounts};
+      } else {
         return {
           type: actions.activities.showcase
         };

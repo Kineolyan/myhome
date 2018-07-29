@@ -9,11 +9,13 @@ import MenuItem from 'material-ui/MenuItem';
 import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
 import AccountExportActivity from './activities/AccountExportActivity';
+import TemplateActivity from './activities/TemplateActivity';
 import Showcase from './general/Showcase';
 
 const menuLinks = [
   {target: `#/comptes`, label: 'Comptes'},
   {target: `#/comptes/edit`, label: 'Ajouter'},
+  {target: '#/comptes/templates', label: 'Templates'},
   {target: `#/comptes/export`, label: 'Export'},
   {target: `#/showcase`, label: 'Showcase'}
 ];
@@ -42,7 +44,7 @@ class App extends Component {
         width={200}
         open={this.state.openMenu}
         onRequestChange={this.cbks.toggleMenu}>
-      {menuLinks.map(link => <a href={link.target}>
+      {menuLinks.map(link => <a href={link.target} key={link.target}>
         <MenuItem onTouchTap={this.cbks.closeMenu}>
           {link.label}
         </MenuItem>
@@ -57,6 +59,7 @@ class App extends Component {
       switch(viewName) {
         case 'accounts': return 'My Home | Accounts';
         case 'transactions': return 'My Home | Transactions';
+        case 'templates': return 'My Home | Templates';
         case 'export': return 'My Home | Account Export';
         default: return `My Home | [${viewName}]`;
       }
@@ -82,6 +85,7 @@ class RouterApp extends Component {
     switch(this.props.view) {
       case 'accounts': return <AccountActivity />;
       case 'transactions': return <TransactionActivity/>;
+      case 'templates': return <TemplateActivity />;
       case 'export': return <AccountExportActivity />;
       default: return <Showcase />;
     }
