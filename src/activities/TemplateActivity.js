@@ -1,11 +1,13 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import _ from 'lodash';
 
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 
 import actions from '../redux/actions';
 import {getStateValues} from '../redux/horizonStore';
+import TemplateEditor from '../transactions/templates/TemplateEditor';
 
 const SelectTemplate = ({templates, value, onSelected}) => {
 	return <SelectField
@@ -26,6 +28,13 @@ const SelectTemplate = ({templates, value, onSelected}) => {
 
 class TemplateActivity extends React.Component {
 
+	constructor(props) {
+		super(props);
+		this.state = {
+			editedTemplate: null
+		};
+	}
+
 	componentDidMount() {
 		this.props.startQuery({});
 	}
@@ -35,7 +44,17 @@ class TemplateActivity extends React.Component {
 			<SelectTemplate
 					value=''
 					templates={this.props.templates}
-					onSelected={() => {}} />
+					onSelected={(idx) => this.setState({
+						editedTemplate: _.cloneDeep(this.props.templates[idx])
+					})} />
+			{
+				this.state.editedTemplate
+						? <TemplateEditor
+								template={this.state.editedTemplate}
+								editorId="template-activity-editor"
+								onSubmit={() => this.setState({editedTemplate: null})}/>
+						: null
+			}
     </div>;
   }
 
