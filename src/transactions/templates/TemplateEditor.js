@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
 
 import TextField from 'material-ui/TextField';
@@ -10,21 +9,16 @@ import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
-import AutoComplete from 'material-ui/AutoComplete';
 
 import FloatingActionButton from 'material-ui/FloatingActionButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
 
 import actions from '../../redux/actions';
 import {getEditedValue} from '../../redux/editorStore';
-import {getStateValues} from '../../redux/horizonStore';
 import {Type} from '../models';
 import CategoryPicker from '../../categories/CategoryPicker';
 import CategoryEditor from '../../categories/CategoryEditor';
 import AccountPicker from '../../comptes/AccountPicker';
-import GroupPicker from '../../groups/GroupPicker';
-import GroupEditor from '../../groups/GroupEditor';
-import {WithHorizons} from '../../core/horizon';
 import * as muiForm from '../../core/muiForm';
 import {prepareElement, submitElement} from '../../core/ElementEditor';
 
@@ -164,7 +158,6 @@ class TemplateEditor extends React.Component {
 	}
 
 	doRender(props) {
-		const readEditedElement = () => props[ELEMENT_PROP];
 		const updater = newState => props.edit(newState[ELEMENT_PROP]);
 		const setModelValue = (...args) => muiForm.setModelValue(
 			props, ELEMENT_PROP, updater,

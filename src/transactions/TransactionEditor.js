@@ -27,6 +27,7 @@ import GroupEditor from '../groups/GroupEditor';
 import {WithHorizons} from '../core/horizon';
 import * as muiForm from '../core/muiForm';
 import {prepareElement, submitElement} from '../core/ElementEditor';
+import {applyTemplate} from './templates/functions';
 
 const PAYMENT_TYPES = [
   {id: Type.CARTE, name: 'Carte'},
@@ -126,20 +127,9 @@ const TransactionEditor = reactStamp(React)
     defineTransactionObject(chosenObject, idx) {
       const template = this.props.templates[idx - this.props.latestObjects.length];
       if (template !== undefined && chosenObject === `${template.object} [t]`) {
-        // Save the transaction id for update
-        const transactionId = this.props.editedTransaction.id;
-        const transaction = this.makeStateTransaction(template);
-        transaction.id = transactionId;
-        transaction.templateId = template.id;
-        // Set the current month and year for the date
-        const now = new Date();
-        transaction.date.setFullYear(now.getFullYear());
-        transaction.date.setMonth(now.getMonth());
-        if (now < transaction.date) {
-          // Set a template for end of month at a beginnning of a month
-          transaction.date.setMonth(transaction.date.getMonth() - 1);
-        }
-
+        const transaction = applyTemplate(
+          {...DEFAULT_TRANSACTION, id: this.props.editedTransaction.id},
+          template);
         this.props.edit(transaction);
       } else {
         // Just use the value without template
