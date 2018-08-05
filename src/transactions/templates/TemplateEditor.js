@@ -28,9 +28,19 @@ const PAYMENT_TYPES = [
   {id: Type.CHEQUE, name: 'Chèque'},
   {id: Type.VIREMENT, name: 'Virement'}
 ];
+const TemplateType = {
+	FREQUENCY: 'frequency',
+	PREFILL: 'pre-fill'
+};
 const TEMPLATE_TYPES = [
-  {id: 'frequency', name: 'Fréquence'},
-  {id: 'template', name: 'Template'},
+  {id: TemplateType.FREQUENCY, name: 'Fréquence'},
+  {id: TemplateType.PREFILL, name: 'Pre-remplissage'},
+];
+const Frequency = {
+	MONTHLY: 'monthly'
+};
+const FREQUENCIES = [
+  {id: Frequency.MONTHLY, name: 'Tous les mois'}
 ];
 
 const TODAY = new Date();
@@ -78,7 +88,7 @@ const submit = (props) => {
 
 /* -- Sub-components -- */
 
-const TemplateObject = (props) => {
+const ObjectField = (props) => {
 	return <div>
 		<TextField
 			hintText="Objet de la transaction"
@@ -86,12 +96,12 @@ const TemplateObject = (props) => {
 			onChange={props.setObject} />
 	</div>;
 };
-const TemplateAccount = (props) => {
+const AccountField = (props) => {
 	return <AccountPicker
 		value={getValue(props, 'account')}
 		onSelect={props.setAccount} />;
 };
-const TemplateType = (props) => {
+const TypeSelector = (props) => {
 	return <SelectField
 			value={props.type || null}
 			onChange={props.setType}
@@ -101,7 +111,7 @@ const TemplateType = (props) => {
 				value={value.id} primaryText={value.name} />)}
 	</SelectField>;
 };
-const TemplatePayment = (props) => {
+const PaymentSelector = (props) => {
 	return <SelectField
 			value={props.editedTemplate.type || null}
 			onChange={props.setType}
@@ -111,12 +121,12 @@ const TemplatePayment = (props) => {
 				value={value.id} primaryText={value.name} />)}
 	</SelectField>;
 };
-const TemplateCategories = (props) => {
+const CategorySelector = (props) => {
 	return <CategoryPicker
 		value={getValue(props, 'category')}
 		onSelect={props.setCategory} />;
 };
-const TemplateForms = (props) => {
+const Forms = (props) => {
 	return [
 		<Dialog key="category"
 			title="Ajouter une catégorie"
@@ -126,12 +136,91 @@ const TemplateForms = (props) => {
 		</Dialog>
 	];
 };
-const TemplateSubmitButtons = (props) =>
+const SubmitButtons = (props) =>
 	<div>
 		<RaisedButton key="save-btn" label="Sauver" primary={true}
 			disabled={!canSubmit(props)}
 			onClick={props.submit} />
 	</div>;
+const FrequencySelector = (props) => {
+	return <SelectField
+			value={props.frequency || ''}
+			onChange={props.setFrequency}
+			floatingLabelText={'Fréquence'}
+			floatingLabelFixed={true}>
+		{FREQUENCIES.map(value => <MenuItem key={value.id}
+				value={value.id} primaryText={value.name} />)}
+	</SelectField>;
+};
+
+const FrequencyEditor = (props) => {
+	const updater = newState => props.edit(newState[ELEMENT_PROP]);
+	const setModelValue = (...args) => muiForm.setModelValue(
+		props, ELEMENT_PROP, updater,
+		...args);
+	const setModelFromInput = key => (...args) => muiForm.setModelFromInput(
+		props, ELEMENT_PROP, updater,
+		key,
+		...args);
+	const setModelFromChoice = key => (...args) => muiForm.setModelFromChoice(
+		props, ELEMENT_PROP, updater,
+		key,
+		...args);
+
+	return <div>
+		<Forms
+				isOpen={props.openCategoryForm}
+				closeCategoryForm={() => props.toggleCategoryForm(false)}/>
+		<ObjectField
+				setObject={setModelFromInput('object')}
+				{...props}/>
+		<div>
+			<TextField hintText="Montant de la transaction" type="number"
+				value={props.editedTemplate.amount}
+				onChange={setModelFromInput('amount')} />
+		</div>
+		<div>
+			<DatePicker
+				hintText="Date de la transaction"
+				value={props.editedTemplate.date}
+				maxDate={TODAY}
+				onChange={setModelFromInput('date')}
+				autoOk={true}/>
+			<FrequencySelector 
+				frequency={props.editedTemplate.frequency.type}
+				setFrequency={setModelFromChoice('frequency.type')} />
+		</div>
+		<div>
+			<AccountField
+					setAccount={value => setModelValue('account')}
+					{...props} />
+		</div>
+		<div>
+			<PaymentSelector
+					setType={setModelFromChoice('type')}
+					{...props} />
+		</div>
+		<div>
+			<CategorySelector
+					setCategory={category => setModelValue('category')}
+					{...props} />
+			<FloatingActionButton
+					onTouchTap={() => props.toggleCategoryForm(true)}
+					mini={true}>
+				<ContentAdd />
+			</FloatingActionButton>
+		</div>
+		<SubmitButtons
+				submit={() => submit(props)}
+				{...props} />
+	</div>;
+};
+
+const EditorSwitch = (props) => {
+	switch(props.type) {
+		case TemplateType.FREQUENCY : return <FrequencyEditor {...props} />;
+	}
+};
 
 const ELEMENT_PROP = 'editedTemplate';
 class TemplateEditor extends React.Component {
@@ -166,71 +255,19 @@ class TemplateEditor extends React.Component {
 	}
 
 	render() {
-		return this.doRender(this.props);
+		return this.doRender({
+			openCategoryForm: this.state.openCategoryForm,
+			toggleCategoryForm: visible => this.toggleCategoryForm(visible),
+			...this.props
+		});
 	}
 
 	doRender(props) {
-		const updater = newState => props.edit(newState[ELEMENT_PROP]);
-		const setModelValue = (...args) => muiForm.setModelValue(
-			props, ELEMENT_PROP, updater,
-			...args);
-		const setModelFromInput = key => (...args) => muiForm.setModelFromInput(
-			props, ELEMENT_PROP, updater,
-			key,
-			...args);
-		const setModelFromChoice = key => (...args) => muiForm.setModelFromChoice(
-			props, ELEMENT_PROP, updater,
-			key,
-			...args);
-
 		if (!props.editedTemplate) {
 			return <p><i>Loading...</i></p>;
+		} else {
+			return <EditorSwitch {...props} />;
 		}
-
-		return <div>
-			<TemplateForms
-					isOpen={this.state.openCategoryForm}
-					closeCategoryForm={() => this.toggleCategoryForm(false)}/>
-			<TemplateObject
-					setObject={setModelFromInput('object')}
-					{...props}/>
-			<div>
-				<TextField hintText="Montant de la transaction" type="number"
-					value={props.editedTemplate.amount}
-					onChange={setModelFromInput('amount')} />
-			</div>
-			<div>
-				<DatePicker
-					hintText="Date de la transaction"
-					value={props.editedTemplate.date}
-					maxDate={TODAY}
-					onChange={setModelFromInput('date')}
-					autoOk={true}/>
-			</div>
-			<div>
-				<TemplateAccount
-						setAccount={value => setModelValue('account')}
-						{...props} />
-			</div>
-			<div>
-				<TemplatePayment
-						setType={setModelFromChoice('type')}
-						{...props} />
-			</div>
-			<div>
-				<TemplateCategories
-						setCategory={category => setModelValue('category')}
-						{...props} />
-				<FloatingActionButton
-						onTouchTap={() => this.toggleCategoryForm(true)}
-						mini={true}>
-					<ContentAdd />
-				</FloatingActionButton>
-			</div>
-			<TemplateSubmitButtons
-					submit={() => submit(props)}
-					{...props} />
-		</div>;
 	}
 
 }
@@ -245,15 +282,26 @@ TemplateEditor.defaultProps = {
 	onSubmit: _.noop
 };
 
+const detectType = (template) => {
+	if (template === undefined) {
+		return undefined;
+	} else if (template.frequency) {
+		return TemplateType.FREQUENCY;
+	} else {
+		return TemplateType.PREFILL;
+	}
+}
+
 function mapStateToProps(state, props) {
   const editedTemplate = getEditedValue(
     state.editors,
     props.editorId,
-    undefined);
+		undefined);
 
   return {
     ...props,
-    editedTemplate
+		editedTemplate,
+		type: detectType(editedTemplate)
   };
 }
 
