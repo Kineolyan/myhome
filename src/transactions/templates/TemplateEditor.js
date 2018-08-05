@@ -28,14 +28,12 @@ const PAYMENT_TYPES = [
   {id: Type.CHEQUE, name: 'Chèque'},
   {id: Type.VIREMENT, name: 'Virement'}
 ];
+const TEMPLATE_TYPES = [
+  {id: 'frequency', name: 'Fréquence'},
+  {id: 'template', name: 'Template'},
+];
 
 const TODAY = new Date();
-const DEFAULT_TRANSACTION = {
-  object: '',
-  type: Type.CARTE,
-  date: TODAY
-};
-
 
 const getValue = (props, key) => props.editedTemplate[key] || props.template[key];
 
@@ -95,6 +93,16 @@ const TemplateAccount = (props) => {
 };
 const TemplateType = (props) => {
 	return <SelectField
+			value={props.type || null}
+			onChange={props.setType}
+			floatingLabelText={'Type de template'}
+			floatingLabelFixed={true}>
+		{TEMPLATE_TYPES.map(value => <MenuItem key={value.id}
+				value={value.id} primaryText={value.name} />)}
+	</SelectField>;
+};
+const TemplatePayment = (props) => {
+	return <SelectField
 			value={props.editedTemplate.type || null}
 			onChange={props.setType}
 			floatingLabelText={'Moyen de payement'}
@@ -139,7 +147,11 @@ class TemplateEditor extends React.Component {
 		if (!_.isEmpty(this.props.template)) {
 			initializeElement(this.props);
 		} else {
-			this.props.setUp(DEFAULT_TRANSACTION);
+			this.props.setUp({
+				object: '',
+				type: Type.CARTE,
+				date: TODAY
+			});
 		}
 	}
 
@@ -201,7 +213,7 @@ class TemplateEditor extends React.Component {
 						{...props} />
 			</div>
 			<div>
-				<TemplateType
+				<TemplatePayment
 						setType={setModelFromChoice('type')}
 						{...props} />
 			</div>
