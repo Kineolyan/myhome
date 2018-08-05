@@ -27,7 +27,7 @@ import GroupEditor from '../groups/GroupEditor';
 import {WithHorizons} from '../core/horizon';
 import * as muiForm from '../core/muiForm';
 import {prepareElement, submitElement} from '../core/ElementEditor';
-import {applyTemplate} from './templates/functions';
+import {applyTemplate} from './templates/model';
 
 const PAYMENT_TYPES = [
   {id: Type.CARTE, name: 'Carte'},

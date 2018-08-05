@@ -22,23 +22,18 @@ import AccountPicker from '../../comptes/AccountPicker';
 import * as muiForm from '../../core/muiForm';
 import {prepareElement, submitElement} from '../../core/ElementEditor';
 
+import {TemplateType, Frequency, detectType} from './model';
+
 const PAYMENT_TYPES = [
   {id: Type.CARTE, name: 'Carte'},
   {id: Type.MONNAIE, name: 'Monnaie'},
   {id: Type.CHEQUE, name: 'Chèque'},
   {id: Type.VIREMENT, name: 'Virement'}
 ];
-const TemplateType = {
-	FREQUENCY: 'frequency',
-	PREFILL: 'pre-fill'
-};
 const TEMPLATE_TYPES = [
   {id: TemplateType.FREQUENCY, name: 'Fréquence'},
   {id: TemplateType.PREFILL, name: 'Pre-remplissage'},
 ];
-const Frequency = {
-	MONTHLY: 'monthly'
-};
 const FREQUENCIES = [
   {id: Frequency.MONTHLY, name: 'Tous les mois'}
 ];
@@ -374,16 +369,6 @@ TemplateEditor.defaultProps = {
 	template: {},
 	onSubmit: _.noop
 };
-
-const detectType = (template) => {
-	if (template === undefined) {
-		return undefined;
-	} else if (template.frequency) {
-		return TemplateType.FREQUENCY;
-	} else {
-		return TemplateType.PREFILL;
-	}
-}
 
 function mapStateToProps(state, props) {
   const editedTemplate = getEditedValue(
