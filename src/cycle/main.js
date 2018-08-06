@@ -85,7 +85,7 @@ function deleteAccount(sources) {
         store: 'transactions',
         mode: Operations.SELECT,
         queryId: `listing-transactions-to-delete-for-${response.context.accountId}`,
-        element: response.context.accountId,
+        conditions: {account: response.context.accountId},
         category: DELETED_ACCOUNT,
         context: response.context
       };
@@ -138,7 +138,7 @@ function deleteTemplate(sources) {
         store: 'transactions',
         mode: Operations.SELECT,
         queryId: `listing-transactions-with-template-${response.value}`,
-        element: response.value,
+        conditions: {templateId: response.value},
         category: DELETED_TEMPLATE,
         context: {templateId: response.value}
       };
@@ -154,10 +154,12 @@ function deleteTemplate(sources) {
       store: 'transactions',
       mode: Operations.UPDATE,
       queryId: `untemplate-transactions-for-${response.context.templateId}`,
-      values: response.values.map(transaction => ({
+      values: response.values.map(transaction => {
+        debugger;
+        return {
         id: transaction.id,
         templateId: null
-      })),
+      };}),
       category: DELETED_TEMPLATE
     }));
 
@@ -195,7 +197,7 @@ function makeTemplate(sources) {
       };
     });
 
-  const updateTrasaction$ = sources.HORIZONS
+  const updateTransaction$ = sources.HORIZONS
     .filter(operation => operation.category === MAKE_TEMPLATE
         && operation.store === 'templates'
         && operation.mode === Operations.STORE
@@ -213,7 +215,7 @@ function makeTemplate(sources) {
     });
 
   return {
-    HORIZONS: Streams.merge(createTemplate$, updateTrasaction$)
+    HORIZONS: Streams.merge(createTemplate$, updateTransaction$)
   };
 }
 
@@ -269,12 +271,18 @@ function main(sources) {
 
   const hQueries$ = Streams.merge(
     transactions$.HORIZONS,
-    categories$.HORIZONS,
-    templates$.HORIZONS,
-    accounts$.HORIZONS,
+    Streams.merge( // Only queries and updates
+      categories$.queries,
+      categories$.updates),
+    Streams.merge(
+      templates$.queries,
+      templates$.updates,
+      opsOnDeletedTemplate$.HORIZONS), // Special delete
+    Streams.merge(
+      accounts$.queries,
+      accounts$.updates,
+      opsOnDeletedAccounts$.HORIZONS), // Special delete
     groups$.HORIZONS,
-    opsOnDeletedAccounts$.HORIZONS,
-    opsOnDeletedTemplate$.HORIZONS,
     opsToMakeTemplate$.HORIZONS
   );
 

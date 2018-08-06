@@ -1,5 +1,3 @@
-import { Z_DEFLATED } from "zlib";
-
 const TemplateType = {
 	FREQUENCY: 'frequency',
 	PREFILL: 'pre-fill'

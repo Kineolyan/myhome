@@ -111,6 +111,11 @@ const submit = (props) => {
 	// TODO move this out of the editor
 	props.onSubmit();
 };
+const doDelete = (props) => {
+	props.deleteTemplate();
+	// TODO move this out of the editor
+	props.onSubmit();
+};
 
 /* -- Sub-components -- */
 
@@ -154,9 +159,11 @@ const Forms = (props) => {
 };
 const SubmitButtons = (props) =>
 	<div>
-		<RaisedButton key="save-btn" label="Sauver" primary={true}
+		<RaisedButton label="Sauver" primary={true}
 			disabled={!props.canSubmit(props)}
 			onClick={props.submit} />
+		<RaisedButton label="Supprimer" primary={true}
+			onClick={props.delete} />
 	</div>;
 const FrequencySelector = (props) => {
 	return <SelectField
@@ -230,7 +237,7 @@ const FrequencyEditor = (props) => {
 		<SubmitButtons
 				canSubmit={() => canSubmitFrequencyTemplate(props)}
 				submit={() => submit(props)}
-				{...props} />
+				delete={() => doDelete(props)} />
 	</div>;
 };
 const PreFillEditor = (props) => {
@@ -279,9 +286,9 @@ const PreFillEditor = (props) => {
 			</FloatingActionButton>
 		</div>
 		<SubmitButtons
-				canSubmit={() => canSubmitPrefillTemplate(props)}
+				canSubmit={() => canSubmitFrequencyTemplate(props)}
 				submit={() => submit(props)}
-				{...props} />
+				delete={() => doDelete(props)} />
 	</div>;
 };
 
@@ -398,7 +405,12 @@ function mapDispatchToProps(dispatch, props) {
     save: (template) => dispatch({
       type: actions.templates.save,
       value: template
-    })
+    }),
+		deleteTemplate: () => dispatch({
+			type: actions.templates.delete,
+			queryId: `${props.editorId}-delete-${props.template.id}`,
+			templateId: props.template.id
+		})
   }
 }
 

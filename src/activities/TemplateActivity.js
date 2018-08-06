@@ -49,6 +49,11 @@ class TemplateActivity extends React.Component {
 					})} />
 			{
 				this.state.editedTemplate
+						? <div>Template id: {this.state.editedTemplate.id}</div>
+						: null
+			}
+			{
+				this.state.editedTemplate
 						? <TemplateEditor
 								template={this.state.editedTemplate}
 								editorId="template-activity-editor"
