@@ -6,31 +6,26 @@ function parseUrl(hash = '/') {
 
 function makeRouterDriver() {
 	return url$ => {
-		let urlListener = null;
-
 		url$.addListener({
-			next(msg) {
-				if (urlListener) {
-					urlListener.next(msg);
-				}
-			}
-		});
-
-		window.addEventListener("hashchange", event => {
-			if (urlListener) {
-				urlListener.next(parseUrl(event.newURL));
+			next(url) {
+				window.location.hash = url;
 			}
 		});
 
 		return xs.create({
+				eventListener: null,
+				listener: null,
 				start(listener) {
-					urlListener = listener;
+					this.eventListener = event => listener.next(event.newURL);
+					window.addEventListener("hashchange", this.eventListener);
 				},
 				stop() {
-					urlListener = null;
+					window.removeEventListener(this.eventListener);
+					this.eventListener = null;
 				}
 			})
-			.startWith(parseUrl(window.location.hash));
+			.startWith(window.location.hash)
+			.map(parseUrl);
 	};
 }
 

@@ -28,9 +28,17 @@ class TransactionView extends React.Component {
 
   renderTemplateId() {
     if (this.transaction.templateId) {
+      const clickHandler = e => {
+        e.preventDefault();
+        this.props.linkToTemplate(this.transaction.templateId);
+      };
       return [
         <br key="template-br"/>,
-        <span key="template-info">Based on template {this.transaction.templateId}</span>
+        <span key="template-info">Based on template 
+          <u onClick={clickHandler}>
+            {this.transaction.templateId}
+          </u>
+        </span>
       ];
     }
   }
@@ -98,6 +106,13 @@ function dispatchToProps(dispatch, props) {
       type: actions.groups.query,
       queryId: groupQueryId(props),
       element: props.transaction.group
+    }),
+    linkToTemplate: (templateId) => dispatch({
+      type: actions.location.goto,
+      context: {
+        entity: 'templates',
+        id: templateId
+      }
     })
   };
 }

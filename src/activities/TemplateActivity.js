@@ -39,6 +39,15 @@ class TemplateActivity extends React.Component {
 		this.props.startQuery({});
 	}
 
+	// componentDidUpdate() {
+	// 	const wantedId = this.props.context.id;
+	// 	const currentId = this.state.
+	// 	if (this.state.editedTemplate === mull 
+	// 		|| this.props.editedTemplate.id !== ) {
+	// 		const template = this.props.templates.find(t => t.id === this.props.context,id)
+	// 	}
+	// }
+
   render() {
     return <div>
 			<SelectTemplate

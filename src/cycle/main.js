@@ -219,37 +219,74 @@ function makeTemplate(sources) {
   };
 }
 
-function main(sources) {
-  const state$ = sources.STATE;
-
+const routing = (sources) => {
   const loadPage$ = sources.ROUTER
     .map((url = '') => {
-      if (url === '/comptes/edit') {
-        return {type: actions.activities.transactions};
-      } else if (url === '/comptes/export') {
-        return {type: actions.activities.export};
-      } else if (url === '/comptes/templates') {
-        return {type: actions.activities.templates};
-      } else if (url.startsWith('/comptes')) {
-        return {type: actions.activities.accounts};
+      const parts = url.split('/');
+      parts.shift(); // Pop the first /
+      if (parts[0] === 'comptes') {
+        if (parts[1] === 'templates') {
+          const id = parts[2];
+          return {
+            type: actions.activities.templates,
+            context: {id}
+          };
+        } else {
+          const section = parts[1];
+          let type;
+          switch (section) {
+          case 'export': 
+            type = actions.activities.export;
+            break;
+          case 'edit':
+            type = actions.activities.transactions;
+            break;
+          default:
+            type = actions.activities.accounts;
+          }
+          return {type};
+        }
       } else {
+        // Always redirect to showcase
         return {
           type: actions.activities.showcase
         };
       }
     });
 
-  const loadUrl$ = sources.ROUTER
-    .map(url => ({
-      type: actions.location.load,
-      url: {
-        path: url
-      }
-    }));
-
   const changeUrl$ = sources.ACTION
     .filter(action => action.type === actions.location.goto)
-    .map(action => action.url);
+    .map(({context}) => {
+      switch (context.entity) {
+      case 'comptes': {
+        let url = '/comptes';
+        if (context.section) {
+          url += `/${context.section}`;
+        }
+        return url;
+      }
+      case 'templates': {
+        let url = '/comptes/templates';
+        if (context.id) {
+          url += `/${context.id}`;
+        }
+        return url;
+      }
+      case 'showcase': return '/showcase';
+      default: throw new Error(`Unsupported entity ${context.entity} in ${context}`);
+      }
+    });
+
+  return {
+    ACTION: loadPage$,
+    ROUTER: changeUrl$
+  };
+}
+
+function main(sources) {
+  const state$ = sources.STATE;
+
+  const routes$ = routing(sources);
 
   const transactions$ = hzStore(sources, 'transactions', actions.transactions);
   const categories$ = hzStore(sources, 'categories', actions.categories);
@@ -266,7 +303,7 @@ function main(sources) {
     templates$.ACTION,
     accounts$.ACTION,
     groups$.ACTION,
-    loadPage$, loadUrl$
+    routes$.ACTION
   );
 
   const hQueries$ = Streams.merge(
@@ -299,7 +336,7 @@ function main(sources) {
     STATE: state$,
     HORIZONS: hQueries$,
     LOG: log$,
-    ROUTER: changeUrl$
+    ROUTER: routes$.ROUTER
   };
 }
 

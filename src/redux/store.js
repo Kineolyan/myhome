@@ -11,7 +11,7 @@ type StoreType = {
   queries: QueryMappingType
 }
 export type StateType = {
-  view: string,
+  view: {id: string, context?: any},
   transactions: StoreType,
   categories: StoreType,
   accounts: StoreType,
@@ -21,7 +21,7 @@ export type StateType = {
 }
 
 const initialState: StateType = {
-  view: 'showcase',
+  view: {id: 'showcase'},
   transactions: horizonStore.makeStore(),
   categories: horizonStore.makeStore(),
   accounts: horizonStore.makeStore(),
@@ -33,7 +33,10 @@ const initialState: StateType = {
 const selectView = (state, action) => {
   for (const activity in actions.activities) {
     if (actions.activities[activity] === action.type) {
-      return activity;
+      return {
+        id: activity, 
+        context: action.context || {}
+      };
     }
   }
   return state;
