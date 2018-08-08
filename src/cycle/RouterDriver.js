@@ -17,10 +17,10 @@ function makeRouterDriver() {
 				listener: null,
 				start(listener) {
 					this.eventListener = event => listener.next(event.newURL);
-					window.addEventListener("hashchange", this.eventListener);
+					window.addEventListener('hashchange', this.eventListener);
 				},
 				stop() {
-					window.removeEventListener(this.eventListener);
+					window.removeEventListener('hashchange', this.eventListener);
 					this.eventListener = null;
 				}
 			})

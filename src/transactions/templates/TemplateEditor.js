@@ -286,7 +286,7 @@ const PreFillEditor = (props) => {
 			</FloatingActionButton>
 		</div>
 		<SubmitButtons
-				canSubmit={() => canSubmitFrequencyTemplate(props)}
+				canSubmit={() => canSubmitPrefillTemplate(props)}
 				submit={() => submit(props)}
 				delete={() => doDelete(props)} />
 	</div>;

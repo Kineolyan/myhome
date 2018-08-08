@@ -32,6 +32,9 @@ export default {
 		store: 'STORE_GROUPS',
 		save: 'SAVE_GROUP'
 	},
+	activity: {
+		setState: 'SET_STATE'
+	},
 	activities: {
 		transactions: 'LOAD_TRANSACTION_ACTIVITY',
 		accounts: 'LOAD_ACCOUNT_ACTIVITY',

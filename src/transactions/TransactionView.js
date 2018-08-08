@@ -34,10 +34,8 @@ class TransactionView extends React.Component {
       };
       return [
         <br key="template-br"/>,
-        <span key="template-info">Based on template 
-          <u onClick={clickHandler}>
-            {this.transaction.templateId}
-          </u>
+        <span key="template-info">
+          Based on template <u className="fake-link" onClick={clickHandler}>{this.transaction.templateId}</u>
         </span>
       ];
     }

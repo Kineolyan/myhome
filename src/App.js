@@ -84,24 +84,24 @@ class App extends Component {
   }
 }
 
-class RouterApp extends Component {
-  renderView() {
-    switch(this.props.view.id) {
-      case 'accounts': return <AccountActivity />;
-      case 'transactions': return <TransactionActivity/>;
-      case 'templates': return <TemplateActivity context={this.props.view.context}/>;
-      case 'export': return <AccountExportActivity />;
-      default: return <Showcase />;
-    }
+const getView = (viewId) => {
+  switch (viewId) {
+    case 'accounts': return AccountActivity;
+    case 'transactions': return TransactionActivity;
+    case 'templates': return TemplateActivity;
+    case 'export': return AccountExportActivity;
+    default: return Showcase;
   }
+};
 
-  render() {
-    return <App view={this.props.view} linkTo={this.props.linkTo}>
-      {this.renderView()}
-    </App>;
-  }
-}
-
+const RouterApp = (props) => {
+  const View = getView(props.view.id);
+  return <App view={props.view} linkTo={props.linkTo}>
+    <View
+        context={props.view.context}
+        state={props.view.state} />
+  </App>;
+};
 const mapStateToProps = (state, props) => {
 	return {
 		...props,

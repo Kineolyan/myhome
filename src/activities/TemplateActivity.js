@@ -18,7 +18,8 @@ const SelectTemplate = ({templates, value, onSelected}) => {
 		{
 			templates.map((t) => {
 				const id = t.id;
-				const name = `${t.object} (${JSON.stringify(t.frequency)})`;
+				const info = t.frequency ? ` (${JSON.stringify(t.frequency)})` : '';
+				const name = `${t.object}${info}`;
 				return <MenuItem key={id} value={id} primaryText={name} />;
 			})
 		}
@@ -28,45 +29,37 @@ const SelectTemplate = ({templates, value, onSelected}) => {
 
 class TemplateActivity extends React.Component {
 
-	constructor(props) {
-		super(props);
-		this.state = {
-			editedTemplate: null
-		};
-	}
-
 	componentDidMount() {
 		this.props.startQuery({});
 	}
 
-	// componentDidUpdate() {
-	// 	const wantedId = this.props.context.id;
-	// 	const currentId = this.state.
-	// 	if (this.state.editedTemplate === mull 
-	// 		|| this.props.editedTemplate.id !== ) {
-	// 		const template = this.props.templates.find(t => t.id === this.props.context,id)
-	// 	}
-	// }
-
   render() {
+		return this.doRender(this.props);
+	}
+
+	doRender(props) {
+		if (_.isEmpty(props.templates)) {
+			return <div>Loading...</div>;
+		}
+
     return <div>
 			<SelectTemplate
 					value=''
 					templates={this.props.templates}
-					onSelected={(idx) => this.setState({
-						editedTemplate: _.cloneDeep(this.props.templates[idx])
+					onSelected={(idx) => props.setState({
+						templateId: props.templates[idx].id
 					})} />
 			{
-				this.state.editedTemplate
-						? <div>Template id: {this.state.editedTemplate.id}</div>
+				props.editedTemplate
+						? <div>Template id: {props.editedTemplate.id}</div>
 						: null
 			}
 			{
-				this.state.editedTemplate
+				props.editedTemplate
 						? <TemplateEditor
-								template={this.state.editedTemplate}
+								template={props.editedTemplate}
 								editorId="template-activity-editor"
-								onSubmit={() => this.setState({editedTemplate: null})}/>
+								onSubmit={() => props.setState({templateId: null})}/>
 						: null
 			}
     </div>;
@@ -77,10 +70,15 @@ class TemplateActivity extends React.Component {
 const REDUX_ID = 'template-activity';
 const mapStateToProps = (state, props) => {
 	const templates = getStateValues(state.templates, REDUX_ID);
+	const templateId = props.state.templateId || props.context.id;
+	const editedTemplate = templateId !== undefined
+		? templates.find(t => t.id === templateId)
+		: null;
 
 	return {
-		...props,
-		templates
+		templates,
+		templateId,
+		editedTemplate
 	};
 };
 
@@ -92,7 +90,11 @@ const mapDispatchToProps = (dispatch, props) => ({
       ...query
     });
 	},
-  stopQuery() {},
+	stopQuery() {},
+	setState: (state) => dispatch({
+		type: actions.activity.setState,
+		state
+	}),
   deleteTemplate: (templateId) => dispatch({
     type: actions.templates.delete,
     queryId: `${REDUX_ID}-delete-${templateId}`,
