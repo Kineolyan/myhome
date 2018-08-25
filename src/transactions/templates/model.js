@@ -37,10 +37,14 @@ const computeDateByFrequency = (input, {type}) => {
 const applyTemplate = (base, template) => {
   const id = base.id;
   const transaction = {...base, ...template};
+
+  // Set the id of the base or remove the one of the template
   if (id !== undefined) {
-    // Restore id if any
     transaction.id = id;
+  } else {
+    Reflect.deleteProperty(transaction, 'id');
   }
+
   transaction.templateId = template.id;
 
   const type = detectType(template);

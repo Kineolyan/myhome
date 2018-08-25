@@ -156,6 +156,10 @@ class TransactionsView extends React.Component {
     if (!baseTransaction) {
       throw new Error('No base transaction for template');
     }
+
+    // Remove the id of the base transaction
+    Reflect.deleteProperty(baseTransaction, 'id');
+
     this.props.makeTemplate(baseTransaction);
   }
 
@@ -196,7 +200,7 @@ class TransactionsView extends React.Component {
   renderGroup({groupId, count}) {
     const group = {
       ...this.state.groups[groupId],
-      ...this.props.groups[groupId] 
+      ...this.props.groups[groupId]
     };
     return <TableRow key={group.id}>
       <TableRowColumn style={TYPE_COLUMN_STYLE}>{count}+</TableRowColumn>
