@@ -85,7 +85,7 @@ function deleteAccount(sources) {
         store: 'transactions',
         mode: Operations.SELECT,
         queryId: `listing-transactions-to-delete-for-${response.context.accountId}`,
-        element: response.context.accountId,
+        conditions: {account: response.context.accountId},
         category: DELETED_ACCOUNT,
         context: response.context
       };
@@ -138,7 +138,7 @@ function deleteTemplate(sources) {
         store: 'transactions',
         mode: Operations.SELECT,
         queryId: `listing-transactions-with-template-${response.value}`,
-        element: response.value,
+        conditions: {templateId: response.value},
         category: DELETED_TEMPLATE,
         context: {templateId: response.value}
       };
@@ -154,10 +154,12 @@ function deleteTemplate(sources) {
       store: 'transactions',
       mode: Operations.UPDATE,
       queryId: `untemplate-transactions-for-${response.context.templateId}`,
-      values: response.values.map(transaction => ({
+      values: response.values.map(transaction => {
+        debugger;
+        return {
         id: transaction.id,
         templateId: null
-      })),
+      };}),
       category: DELETED_TEMPLATE
     }));
 
@@ -195,7 +197,7 @@ function makeTemplate(sources) {
       };
     });
 
-  const updateTrasaction$ = sources.HORIZONS
+  const updateTransaction$ = sources.HORIZONS
     .filter(operation => operation.category === MAKE_TEMPLATE
         && operation.store === 'templates'
         && operation.mode === Operations.STORE
@@ -213,46 +215,78 @@ function makeTemplate(sources) {
     });
 
   return {
-    HORIZONS: Streams.merge(createTemplate$, updateTrasaction$)
+    HORIZONS: Streams.merge(createTemplate$, updateTransaction$)
   };
 }
 
-function main(sources) {
-  const state$ = sources.STATE;
-
+const routing = (sources) => {
   const loadPage$ = sources.ROUTER
-    .map(url => {
-      switch(url) {
-      case '/comptes/edit':
-        return {
-          type: actions.activities.transactions
-        };
-      case '/comptes':
-        return {
-          type: actions.activities.accounts
-        };
-      case '/comptes/export':
-        return {
-          type: actions.activities.export
-        };
-      default:
+    .map((url = '') => {
+      const parts = url.split('/');
+      parts.shift(); // Pop the first /
+      if (parts[0] === 'comptes') {
+        if (parts[1] === 'templates') {
+          const id = parts[2];
+          return {
+            type: actions.activities.templates,
+            context: {id}
+          };
+        } else {
+          const section = parts[1];
+          let type;
+          switch (section) {
+          case 'export': 
+            type = actions.activities.export;
+            break;
+          case 'edit':
+            type = actions.activities.transactions;
+            break;
+          default:
+            type = actions.activities.accounts;
+          }
+          return {type};
+        }
+      } else {
+        // Always redirect to showcase
         return {
           type: actions.activities.showcase
         };
       }
     });
 
-  const loadUrl$ = sources.ROUTER
-    .map(url => ({
-      type: actions.location.load,
-      url: {
-        path: url
-      }
-    }));
-
   const changeUrl$ = sources.ACTION
     .filter(action => action.type === actions.location.goto)
-    .map(action => action.url);
+    .map(({context}) => {
+      switch (context.entity) {
+      case 'comptes': {
+        let url = '/comptes';
+        if (context.section) {
+          url += `/${context.section}`;
+        }
+        return url;
+      }
+      case 'templates': {
+        let url = '/comptes/templates';
+        if (context.id) {
+          url += `/${context.id}`;
+        }
+        return url;
+      }
+      case 'showcase': return '/showcase';
+      default: throw new Error(`Unsupported entity ${context.entity} in ${context}`);
+      }
+    });
+
+  return {
+    ACTION: loadPage$,
+    ROUTER: changeUrl$
+  };
+}
+
+function main(sources) {
+  const state$ = sources.STATE;
+
+  const routes$ = routing(sources);
 
   const transactions$ = hzStore(sources, 'transactions', actions.transactions);
   const categories$ = hzStore(sources, 'categories', actions.categories);
@@ -269,17 +303,23 @@ function main(sources) {
     templates$.ACTION,
     accounts$.ACTION,
     groups$.ACTION,
-    loadPage$, loadUrl$
+    routes$.ACTION
   );
 
   const hQueries$ = Streams.merge(
     transactions$.HORIZONS,
-    categories$.HORIZONS,
-    templates$.HORIZONS,
-    accounts$.HORIZONS,
+    Streams.merge( // Only queries and updates
+      categories$.queries,
+      categories$.updates),
+    Streams.merge(
+      templates$.queries,
+      templates$.updates,
+      opsOnDeletedTemplate$.HORIZONS), // Special delete
+    Streams.merge(
+      accounts$.queries,
+      accounts$.updates,
+      opsOnDeletedAccounts$.HORIZONS), // Special delete
     groups$.HORIZONS,
-    opsOnDeletedAccounts$.HORIZONS,
-    opsOnDeletedTemplate$.HORIZONS,
     opsToMakeTemplate$.HORIZONS
   );
 
@@ -296,7 +336,7 @@ function main(sources) {
     STATE: state$,
     HORIZONS: hQueries$,
     LOG: log$,
-    ROUTER: changeUrl$
+    ROUTER: routes$.ROUTER
   };
 }
 

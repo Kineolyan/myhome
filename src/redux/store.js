@@ -11,7 +11,7 @@ type StoreType = {
   queries: QueryMappingType
 }
 export type StateType = {
-  view: string,
+  view: {id: string, context?: any},
   transactions: StoreType,
   categories: StoreType,
   accounts: StoreType,
@@ -21,7 +21,7 @@ export type StateType = {
 }
 
 const initialState: StateType = {
-  view: 'showcase',
+  view: {id: 'showcase'},
   transactions: horizonStore.makeStore(),
   categories: horizonStore.makeStore(),
   accounts: horizonStore.makeStore(),
@@ -30,13 +30,24 @@ const initialState: StateType = {
   editors: editorStore.makeStore()
 };
 
-const selectView = (state, action) => {
+const manageView = (state, action) => {
   for (const activity in actions.activities) {
     if (actions.activities[activity] === action.type) {
-      return activity;
+      return {
+        id: activity, 
+        context: action.context || {},
+        state: {}
+      };
     }
   }
-  return state;
+  if (action.type === actions.activity.setState) {
+    return {
+      ...state,
+      state: action.state
+    };
+  } else {
+    return state;
+  }
 };
 
 /*
@@ -52,7 +63,7 @@ const appState = (state: StateType = initialState, action: any) => {
     default:
       return {
         ...state,
-        view: selectView(state.view, action),
+        view: manageView(state.view, action),
         accounts: horizonStore.storeState(state.accounts, actions.accounts, action),
         transactions: horizonStore.storeState(state.transactions, actions.transactions, action),
         templates: horizonStore.storeState(state.templates, actions.templates, action),

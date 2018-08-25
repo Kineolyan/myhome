@@ -11,9 +11,9 @@ function setModelFromChoice(state, formStateKey, udpater, key, event, index, val
 function setModelValue(state, formStateKey, updater, key, value, acceptEmpty = false) {
   const element = {...state[formStateKey]};
   if (!_.isEmpty(value) || acceptEmpty || value instanceof Date) {
-    element[key] = value;
+    _.set(element, key, value);
   } else {
-    Reflect.deleteProperty(element, key);
+    _.unset(element, key);
   }
 
   return updater({[formStateKey]: element});

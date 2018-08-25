@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import {connect} from 'react-redux';
 import './App.css';
 
+import actions from './redux/actions';
+
 import AppBar from 'material-ui/AppBar';
 import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
@@ -9,13 +11,15 @@ import MenuItem from 'material-ui/MenuItem';
 import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
 import AccountExportActivity from './activities/AccountExportActivity';
+import TemplateActivity from './activities/TemplateActivity';
 import Showcase from './general/Showcase';
 
 const menuLinks = [
-  {target: `#/comptes`, label: 'Comptes'},
-  {target: `#/comptes/edit`, label: 'Ajouter'},
-  {target: `#/comptes/export`, label: 'Export'},
-  {target: `#/showcase`, label: 'Showcase'}
+  {label: 'Comptes', target: {entity: 'comptes'}},
+  {label: 'Ajouter', target: {entity: 'comptes', section: 'edit'}},
+  {label: 'Templates', target: {entity: 'templates'}},
+  {label: 'Export', target: {entity: 'comptes', section: 'export'}},
+  {label: 'Showcase', target: {entity: 'showcase'}}
 ];
 class App extends Component {
   constructor(props) {
@@ -42,11 +46,13 @@ class App extends Component {
         width={200}
         open={this.state.openMenu}
         onRequestChange={this.cbks.toggleMenu}>
-      {menuLinks.map(link => <a href={link.target}>
+      {menuLinks.map(link => <div 
+          onClick={() => this.props.linkTo(link.target)} 
+          key={link.label}>
         <MenuItem onTouchTap={this.cbks.closeMenu}>
           {link.label}
         </MenuItem>
-      </a>)}
+      </div>)}
     </Drawer>;
   }
 
@@ -57,6 +63,7 @@ class App extends Component {
       switch(viewName) {
         case 'accounts': return 'My Home | Accounts';
         case 'transactions': return 'My Home | Transactions';
+        case 'templates': return 'My Home | Templates';
         case 'export': return 'My Home | Account Export';
         default: return `My Home | [${viewName}]`;
       }
@@ -67,7 +74,7 @@ class App extends Component {
     return (
       <div className="App">
         <AppBar
-          title={this.renderTitle(this.props.view)}
+          title={this.renderTitle(this.props.view.id)}
           iconClassNameRight="muidocs-icon-navigation-expand-more"
           onLeftIconButtonTouchTap={this.cbks.openMenu}/>
         {this.renderMenu()}
@@ -77,29 +84,38 @@ class App extends Component {
   }
 }
 
-class RouterApp extends Component {
-  renderView() {
-    switch(this.props.view) {
-      case 'accounts': return <AccountActivity />;
-      case 'transactions': return <TransactionActivity/>;
-      case 'export': return <AccountExportActivity />;
-      default: return <Showcase />;
-    }
+const getView = (viewId) => {
+  switch (viewId) {
+    case 'accounts': return AccountActivity;
+    case 'transactions': return TransactionActivity;
+    case 'templates': return TemplateActivity;
+    case 'export': return AccountExportActivity;
+    default: return Showcase;
   }
+};
 
-  render() {
-    return <App view={this.props.view}>
-      {this.renderView()}
-    </App>;
-  }
-}
-
+const RouterApp = (props) => {
+  const View = getView(props.view.id);
+  return <App view={props.view} linkTo={props.linkTo}>
+    <View
+        context={props.view.context}
+        state={props.view.state} />
+  </App>;
+};
 const mapStateToProps = (state, props) => {
 	return {
 		...props,
 		view: state.view
 	};
 };
-const ReduxApp = connect(mapStateToProps, () => ({}))(RouterApp);
+const mapDispatchToProps = (dispatch, props) => {
+  return {
+    linkTo: (context) => dispatch({
+      type: actions.location.goto,
+      context
+    })
+  }
+}
+const ReduxApp = connect(mapStateToProps, mapDispatchToProps)(RouterApp);
 
 export default ReduxApp;
