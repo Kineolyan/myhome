@@ -16,7 +16,7 @@ start() {
 	# We could serve it with security, but it means managing migration
 	## hz serve --secure no --permissions no --port 8000
 	# ... or just run it as dev
-	hz serve --dev --port 8000
+	hz serve --dev --port 8000 --serve-static build/
 }
 
 backup
