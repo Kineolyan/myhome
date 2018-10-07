@@ -1,6 +1,7 @@
 import xs from 'xstream';
 import actions from '../redux/actions';
 import {Operations} from '../cycle/HorizonDriver';
+import {TemplateType} from '../transactions/templates/model';
 
 const Streams = {
   merge(first, ...others) {
@@ -178,13 +179,10 @@ function makeTemplate(sources) {
     .filter(action => action.type === actions.transactions.toTemplate)
     .map(action => {
       const transaction = {...action.transaction};
-      const template = {
-        ...transaction,
-        frequency: {
-          type: 'monthly'
-        }
-      };
-      Reflect.deleteProperty(template, 'id');
+      // Create a new pre-filled template
+      const template = {...transaction};
+      ['id', 'date', 'templateId', 'createdAt', 'updatedAt'].forEach(
+        prop => Reflect.deleteProperty(template, prop));
 
       return {
         store: 'templates',
@@ -200,8 +198,7 @@ function makeTemplate(sources) {
   const updateTransaction$ = sources.HORIZONS
     .filter(operation => operation.category === MAKE_TEMPLATE
         && operation.store === 'templates'
-        && operation.mode === Operations.STORE
-        && operation.success)
+        && operation.mode === Operations.STORE)
     .map(operation => {
       const transaction = operation.context.transaction;
       transaction.templateId = operation.value.id;
@@ -235,7 +232,7 @@ const routing = (sources) => {
           const section = parts[1];
           let type;
           switch (section) {
-          case 'export': 
+          case 'export':
             type = actions.activities.export;
             break;
           case 'edit':
