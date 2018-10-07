@@ -271,9 +271,22 @@ class TransactionsView extends React.Component {
       const title = <div className="dialog-header">
         <span className="dialog-title">Transaction</span>
         <div className="dialog-actions">
-          <FlatButton label="Edit" onTouchTap={this.cbks.openEditor}/>
+          {
+            this.state.detailViewMode !== PanelMode.VIEW
+              ? <FlatButton label="View" onTouchTap={this.cbks.closeEditor}/>
+              : null
+          }
+          {
+            this.state.detailViewMode !== PanelMode.EDIT
+              ? <FlatButton label="Edit" onTouchTap={this.cbks.openEditor}/>
+              : null
+          }
           <FlatButton label="Delete" onTouchTap={this.cbks.deleteTransaction}/>
-          <FlatButton label="Set Template" onTouchTap={this.cbks.associateTemplate}/>
+          {
+            this.state.detailViewMode !== PanelMode.SET_TEMPLATE
+              ? <FlatButton label="Set Template" onTouchTap={this.cbks.associateTemplate}/>
+              : null
+          }
           <FlatButton label="As Template" onTouchTap={this.cbks.makeTemplate}/>
         </div>
       </div>;
