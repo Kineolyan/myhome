@@ -10,19 +10,21 @@ import {getStateValues} from '../redux/horizonStore';
 import TemplateEditor from '../transactions/templates/TemplateEditor';
 
 const SelectTemplate = ({templates, value, onSelected}) => {
+	const options = _(templates)
+		.sortBy(t => t.object)
+		.map((t) => {
+			const id = t.id;
+			const info = t.frequency ? ` (${JSON.stringify(t.frequency)})` : '';
+			const name = `${t.object}${info}`;
+			return <MenuItem key={id} value={id} primaryText={name} />;
+		})
+		.value();
 	return <SelectField
 			value={value || ''}
 			onChange={(event, index) => onSelected(index)}
 			hintText={'Select a template'}
 			floatingLabelFixed={true}>
-		{
-			templates.map((t) => {
-				const id = t.id;
-				const info = t.frequency ? ` (${JSON.stringify(t.frequency)})` : '';
-				const name = `${t.object}${info}`;
-				return <MenuItem key={id} value={id} primaryText={name} />;
-			})
-		}
+		{options}
 	</SelectField>;
 
 };

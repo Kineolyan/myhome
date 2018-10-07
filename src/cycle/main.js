@@ -156,7 +156,6 @@ function deleteTemplate(sources) {
       mode: Operations.UPDATE,
       queryId: `untemplate-transactions-for-${response.context.templateId}`,
       values: response.values.map(transaction => {
-        debugger;
         return {
         id: transaction.id,
         templateId: null

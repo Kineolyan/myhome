@@ -51,19 +51,22 @@ class TransactionPanel extends React.Component {
   }
 
   renderTemplateSetter() {
+    const templates = _(this.state.templates)
+      .sortBy(t => t.object)
+      .map(template =>
+        <li key={template.id}>
+          <span style={{
+            fontWeight: template.id === this.props.transaction.templateId
+              ? 'bold'
+              : 'normal'
+            }}>{template.object}</span>
+          &nbsp;
+          <span onClick={() => this.associateTemplate(template)}>[Use]</span>
+        </li>)
+      .value();
     return <div style={{marginTop: 10}}>
         <div>Pick a template for the transaction</div>
-        <ul>
-          {this.state.templates.map(template => <li key={template.id}>
-            <span style={{
-              fontWeight: template.id === this.props.transaction.templateId
-                ? 'bold'
-                : 'normal'
-              }}>{template.object}</span>
-            &nbsp;
-            <span onClick={() => this.associateTemplate(template)}>[Use]</span>
-          </li>)}
-        </ul>
+        <ul>{templates}</ul>
       </div>;
   }
 
