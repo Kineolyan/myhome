@@ -19,7 +19,7 @@ const detectType = (template) => {
 
 const computeDateByFrequency = (input, {type}) => {
   // Set the current month and year for the date
-  const date = new Date(input)
+  const date = new Date(input);
   const now = new Date();
   if (type === 'monthly') {
     date.setFullYear(now.getFullYear());
@@ -27,6 +27,14 @@ const computeDateByFrequency = (input, {type}) => {
     if (now < date) {
       // Set a template for end of month at a beginnning of a month
       date.setMonth(date.getMonth() - 1);
+    }
+    // Often, monthly operations do not occur on week-ends, move to the next day if needed
+    if (date.getDay() === 6) {
+      // Saturday, advance by 2 days
+      date.setDate(date.getDate + 2);
+    } else if (date.getDay() === 0) {
+      // Sunday, advance by 1 day
+      date.setDate(date.getDate() + 1);
     }
   } else {
     throw new Error(`Unsupported frequency ${type}`);
