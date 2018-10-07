@@ -52,9 +52,13 @@ const applyTemplate = (base, template) => {
     // Remove the frequency attribute and change the date
     transaction.date = computeDateByFrequency(template.date, template.frequency);
     Reflect.deleteProperty(transaction, 'frequency');
+  } else if (type === TemplateType.PREFILL) {
+    // Restore existing date
+    transaction.date = base.date || new Date();
   } else {
-    transaction.date = transaction.date !== undefined ?
-      new Date(transaction.date) : new Date();
+    transaction.date = transaction.date !== undefined
+      ? new Date(transaction.date)
+      : new Date();
   }
 
   return transaction;
