@@ -3,24 +3,26 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
-    "flow-bin": "^0.56.0",
-    "react-scripts": "1.0.14"
+    "flow-bin": "^0.83.0",
+    "react-scripts": "2.0.5"
   },
   "dependencies": {
-    "@cycle/rxjs-run": "^7.1.0",
+    "@cycle/rxjs-run": "^10.1.0",
     "@cycle/xstream-run": "^4.2.0",
-    "lodash": "^4.17.4",
-    "material-ui": "^0.19.3",
-    "prop-types": "^15.6.0",
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0",
-    "react-redux": "^5.0.6",
-    "react-router": "^4.2.0",
+    "global": "^4.3.2",
+    "lodash": "^4.17.11",
+    "material-ui": "^0.20.2",
+    "npm-check-updates": "^2.14.2",
+    "prop-types": "^15.6.2",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
+    "react-redux": "^5.0.7",
+    "react-router": "^4.3.1",
     "react-stamp": "^0.6.0",
-    "react-tap-event-plugin": "^3.0.2",
-    "redux": "^3.7.2",
+    "react-tap-event-plugin": "^3.0.3",
+    "redux": "^4.0.1",
     "redux-cycles": "^0.4.1",
-    "rxjs": "^5.4.3"
+    "rxjs": "^6.3.3"
   },
   "scripts": {
     "start": "react-scripts start",
