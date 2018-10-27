@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-
-import TextField from 'material-ui/TextField';
-import RaisedButton from 'material-ui/RaisedButton';
+import { Form, Input, Button } from 'antd';
 
 import {prepareElement, submitElement} from '../core/ElementEditor';
 import {setModelFromInput} from '../core/muiForm';
@@ -16,7 +14,8 @@ class GroupEditor extends React.Component {
       setName: (...args) => setModelFromInput(
         this.props, 'editedGroup',
         newState => this.props.edit(newState.editedGroup),
-        'name', ...args),
+        'name',
+        ...args),
       submit: () => submitElement(
         prepareElement(this.props.editedGroup, {}),
         group => this.props.submit(group),
@@ -25,13 +24,23 @@ class GroupEditor extends React.Component {
   }
 
   render() {
-    return <div>
-      <TextField hintText="Nom pour le groupe de transactions"
-        defaultValue={this.props.group.name}
-        onChange={this.cbks.setName} />
-      <RaisedButton label="Ajouter" primary={true}
-        onClick={this.cbks.submit} />
-    </div>;
+    return (
+      <Form layout="inline">
+        <Form.Item>
+          <Input placeholder="Nom pour le groupe de transactions"
+            value={this.props.editedGroup.name || this.props.group.name}
+            onChange={this.cbks.setName} />
+        </Form.Item>
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            onClick={this.cbks.submit}>
+            Ajouter
+          </Button>
+        </Form.Item>
+      </Form>
+    );
   }
 }
 

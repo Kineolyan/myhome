@@ -1,6 +1,5 @@
 import React from 'react';
-
-import RaisedButton from 'material-ui/RaisedButton';
+import {Button} from 'antd';
 
 import TransactionList from '../transactions/TransactionList';
 import TransactionEditor from '../transactions/TransactionEditor';
@@ -69,13 +68,15 @@ class TransactionActivity extends React.Component {
 
     return <div>
       <div style={{width: '100%', textAlign: 'center'}}>
-        <RaisedButton onTouchTap={this.cbks.toggleTransactionsDisplay}
-            secondary={this.state.displayTransactions}>
-          <span style={TOGGLE_BUTTON_STYLE}>Transactions</span>
-        </RaisedButton> - Ajout - <RaisedButton onTouchTap={this.cbks.toggleSearchDisplay}
-            secondary={this.state.displaySearch}>
-          <span style={TOGGLE_BUTTON_STYLE}>Recherche</span>
-        </RaisedButton>
+        <Button
+            onClick={this.cbks.toggleTransactionsDisplay}
+            type={this.state.displayTransactions ? 'dashed' : undefined}>
+          Transactions
+        </Button> - Ajout - <Button
+            onClick={this.cbks.toggleSearchDisplay}
+            type={this.state.displaySearch ? 'dashed' : undefined}>
+          Recherche
+        </Button>
       </div>
       <div className="panel">
         {transactionsView}
