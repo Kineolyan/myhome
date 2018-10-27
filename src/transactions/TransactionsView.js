@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
+import {Table} from 'antd';
 
-import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
+// import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import CreditCardIcon from 'material-ui/svg-icons/action/credit-card';
@@ -187,14 +188,20 @@ class TransactionsView extends React.Component {
   }
 
   renderTransaction(transaction) {
-    return <TableRow key={transaction.id} onClick={this.cbks.goPrevious}>
-      <TableRowColumn style={TYPE_COLUMN_STYLE}>{this.renderTypeIcon(transaction.type)}</TableRowColumn>
-      <TableRowColumn>{transaction.object}</TableRowColumn>
-      <TableRowColumn>{this.renderAmount(transaction)}</TableRowColumn>
-      <TableRowColumn>
-        {new Date(transaction.date).toLocaleDateString()}
-      </TableRowColumn>
-    </TableRow>;
+    // return <TableRow key={transaction.id} onClick={this.>
+    //   <TableRowColumn style={TYPE_COLUMN_STYLE}>{this.renderTypeIcon(transaction.type)}</TableRowColumn>
+    //   <TableRowColumn>{transaction.object}</TableRowColumn>
+    //   <TableRowColumn>{this.renderAmount(transaction)}</TableRowColumn>
+    //   <TableRowColumn>
+    //     {new Date(transaction.date).toLocaleDateString()}
+    //   </TableRowColumn>
+    // </TableRow>;
+    return {
+      type: transaction.type,
+      object: transaction.object,
+      value: transaction.amount,
+      date: new Date(transaction.date).toLocaleDateString()
+    };
   }
 
   renderGroup({groupId, count}) {
@@ -202,27 +209,52 @@ class TransactionsView extends React.Component {
       ...this.state.groups[groupId],
       ...this.props.groups[groupId]
     };
-    return <TableRow key={group.id}>
-      <TableRowColumn style={TYPE_COLUMN_STYLE}>{count}+</TableRowColumn>
-      <TableRowColumn>{group.name || group.id}</TableRowColumn>
-      <TableRowColumn>...</TableRowColumn>
-      <TableRowColumn>...</TableRowColumn>
-    </TableRow>;
+    // return <TableRow key={group.id}>
+    //   <TableRowColumn style={TYPE_COLUMN_STYLE}>{count}+</TableRowColumn>
+    //   <TableRowColumn>{group.name || group.id}</TableRowColumn>
+    //   <TableRowColumn>...</TableRowColumn>
+    //   <TableRowColumn>...</TableRowColumn>
+    // </TableRow>;
+    return {
+      type: `${count}+`,
+      object: group.name || group.id,
+      value: '...',
+      date: '...'
+    };
   }
 
-  renderRows() {
+  renderTable() {
     const startIdx = this.state.index * this.props.pagination;
     const endIdx = Math.min(startIdx + this.props.pagination, this.state.transactions.length);
 
-    const rows = [];
-    for (let i = startIdx; i < endIdx; i += 1) {
-      const row = this.state.transactions[i];
-      const rowElt = row.groupRow ?
-        this.renderGroup(row) : this.renderTransaction(row);
-      rows.push(rowElt);
-    }
+    const columns = [{
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+    }, {
+      title: 'Objet',
+      dataIndex: 'object',
+      key: 'object',
+    }, {
+      title: 'Montant',
+      dataIndex: 'value',
+      key: 'value',
+    }, {
+      title: 'Date',
+      dataIndex: 'date',
+      key: 'date'
+    }];
 
-    return rows;
+    // const dataSource = [];
+    // for (let i = startIdx; i < endIdx; i += 1) {
+    //   const row = this.state.transactions[i];
+    //   const rowElt = row.groupRow ? this.renderGroup(row) : this.renderTransaction(row);
+    //   dataSource.push(rowElt);
+    // }
+    const dataSource = this.state.transactions.map(
+      row => row.groupRow ? this.renderGroup(row) : this.renderTransaction(row));
+
+    return <Table dataSource={dataSource} columns={columns} />
   }
 
   renderPrevious() {
@@ -322,29 +354,10 @@ class TransactionsView extends React.Component {
     if (_.isEmpty(this.state.transactions)) {
       return <p>No transactions</p>;
     }
-
     return <div>
       {this.renderHighlightedTransaction()}
       {this.renderHighlightedGroup()}
-      <div style={{display: 'flex', flexDirection: 'row'}}>
-        <Table onCellClick={this.cbks.highlightRow} style={{flex: 1}}>
-          <TableHeader displaySelectAll={false} adjustForCheckbox={false}>
-            <TableRow>
-              <TableHeaderColumn style={TYPE_COLUMN_STYLE}>Type</TableHeaderColumn>
-              <TableHeaderColumn>Objet</TableHeaderColumn>
-              <TableHeaderColumn>Montant</TableHeaderColumn>
-              <TableHeaderColumn>Date</TableHeaderColumn>
-            </TableRow>
-          </TableHeader>
-          <TableBody
-              displayRowCheckbox={false}
-              showRowHover={true}
-              stripedRows={true}>
-            {this.renderRows()}
-          </TableBody>
-        </Table>
-        {this.renderPagination()}
-      </div>
+      {this.renderTable()}
     </div>;
   }
 }

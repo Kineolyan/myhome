@@ -1,9 +1,5 @@
 import React from 'react';
-
-import FloatingActionButton from 'material-ui/FloatingActionButton';
-import ActionSearch from 'material-ui/svg-icons/action/search';
-import NavigationClose from 'material-ui/svg-icons/navigation/close';
-import DoneAllIcon from 'material-ui/svg-icons/action/done-all';
+import {Button} from 'antd';
 
 import TransactionHistory from '../transactions/TransactionHistory';
 import AccountPicker from '../comptes/AccountPicker';
@@ -118,16 +114,14 @@ class AccountActivity extends React.Component {
       <div>
         <AccountPicker value={this.state.account}
           onSelect={this.cbks.setAccount} />
-        <FloatingActionButton onTouchTap={this.cbks.clearAccount}
-            mini={true} secondary={true}>
-          <NavigationClose />
-        </FloatingActionButton>&nbsp;
+        <Button
+          onClick={this.cbks.clearAccount}
+          size="small" shape="circle" icon="close" />&nbsp;
         <CategoryPicker value={this.state.category}
           onSelect={this.cbks.setCategory} />
-        <FloatingActionButton onTouchTap={this.cbks.clearCategory}
-            mini={true} secondary={true}>
-          <NavigationClose />
-        </FloatingActionButton>
+        <Button
+          onClick={this.cbks.clearCategory}
+          size="small" shape="circle" icon="close" />&nbsp;
       </div>
       <ReduxTransactions viewId="account" pagination={20}
         query={this.state.query}/>
@@ -138,14 +132,12 @@ class AccountActivity extends React.Component {
     return <div>
       <div>
         <div style={{float: 'right'}}>
-          <FloatingActionButton onTouchTap={this.cbks.toggleSearchDisplay}
-              secondary={this.state.displaySearch}>
-            <ActionSearch />
-          </FloatingActionButton>
-          <FloatingActionButton onTouchTap={this.cbks.toggleValidationDisplay}
-              secondary={this.state.displaySearch}>
-            <DoneAllIcon />
-          </FloatingActionButton>
+          <Button
+            onClick={this.cbks.toggleSearchDisplay}
+            size="large" shape="circle" icon="search" />
+          <Button
+            onClick={this.cbks.toggleValidationDisplay}
+            size="large" shape="circle" icon="pushpin" />
         </div>
         <AccountEditor editorId="account-activity-account-editor"/>
       </div>
