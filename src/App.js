@@ -5,10 +5,6 @@ import { Layout, Menu, Breadcrumb } from 'antd';
 import './App.css';
 import actions from './redux/actions';
 
-import AppBar from 'material-ui/AppBar';
-import Drawer from 'material-ui/Drawer';
-import MenuItem from 'material-ui/MenuItem';
-
 import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
 import AccountExportActivity from './activities/AccountExportActivity';
@@ -79,7 +75,7 @@ class App extends Component {
         <Header>
           {this.renderMenu()}
         </Header>
-        <Content style={{ padding: '0 50px' }}>
+        <Content style={{ padding: '0 10px' }}>
           {this.props.children}
         </Content>
       </Layout>

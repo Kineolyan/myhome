@@ -2,9 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import _ from 'lodash';
-
-import TextField from 'material-ui/TextField';
-import RaisedButton from 'material-ui/RaisedButton';
+import { Form, Icon, Input, Button } from 'antd';
 
 import actions from '../redux/actions';
 import {getEditedValue} from '../redux/editorStore';
@@ -16,12 +14,13 @@ class AccountEditor extends React.Component {
   componentWillMount() {
     this.props.setUp({});
     this.cbks = {
-      setName: setModelFromInput.bind(
-        null,
+      setName: (event) => setModelFromInput(
         this.props,
         ELEMENT_KEY,
         newState => this.props.edit(newState[ELEMENT_KEY]),
-        'name'),
+        'name',
+        null,
+        event.currentTarget.value),
       submit: this.submit.bind(this)
     };
   }
@@ -40,17 +39,25 @@ class AccountEditor extends React.Component {
   }
 
   render() {
-    return <div>
-      <div>
-        <TextField defaultValue={this.props.account.name}
-          hintText="Nom du compte"
-          onChange={this.cbks.setName}/>
-      </div>
-      <div>
-        <RaisedButton label="Enregistrer" primary={true}
-          onClick={this.cbks.submit} />
-      </div>
-    </div>;
+    return (
+      <Form layout="inline">
+        <Form.Item>
+          <Input
+            prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />}
+            placeholder="Nom de compte"
+            value={this.props.editedAccount.name || this.props.account.name}
+            onChange={this.cbks.setName}/>
+        </Form.Item>
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            onClick={this.cbks.submit}>
+            Enregistrer
+          </Button>
+        </Form.Item>
+      </Form>
+    );
   }
 }
 
