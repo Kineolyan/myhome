@@ -1,7 +1,12 @@
 import _ from 'lodash';
 
 function setModelFromInput(state, formStateKey, udpater, key, event, value) {
-  return setModelValue(state, formStateKey, udpater, key, value);
+  return setModelValue(
+    state,
+    formStateKey,
+    udpater,
+    key,
+    value || event.currentTarget.value);
 }
 
 function setModelFromChoice(state, formStateKey, udpater, key, event, index, value) {
