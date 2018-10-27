@@ -2,9 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {Table} from 'antd';
+import {Table, Tag} from 'antd';
 
-// import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
 import CreditCardIcon from 'material-ui/svg-icons/action/credit-card';
@@ -126,12 +125,12 @@ class TransactionsView extends React.Component {
     return rows;
   }
 
-  highlightRow(tableIdx) {
-    const rowIdx = this.state.index * this.props.pagination + tableIdx;
-    const row = this.state.transactions[rowIdx];
-    if (row.groupRow) {
+  highlightRow(row, rowIdx) {
+    // const rowIdx = this.state.index * this.props.pagination + tableIdx;
+    const transaction = this.state.transactions[rowIdx];
+    if (transaction.groupRow) {
       this.setState({
-        detailledGroup: row.groupId
+        detailledGroup: transaction.groupId
       });
     } else {
       this.setState({
@@ -178,13 +177,18 @@ class TransactionsView extends React.Component {
     }
   }
 
-  renderAmount(transaction) {
-    const amount = transaction.amount || 0;
-    const color = amount >= 0 ? '#a0fdbd' : '#fea4a9';
+  renderAmount(amount) {
+    if (_.isNumber(amount)) {
+      const color = amount >= 0 ? '#a0fdbd' : '#fea4a9';
 
-    return <Chip style={{margin: 4}} backgroundColor={color}>
-      <span style={{fontSize: 13}}>{amount.toFixed(2)} €</span>
-    </Chip>;
+      return (
+        <Tag style={{margin: 4}} color={color}>
+          {amount.toFixed(2)} €
+        </Tag>
+      );
+    } else {
+      return amount;
+    }
   }
 
   renderTransaction(transaction) {
@@ -239,6 +243,7 @@ class TransactionsView extends React.Component {
       title: 'Montant',
       dataIndex: 'value',
       key: 'value',
+      render: value => this.renderAmount(value)
     }, {
       title: 'Date',
       dataIndex: 'date',
@@ -254,7 +259,12 @@ class TransactionsView extends React.Component {
     const dataSource = this.state.transactions.map(
       row => row.groupRow ? this.renderGroup(row) : this.renderTransaction(row));
 
-    return <Table dataSource={dataSource} columns={columns} />
+    return <Table  
+        size="small"
+        dataSource={dataSource} columns={columns} 
+        onRow={(record, index) => ({
+          onClick: () => this.highlightRow(record, index)
+        })} />
   }
 
   renderPrevious() {
