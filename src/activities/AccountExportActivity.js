@@ -4,6 +4,7 @@ import _ from 'lodash';
 import {Button} from 'antd';
 
 import actions from '../redux/actions';
+import * as dispatcher from '../redux/dispatcher';
 import {getStateValues} from '../redux/horizonStore';
 
 import DatePicker from 'material-ui/DatePicker';
@@ -24,26 +25,16 @@ class AccountExportActivity extends React.Component {
 	constructor(props) {
 		super(props);
 
-		this.state = {
-			account: null,
-			from: TODAY,
-			to: TODAY
-		};
-
 		this.cbks = {
-			setAccount: account => this.setState({account}),
-			setFrom: (e, date) => this.setState({from: date}),
-			setTo: (e, date) => this.setState({to: date}),
+			setAccount: account => props.setState({account}),
+			setFrom: (e, date) => props.setState({from: date}),
+			setTo: (e, date) => props.setState({to: date}),
 			export: () => this.export()
 		};
 	}
 
-	componentWillMount() {
-		this.props.getCategories();
-	}
-
 	export() {
-		this.props.getTransactions(this.state.account, this.state.from, this.state.to);
+		this.props.getTransactions(this.props.state.account, this.props.state.from, this.props.state.to);
 	}
 
 	isExportDefined(state) {
@@ -54,24 +45,24 @@ class AccountExportActivity extends React.Component {
 		return (
 			<div>
 				<div>
-					<AccountPicker value={this.state.account} onSelect={this.cbks.setAccount} />
+					<AccountPicker value={this.props.state.account} onSelect={this.cbks.setAccount} />
 				</div>
 				<div>
           <DatePicker
             floatingLabelText="Début"
-            value={this.state.from}
-            maxDate={this.state.to}
+            value={this.props.state.from}
+            maxDate={this.props.state.to}
             onChange={this.cbks.setFrom} autoOk={true}/>
 					<DatePicker
 						floatingLabelText="Fin"
-						value={this.state.to}
+						value={this.props.state.to}
 						maxDate={TODAY}
 						onChange={this.cbks.setTo} autoOk={true}/>
 				</div>
 				<div>
 					<Button 
 							type="primary"
-							disabled={!this.isExportDefined(this.state)}
+							disabled={!this.isExportDefined(this.props.state)}
 							onClick={this.cbks.export}>
 						Exporter
 					</Button>
@@ -110,12 +101,14 @@ function stateToProps(state, props) {
     categories: _.keyBy(
 			getStateValues(state.categories, 'export-categories'),
 			'id'),
-    transactions: getStateValues(state.transactions, 'export-transactions')
+		transactions: getStateValues(state.transactions, 'export-transactions'),
+		state: props.state
   };
 }
 
 function dispatchToProps(dispatch, props) {
   return {
+		setState: dispatcher.setState(dispatch),
 		getCategories: () => dispatch({
 			type: actions.categories.query,
 			queryId: 'export-categories'
@@ -130,4 +123,22 @@ function dispatchToProps(dispatch, props) {
   };
 }
 
+const register = () => ({
+	id: 'export',
+	load(dispatch) {
+		dispatcher.setState(dispatch)({
+			account: null,
+			from: TODAY,
+			to: TODAY
+		});
+		dispatch({
+			type: actions.categories.query,
+			queryId: 'export-categories'
+		});
+	}
+});
+
 export default connect(stateToProps, dispatchToProps)(AccountExportActivity);
+export {
+	register
+};

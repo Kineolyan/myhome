@@ -16,6 +16,23 @@ const Panel = {
   VALIDATION: 'validation'
 };
 
+const filterTransactions = (account, category) => {
+  const conditions = {};
+  if (account) {
+    conditions.account = account;
+  }
+  if (category) {
+    conditions.category = category;
+  }
+
+  return {
+    query: {
+      order: 'date descending',
+      conditions
+    }
+  };
+};
+
 class AccountActivity extends React.Component {
   constructor(props) {
     super(props);
@@ -28,10 +45,6 @@ class AccountActivity extends React.Component {
       setCategory: this.setCategory.bind(this),
       clearCategory: this.setCategory.bind(this, null)
     };
-  }
-
-  componentWillMount() {
-    this.filterTransactions();
   }
 
   togglePanel(panel) {
@@ -51,20 +64,8 @@ class AccountActivity extends React.Component {
   }
 
   filterTransactions(account, category) {
-    const conditions = {};
-    if (account) {
-      conditions.account = account;
-    }
-    if (category) {
-      conditions.category = category;
-    }
-
-    this.props.setState({
-      query: {
-        order: this.props.state.query.order,
-        conditions
-      }
-    });
+    const newState = filterTransactions(account, category);
+    this.props.setState(newState);
   }
 
   getRatio(main) {
@@ -148,10 +149,7 @@ const mapStateToProps = (state, props) => {
     displayedPanel: null,
     account: null,
     category: null,
-    query: {
-      conditions: {},
-      order: 'date descending',
-    },
+    query: null,
     ...props.state
   };
 
@@ -164,7 +162,15 @@ const mapDispatchToProps = (dispatch, props) => ({
 	setState: dispatcher.setState(dispatch)
 });
 
+const register = () => ({
+  id: 'accounts',
+  load(dispatch) {
+    dispatcher.setState(dispatch)(filterTransactions());
+  }
+});
+
 export default connect(mapStateToProps, mapDispatchToProps)(AccountActivity);
 export {
-  AccountActivity
+  AccountActivity,
+  register
 };

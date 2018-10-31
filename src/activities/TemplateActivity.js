@@ -19,17 +19,13 @@ const SelectTemplate = ({templates, value, onSelected}) => {
 		})
 		.value();
 	const filterOption = (input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-	const handleChange = (event) => {
-		console.log(event);
-		onSelected();
-	};
 	return (
 		<Select
 				showSearch={true}
 				style={{ width: 200 }}
 				placeholder="Selectionner un template"
 				optionFilterProp="children"
-				onChange={handleChange}
+				onChange={onSelected}
 				filterOption={filterOption}
 				value={value || ''}>
 			{options}
@@ -39,10 +35,6 @@ const SelectTemplate = ({templates, value, onSelected}) => {
 };
 
 class TemplateActivity extends React.Component {
-
-	componentDidMount() {
-		this.props.startQuery({});
-	}
 
   render() {
 		return this.doRender(this.props);
@@ -56,10 +48,8 @@ class TemplateActivity extends React.Component {
     return <div>
 			<SelectTemplate
 					value=''
-					templates={this.props.templates}
-					onSelected={(idx) => props.setState({
-						templateId: props.templates[idx].id
-					})} />
+					templates={props.templates}
+					onSelected={(templateId) => props.setState({templateId})} />
 			{
 				props.editedTemplate
 						? <div>Template id: {props.editedTemplate.id}</div>
@@ -104,7 +94,15 @@ const mapDispatchToProps = (dispatch, props) => ({
   })
 });
 
+const register = () => ({
+	id: 'templates',
+	load(dispatch) {
+		dispatcher.startQuery({dispatch, queryId: REDUX_ID})({});
+	}
+});
+
 export default connect(mapStateToProps, mapDispatchToProps)(TemplateActivity);
 export {
-  TemplateActivity
+	TemplateActivity,
+	register
 };

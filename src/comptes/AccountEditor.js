@@ -18,7 +18,8 @@ class AccountEditor extends React.Component {
         this.props,
         ELEMENT_KEY,
         newState => this.props.edit(newState[ELEMENT_KEY]),
-        'name'),
+        'name',
+        event),
       submit: this.submit.bind(this)
     };
   }

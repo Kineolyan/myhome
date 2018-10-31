@@ -1,7 +1,9 @@
 import xs from 'xstream';
 import actions from '../redux/actions';
 import {Operations} from '../cycle/HorizonDriver';
-import {TemplateType} from '../transactions/templates/model';
+import * as TemplateActivity from '../activities/TemplateActivity';
+import * as AccountActivity from '../activities/AccountActivity';
+import * as AccountExportActivity from '../activities/AccountExportActivity';
 
 const Streams = {
   merge(first, ...others) {
@@ -277,7 +279,51 @@ const routing = (sources) => {
     ACTION: loadPage$,
     ROUTER: changeUrl$
   };
-}
+};
+
+const makeView = ({ACTION: action$}) => {
+  const registry = [
+    TemplateActivity.register(),
+    AccountActivity.register(),
+    AccountExportActivity.register()
+  ].reduce(
+    (acc, {id, load, unload}) => {
+      if (!Reflect.has(acc, id)) {
+        // New unique id, process
+        const templateLoad$ = action$
+          .filter((action) => actions.activities[id] === action.type)
+          .map(_ => {
+            const operations = [];
+            let accept = true;
+            const streamDispatch = (action) => { 
+              if (accept) {
+                operations.push(action); 
+              } else {
+                console.error('Cannot call this dispatcher asynchronously');
+              }
+            };
+            
+            load(streamDispatch);
+            accept = false;
+
+            return xs.of(...operations);
+          })
+          .flatten();
+        acc[id] = {
+          ACTION: templateLoad$
+        };
+      } else {
+        console.error('Cannot register twice the view', id);
+      }
+
+      return acc;
+    },
+    {});
+  
+  return {
+    ACTION: Streams.merge(...Object.values(registry).map(r => r.ACTION))
+  };
+};
 
 function main(sources) {
   const state$ = sources.STATE;
@@ -292,6 +338,7 @@ function main(sources) {
   const opsOnDeletedAccounts$ = deleteAccount(sources);
   const opsOnDeletedTemplate$ = deleteTemplate(sources);
   const opsToMakeTemplate$ = makeTemplate(sources);
+  const views$ = makeView(sources);
 
   const actions$ = Streams.merge(
     transactions$.ACTION,
@@ -299,7 +346,8 @@ function main(sources) {
     templates$.ACTION,
     accounts$.ACTION,
     groups$.ACTION,
-    routes$.ACTION
+    routes$.ACTION,
+    views$.ACTION
   );
 
   const hQueries$ = Streams.merge(
@@ -321,9 +369,9 @@ function main(sources) {
 
   const log$ = Streams.merge(
     // loadUrl$.map(a => ({_stream: 'loadUrl', ...a})),
-    hQueries$.map(a => ({_stream: 'hQuery', ...a})),
-    sources.HORIZONS.map(a => ({_stream: 'hResponse', ...a})),
-    actions$.map(a => ({_stream: 'sinkActions', ...a})),
+    // hQueries$.map(a => ({_stream: 'hQuery', ...a})),
+    // sources.HORIZONS.map(a => ({_stream: 'hResponse', ...a})),
+    // actions$.map(a => ({_stream: 'sinkActions', ...a})),
     sources.ACTION.map(a => ({_stream: 'sourceActions', ...a}))
   );
 

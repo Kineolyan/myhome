@@ -43,11 +43,10 @@ const manageView = (state, action) => {
   if (action.type === actions.activity.setState) {
     return {
       ...state,
-      state: action.state
-      // state: {
-      //   ...state.state,
-      //   ...action.state
-      // }
+      state: {
+        ...state.state,
+        ...action.state
+      }
     };
   } else {
     return state;
