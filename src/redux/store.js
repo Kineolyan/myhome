@@ -44,6 +44,10 @@ const manageView = (state, action) => {
     return {
       ...state,
       state: action.state
+      // state: {
+      //   ...state.state,
+      //   ...action.state
+      // }
     };
   } else {
     return state;

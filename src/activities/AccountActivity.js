@@ -1,5 +1,8 @@
 import React from 'react';
+import {connect} from 'react-redux';
 import {Button} from 'antd';
+
+import * as dispatcher from '../redux/dispatcher';
 
 import TransactionHistory from '../transactions/TransactionHistory';
 import AccountPicker from '../comptes/AccountPicker';
@@ -17,16 +20,6 @@ class AccountActivity extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      displayedPanel: null,
-      account: null,
-      category: null,
-      query: {
-        conditions: {},
-        order: 'date descending',
-      }
-    };
-
     this.cbks = {
       toggleSearchDisplay: this.togglePanel.bind(this, Panel.SEARCH),
       toggleValidationDisplay: this.togglePanel.bind(this, Panel.VALIDATION),
@@ -42,19 +35,19 @@ class AccountActivity extends React.Component {
   }
 
   togglePanel(panel) {
-    this.setState({
-      displayedPanel: this.state.displayedPanel === panel ? null : panel
+    this.props.setState({
+      displayedPanel: this.props.state.displayedPanel === panel ? null : panel
     });
   }
 
   setAccount(account) {
-    this.setState({account});
-    this.filterTransactions(account, this.state.category);
+    this.props.setState({account});
+    this.filterTransactions(account, this.props.state.category);
   }
 
   setCategory(category) {
-    this.setState({category});
-    this.filterTransactions(this.state.account, category);
+    this.props.setState({category});
+    this.filterTransactions(this.props.state.account, category);
   }
 
   filterTransactions(account, category) {
@@ -66,16 +59,16 @@ class AccountActivity extends React.Component {
       conditions.category = category;
     }
 
-    this.setState({
+    this.props.setState({
       query: {
-        order: this.state.query.order,
+        order: this.props.state.query.order,
         conditions
       }
     });
   }
 
   getRatio(main) {
-    if (this.state.displayedPanel) {
+    if (this.props.state.displayedPanel) {
       return main ? '55%' : '45%';
     } else {
       return '100%';
@@ -92,7 +85,7 @@ class AccountActivity extends React.Component {
 
   renderPanel() {
     let cpn;
-    switch (this.state.displayedPanel) {
+    switch (this.props.state.displayedPanel) {
     case Panel.SEARCH:
       cpn = this.renderSearchView();
       break;
@@ -112,19 +105,19 @@ class AccountActivity extends React.Component {
   renderList() {
     return <div className="block" style={{maxWidth: this.getRatio(true)}}>
       <div>
-        <AccountPicker value={this.state.account}
+        <AccountPicker value={this.props.state.account}
           onSelect={this.cbks.setAccount} />
         <Button
           onClick={this.cbks.clearAccount}
           size="small" shape="circle" icon="close" />&nbsp;
-        <CategoryPicker value={this.state.category}
+        <CategoryPicker value={this.props.state.category}
           onSelect={this.cbks.setCategory} />
         <Button
           onClick={this.cbks.clearCategory}
           size="small" shape="circle" icon="close" />&nbsp;
       </div>
       <ReduxTransactions viewId="account" pagination={20}
-        query={this.state.query}/>
+        query={this.props.state.query}/>
     </div>;
   }
 
@@ -150,4 +143,28 @@ class AccountActivity extends React.Component {
 
 }
 
-export default AccountActivity;
+const mapStateToProps = (state, props) => {
+  const activityState = {
+    displayedPanel: null,
+    account: null,
+    category: null,
+    query: {
+      conditions: {},
+      order: 'date descending',
+    },
+    ...props.state
+  };
+
+	return {
+		state: activityState
+	};
+};
+
+const mapDispatchToProps = (dispatch, props) => ({
+	setState: dispatcher.setState(dispatch)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(AccountActivity);
+export {
+  AccountActivity
+};

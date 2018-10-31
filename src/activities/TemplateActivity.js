@@ -1,11 +1,10 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import _ from 'lodash';
-
-import SelectField from 'material-ui/SelectField';
-import MenuItem from 'material-ui/MenuItem';
+import {Select} from 'antd';
 
 import actions from '../redux/actions';
+import * as dispatcher from '../redux/dispatcher';
 import {getStateValues} from '../redux/horizonStore';
 import TemplateEditor from '../transactions/templates/TemplateEditor';
 
@@ -16,16 +15,26 @@ const SelectTemplate = ({templates, value, onSelected}) => {
 			const id = t.id;
 			const info = t.frequency ? ` (${JSON.stringify(t.frequency)})` : '';
 			const name = `${t.object}${info}`;
-			return <MenuItem key={id} value={id} primaryText={name} />;
+			return <Select.Option key={id} value={id}>{name}</Select.Option>;
 		})
 		.value();
-	return <SelectField
-			value={value || ''}
-			onChange={(event, index) => onSelected(index)}
-			hintText={'Select a template'}
-			floatingLabelFixed={true}>
-		{options}
-	</SelectField>;
+	const filterOption = (input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+	const handleChange = (event) => {
+		console.log(event);
+		onSelected();
+	};
+	return (
+		<Select
+				showSearch={true}
+				style={{ width: 200 }}
+				placeholder="Selectionner un template"
+				optionFilterProp="children"
+				onChange={handleChange}
+				filterOption={filterOption}
+				value={value || ''}>
+			{options}
+		</Select>
+	);
 
 };
 
@@ -85,18 +94,9 @@ const mapStateToProps = (state, props) => {
 };
 
 const mapDispatchToProps = (dispatch, props) => ({
-	startQuery(query) {
-		return dispatch({
-      type: actions.templates.query,
-      queryId: REDUX_ID,
-      ...query
-    });
-	},
-	stopQuery() {},
-	setState: (state) => dispatch({
-		type: actions.activity.setState,
-		state
-	}),
+	startQuery: dispatcher.startQuery({dispatch, queryId: REDUX_ID}),
+	stopQuery: dispatcher.stopQuery({dispatch, queryId: REDUX_ID}),
+	setState: dispatcher.setState(dispatch),
   deleteTemplate: (templateId) => dispatch({
     type: actions.templates.delete,
     queryId: `${REDUX_ID}-delete-${templateId}`,

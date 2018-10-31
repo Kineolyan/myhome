@@ -1,12 +1,12 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import _ from 'lodash';
+import {Button} from 'antd';
 
 import actions from '../redux/actions';
 import {getStateValues} from '../redux/horizonStore';
 
 import DatePicker from 'material-ui/DatePicker';
-import RaisedButton from 'material-ui/RaisedButton';
 
 import AccountPicker from '../comptes/AccountPicker';
 import {asDate} from '../core/time';
@@ -69,9 +69,12 @@ class AccountExportActivity extends React.Component {
 						onChange={this.cbks.setTo} autoOk={true}/>
 				</div>
 				<div>
-					<RaisedButton label="Exporter" primary={true}
-						disabled={!this.isExportDefined(this.state)}
-						onClick={this.cbks.export} />
+					<Button 
+							type="primary"
+							disabled={!this.isExportDefined(this.state)}
+							onClick={this.cbks.export}>
+						Exporter
+					</Button>
 				</div>
 			</div>
 		);
