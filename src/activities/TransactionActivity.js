@@ -6,11 +6,6 @@ import TransactionEditor from '../transactions/TransactionEditor';
 import TransactionHistory from '../transactions/TransactionHistory';
 import LatestTransactions from '../transactions/LatestTransactions';
 
-const TOGGLE_BUTTON_STYLE = {
-  paddingLeft: 5,
-  paddingRight: 5
-};
-
 class TransactionActivity extends React.Component {
   constructor(props) {
     super(props);

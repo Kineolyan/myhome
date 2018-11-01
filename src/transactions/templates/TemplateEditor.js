@@ -2,10 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {Button, Input} from 'antd';
+import {Button, Input, Select} from 'antd';
 
-import SelectField from 'material-ui/SelectField';
-import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
 
@@ -14,18 +12,13 @@ import {getEditedValue} from '../../redux/editorStore';
 import {Type} from '../models';
 import CategoryPicker from '../../categories/CategoryPicker';
 import CategoryEditor from '../../categories/CategoryEditor';
+import TypePicker from '../TypePicker';
 import AccountPicker from '../../comptes/AccountPicker';
 import * as muiForm from '../../core/muiForm';
 import {prepareElement, submitElement} from '../../core/ElementEditor';
 
 import {TemplateType, Frequency, detectType} from './model';
 
-const PAYMENT_TYPES = [
-  {id: Type.CARTE, name: 'Carte'},
-  {id: Type.MONNAIE, name: 'Monnaie'},
-  {id: Type.CHEQUE, name: 'Chèque'},
-  {id: Type.VIREMENT, name: 'Virement'}
-];
 const TEMPLATE_TYPES = [
   {id: TemplateType.FREQUENCY, name: 'Fréquence'},
   {id: TemplateType.PREFILL, name: 'Pre-remplissage'},
@@ -129,14 +122,9 @@ const AccountField = (props) => {
 		onSelect={props.setAccount} />;
 };
 const PaymentSelector = (props) => {
-	return <SelectField
-			value={props.editedTemplate.type || null}
-			onChange={props.setType}
-			floatingLabelText={'Moyen de payement'}
-			floatingLabelFixed={true}>
-		{PAYMENT_TYPES.map(value => <MenuItem key={value.id}
-				value={value.id} primaryText={value.name} />)}
-	</SelectField>;
+	return <TypePicker
+			value={props.editedTemplate.type}
+			onSelect={props.setType}/>;
 };
 const CategorySelector = (props) => {
 	return <CategoryPicker
@@ -166,14 +154,16 @@ const SubmitButtons = (props) =>
 		</Button>
 	</div>;
 const FrequencySelector = (props) => {
-	return <SelectField
+	return <Select
 			value={props.frequency || ''}
-			onChange={props.setFrequency}
-			floatingLabelText={'Fréquence'}
-			floatingLabelFixed={true}>
-		{FREQUENCIES.map(value => <MenuItem key={value.id}
-				value={value.id} primaryText={value.name} />)}
-	</SelectField>;
+			onChange={props.setFrequency}>
+		{FREQUENCIES.map(value => 
+			<Select.Option 
+					key={value.id}
+					value={value.id}>
+				{value.name}
+			</Select.Option>)}
+	</Select>;
 };
 
 const FrequencyEditor = (props) => {
@@ -183,10 +173,6 @@ const FrequencyEditor = (props) => {
 		key,
 		...args);
 	const setModelFromInput = key => (...args) => muiForm.setModelFromInput(
-		props, ELEMENT_PROP, updater,
-		key,
-		...args);
-	const setModelFromChoice = key => (...args) => muiForm.setModelFromChoice(
 		props, ELEMENT_PROP, updater,
 		key,
 		...args);
@@ -212,7 +198,7 @@ const FrequencyEditor = (props) => {
 				autoOk={true}/>
 			<FrequencySelector 
 				frequency={props.editedTemplate.frequency.type}
-				setFrequency={setModelFromChoice('frequency.type')} />
+				setFrequency={setModelValue('frequency.type')} />
 		</div>
 		<div>
 			<AccountField
@@ -221,7 +207,7 @@ const FrequencyEditor = (props) => {
 		</div>
 		<div>
 			<PaymentSelector
-					setType={setModelFromChoice('type')}
+					setType={setModelValue('type')}
 					{...props} />
 		</div>
 		<div>
@@ -246,10 +232,6 @@ const PreFillEditor = (props) => {
 		props, ELEMENT_PROP, updater,
 		key,
 		...args);
-	const setModelFromChoice = key => (...args) => muiForm.setModelFromChoice(
-		props, ELEMENT_PROP, updater,
-		key,
-		...args);
 
 	return <div>
 		<Forms
@@ -270,7 +252,7 @@ const PreFillEditor = (props) => {
 		</div>
 		<div>
 			<PaymentSelector
-					setType={setModelFromChoice('type')}
+					setType={setModelValue('type')}
 					{...props} />
 		</div>
 		<div>
@@ -289,14 +271,18 @@ const PreFillEditor = (props) => {
 };
 
 const TypeSelector = (props) => {
-	return <SelectField
+	return <Select
 			value={props.type || null}
+			style={{width: 300}}
 			onChange={props.setType}
-			floatingLabelText={'Type de template'}
-			floatingLabelFixed={true}>
-		{TEMPLATE_TYPES.map(value => <MenuItem key={value.id}
-				value={value.id} primaryText={value.name} />)}
-	</SelectField>;
+			placeholder={'Type de template'}>
+		{TEMPLATE_TYPES.map(value => 
+			<Select.Option 
+					key={value.id}
+					value={value.id}>
+				{value.name}
+			</Select.Option>)}
+	</Select>
 };
 const EditorSwitch = (props) => {
 	switch(props.type) {
@@ -355,7 +341,7 @@ class TemplateEditor extends React.Component {
 				props.edit(template);
 			};
 			return <div>
-				<TypeSelector type={props.type} setType={(e, i, type) => setType(type)} />
+				<TypeSelector type={props.type} setType={setType} />
 				<EditorSwitch {...props} />
 			</div>;
 		}

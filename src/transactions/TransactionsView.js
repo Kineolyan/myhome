@@ -12,11 +12,6 @@ import GroupView from '../groups/GroupView';
 import actions from '../redux/actions';
 import {getStateValues} from '../redux/horizonStore';
 
-const TYPE_COLUMN_STYLE = {
-  width: 40,
-  textAlign: 'center'
-};
-
 class TransactionsView extends React.Component {
   constructor(props) {
     super(props);
@@ -205,9 +200,6 @@ class TransactionsView extends React.Component {
   }
 
   renderTable() {
-    const startIdx = this.state.index * this.props.pagination;
-    const endIdx = Math.min(startIdx + this.props.pagination, this.state.transactions.length);
-
     const columns = [{
       title: 'Type',
       dataIndex: 'type',

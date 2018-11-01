@@ -5,8 +5,6 @@ import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
 import {Button, Input} from 'antd';
 
-import SelectField from 'material-ui/SelectField';
-import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
 import AutoComplete from 'material-ui/AutoComplete';
@@ -15,6 +13,7 @@ import actions from '../redux/actions';
 import {getEditedValue} from '../redux/editorStore';
 import {getStateValues} from '../redux/horizonStore';
 import {Type} from './models';
+import TypePicker from './TypePicker';
 import CategoryPicker from '../categories/CategoryPicker';
 import CategoryEditor from '../categories/CategoryEditor';
 import AccountPicker from '../comptes/AccountPicker';
@@ -25,12 +24,6 @@ import * as muiForm from '../core/muiForm';
 import {prepareElement, submitElement} from '../core/ElementEditor';
 import {applyTemplate} from './templates/model';
 
-const PAYMENT_TYPES = [
-  {id: Type.CARTE, name: 'Carte'},
-  {id: Type.MONNAIE, name: 'Monnaie'},
-  {id: Type.CHEQUE, name: 'Chèque'},
-  {id: Type.VIREMENT, name: 'Virement'}
-];
 
 const TODAY = new Date();
 const DEFAULT_TRANSACTION = {
@@ -96,7 +89,7 @@ const TransactionEditor = reactStamp(React)
         selectCompletedObject: this.defineTransactionObject.bind(this),
         setAmount: this.setModelFromInput.bind(this, 'amount'),
         setAccount: this.setModelValue.bind(this, 'account'),
-        setType: this.setModelFromChoice.bind(this, 'type'),
+        setType: this.setModelValue.bind(this, 'type'),
         setCategory: this.setModelValue.bind(this, 'category'),
         setGroup: this.setModelValue.bind(this, 'group'),
         setDate: this.setModelFromInput.bind(this, 'date'),
@@ -235,14 +228,9 @@ const TransactionEditor = reactStamp(React)
         onSelect={this.cbks.setAccount} />;
     },
     renderType() {
-      return <SelectField
-          value={this.props.editedTransaction.type || null}
-          onChange={this.cbks.setType}
-          floatingLabelText={'Moyen de payement'}
-          floatingLabelFixed={true}>
-        {PAYMENT_TYPES.map(value => <MenuItem key={value.id}
-            value={value.id} primaryText={value.name} />)}
-      </SelectField>;
+      return <TypePicker
+          value={this.getValue('type') || null}
+          onSelect={this.cbks.setType}/>;
     },
     renderCategories() {
       return <CategoryPicker

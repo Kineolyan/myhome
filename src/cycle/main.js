@@ -1,7 +1,6 @@
 import xs from 'xstream';
 import actions from '../redux/actions';
 import {Operations} from '../cycle/HorizonDriver';
-import {TemplateType} from '../transactions/templates/model';
 
 const Streams = {
   merge(first, ...others) {

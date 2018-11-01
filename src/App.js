@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
-import { Layout, Menu, Breadcrumb } from 'antd';
+import { Layout, Menu } from 'antd';
 
 import './App.css';
 import actions from './redux/actions';
@@ -11,7 +11,7 @@ import AccountExportActivity from './activities/AccountExportActivity';
 import TemplateActivity from './activities/TemplateActivity';
 import Showcase from './general/Showcase';
 
-const { Header, Footer, Sider, Content } = Layout;
+const { Header, Content } = Layout;
 
 const menuLinks = [
   {label: 'Comptes', target: {entity: 'comptes'}},

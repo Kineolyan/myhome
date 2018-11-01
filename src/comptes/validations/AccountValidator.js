@@ -2,7 +2,7 @@ import React from 'react';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
-import {Icon, Input, Button} from 'antd';
+import {Input, Button} from 'antd';
 
 import DatePicker from 'material-ui/DatePicker';
 
