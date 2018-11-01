@@ -2,14 +2,9 @@ import React from 'react';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
+import {Icon, Input, Button} from 'antd';
 
-import TextField from 'material-ui/TextField';
-import RaisedButton from 'material-ui/RaisedButton';
 import DatePicker from 'material-ui/DatePicker';
-import FloatingActionButton from 'material-ui/FloatingActionButton';
-import DeleteIcon from 'material-ui/svg-icons/action/delete';
-import ArrowLeft from 'material-ui/svg-icons/hardware/keyboard-arrow-left';
-import ArrowRight from 'material-ui/svg-icons/hardware/keyboard-arrow-right';
 
 import actions from '../../redux/actions';
 import {getStateValues} from '../../redux/horizonStore';
@@ -46,8 +41,8 @@ const AccountValidator = reactStamp(React)
 			this.setState({account});
 			this.getValidation(account, this.state.balanceIdx);
 		},
-		setBalance(event, value) {
-			this.setState({balance: parseFloat(value)});
+		setBalance(event) {
+			this.setState({balance: parseFloat(event.currentTarget.value)});
 		},
 		setValidationDate(event, date) {
 			this.setState({validationDate: date});
@@ -101,18 +96,18 @@ const AccountValidator = reactStamp(React)
 			this.getValidation(this.state.account, balanceIdx);
 		},
 		renderPrevValidation() {
-			return <FloatingActionButton primary={true} mini={true}
-				onTouchTap={this.cbks.previousValidation}>
-					<ArrowLeft/>
-			</FloatingActionButton>;
+			return <Button 
+					type="primary" 
+					size="small" shape="circle" icon="left"
+					onClick={this.cbks.previousValidation} />;
 		},
 		renderNextValidation() {
 			const enabled = this.state.balanceIdx > 1;
-			return <FloatingActionButton primary={true} mini={true}
-				onTouchTap={enabled ? this.cbks.nextValidation : _.noop}
-				disabled={!enabled}>
-					<ArrowRight/>
-			</FloatingActionButton>;
+			return <Button 
+				type="primary"
+				size="small" shape="circle" icon="right"
+				onClick={enabled ? this.cbks.nextValidation : _.noop}
+				disabled={!enabled} />;
 		},
 		renderBalance() {
 			if (this.state.lastValidation) {
@@ -125,10 +120,9 @@ const AccountValidator = reactStamp(React)
 			if (this.state.lastValidation) {
 				return <div className="last-validation">
 					<div style={{float: 'right'}}>
-						<FloatingActionButton primary={true} mini={true}
-							onTouchTap={this.cbks.deleteLastValidation}>
-								<DeleteIcon />
-						</FloatingActionButton>
+						<Button type="primary" 
+							size="small" shape="circle" icon="delete"
+							onClick={this.cbks.deleteLastValidation}/>
 						{this.renderPrevValidation()}
 						{this.renderNextValidation()}
 					</div>
@@ -203,7 +197,7 @@ const AccountValidator = reactStamp(React)
 				<div>
 					Solde du compte <AccountPicker value={this.state.account}
 						onSelect={this.cbks.setAccount} />
-					à hauteur de <TextField type="number" hintText="Solde du compte"
+					à hauteur de <Input type="number" placeholder="Solde du compte"
 						value={this.state.balance}
 						onChange={this.cbks.setBalance} />
 					€ au <DatePicker hintText="Date"
@@ -211,8 +205,11 @@ const AccountValidator = reactStamp(React)
 								maxDate={TODAY}
 								onChange={this.cbks.setValidationDate}
 								autoOk={true} style={{display: 'inline-block'}}/>
-					<RaisedButton label="Valider" primary={true}
-						onTouchTap={this.cbks.validate}/>
+					<Button
+							type="primary"
+							onClick={this.cbks.validate}>
+						Valider
+					</Button>
 				</div>
 				<div>
 					{this.renderBalance()}
@@ -238,22 +235,18 @@ const mapStateToProps = (state, props) => {
 
 const mapDispatchToProps = (dispatch) => ({
 	queryTransactions(query) {
-		return dispatch(Object.assign(
-			{
-				type: actions.transactions.query,
-				queryId: 'validator-transactions'
-			},
-			query
-		));
+		return dispatch({
+			type: actions.transactions.query,
+			queryId: 'validator-transactions',
+			...query
+		});
 	},
 	querySuspicious(query) {
-		return dispatch(Object.assign(
-			{
-				type: actions.transactions.query,
-				queryId: 'validator-suspicious'
-			},
-			query
-		));
+		return dispatch({
+			type: actions.transactions.query,
+			queryId: 'validator-suspicious',
+			...query
+		});
 	},
 	stopQuery() {}
 });

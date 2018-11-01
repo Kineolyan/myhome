@@ -2,18 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {Table, Tag} from 'antd';
+import {Button, Icon, Table, Tag} from 'antd';
 
 import Dialog from 'material-ui/Dialog';
-import FlatButton from 'material-ui/FlatButton';
-import CreditCardIcon from 'material-ui/svg-icons/action/credit-card';
-import ChequeIcon from 'material-ui/svg-icons/action/tab';
-import CoinIcon from 'material-ui/svg-icons/maps/local-atm';
-import TransferIcon from 'material-ui/svg-icons/action/swap-horiz';
-import Chip from 'material-ui/Chip';
-import ArrowDown from 'material-ui/svg-icons/hardware/keyboard-arrow-down';
-import ArrowUp from 'material-ui/svg-icons/hardware/keyboard-arrow-up';
-import FloatingActionButton from 'material-ui/FloatingActionButton';
 
 import {Type} from './models';
 import TransactionPanel, {Mode as PanelMode} from './TransactionPanel';
@@ -169,11 +160,11 @@ class TransactionsView extends React.Component {
 
   renderTypeIcon(type) {
     switch (type) {
-    case Type.CARTE: return <CreditCardIcon/>;
-    case Type.CHEQUE: return <ChequeIcon />;
-    case Type.MONNAIE: return <CoinIcon />;
-    case Type.VIREMENT: return <TransferIcon />;
-    default: return <span title={type}>??</span>;
+    case Type.CARTE: return <Icon type="credit-card"/>;
+    case Type.CHEQUE: return <Icon type="idcard"/>;
+    case Type.MONNAIE: return <Icon type="euro"/>;
+    case Type.VIREMENT: return <Icon type="swap"/>;
+    default: return <span title={type}>--</span>;
     }
   }
 
@@ -192,14 +183,6 @@ class TransactionsView extends React.Component {
   }
 
   renderTransaction(transaction) {
-    // return <TableRow key={transaction.id} onClick={this.>
-    //   <TableRowColumn style={TYPE_COLUMN_STYLE}>{this.renderTypeIcon(transaction.type)}</TableRowColumn>
-    //   <TableRowColumn>{transaction.object}</TableRowColumn>
-    //   <TableRowColumn>{this.renderAmount(transaction)}</TableRowColumn>
-    //   <TableRowColumn>
-    //     {new Date(transaction.date).toLocaleDateString()}
-    //   </TableRowColumn>
-    // </TableRow>;
     return {
       type: transaction.type,
       object: transaction.object,
@@ -213,12 +196,6 @@ class TransactionsView extends React.Component {
       ...this.state.groups[groupId],
       ...this.props.groups[groupId]
     };
-    // return <TableRow key={group.id}>
-    //   <TableRowColumn style={TYPE_COLUMN_STYLE}>{count}+</TableRowColumn>
-    //   <TableRowColumn>{group.name || group.id}</TableRowColumn>
-    //   <TableRowColumn>...</TableRowColumn>
-    //   <TableRowColumn>...</TableRowColumn>
-    // </TableRow>;
     return {
       type: `${count}+`,
       object: group.name || group.id,
@@ -235,6 +212,7 @@ class TransactionsView extends React.Component {
       title: 'Type',
       dataIndex: 'type',
       key: 'type',
+      render: type => this.renderTypeIcon(type)
     }, {
       title: 'Objet',
       dataIndex: 'object',
@@ -250,12 +228,6 @@ class TransactionsView extends React.Component {
       key: 'date'
     }];
 
-    // const dataSource = [];
-    // for (let i = startIdx; i < endIdx; i += 1) {
-    //   const row = this.state.transactions[i];
-    //   const rowElt = row.groupRow ? this.renderGroup(row) : this.renderTransaction(row);
-    //   dataSource.push(rowElt);
-    // }
     const dataSource = this.state.transactions.map(
       row => row.groupRow ? this.renderGroup(row) : this.renderTransaction(row));
 
@@ -267,47 +239,6 @@ class TransactionsView extends React.Component {
         })} />
   }
 
-  renderPrevious() {
-    const enabled = this.state.index > 0;
-
-    return <FloatingActionButton
-        onTouchTap={enabled ? this.cbks.goPrevious : _.noop}
-        mini={true}
-        disabled={!enabled}>
-      <ArrowUp/>
-    </FloatingActionButton>;
-  }
-
-  renderNext() {
-    const lastIndex = (this.state.index + 1) * this.props.pagination;
-    const enabled = lastIndex < this.state.transactions.length;
-
-    return <FloatingActionButton
-        onTouchTap={enabled ? this.cbks.goNext : _.noop}
-        mini={true}
-        disabled={!enabled}>
-      <ArrowDown/>
-    </FloatingActionButton>;
-  }
-
-  renderPagination() {
-    if (this.props.pagination < this.state.transactions.length) {
-      return <div style={{
-          width: 50,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: '60px 10px 10px',
-          justifyContent: 'center'
-      }}>
-        {this.renderPrevious()}
-        <div style={{textAlign: 'center', padding: '10px 0'}}>
-          {this.state.index + 1} / {this.getMaxIndex(this.state.transactions)}
-        </div>
-        {this.renderNext()}
-      </div>;
-    }
-  }
-
   renderHighlightedTransaction() {
     if (this.state.detailledTransaction) {
       const title = <div className="dialog-header">
@@ -315,21 +246,21 @@ class TransactionsView extends React.Component {
         <div className="dialog-actions">
           {
             this.state.detailViewMode !== PanelMode.VIEW
-              ? <FlatButton label="View" onTouchTap={this.cbks.closeEditor}/>
+              ? <Button onClick={this.cbks.closeEditor}>Voir</Button>
               : null
           }
           {
             this.state.detailViewMode !== PanelMode.EDIT
-              ? <FlatButton label="Edit" onTouchTap={this.cbks.openEditor}/>
+              ? <Button onClick={this.cbks.openEditor}>Éditer</Button>
               : null
           }
-          <FlatButton label="Delete" onTouchTap={this.cbks.deleteTransaction}/>
+          <Button onClick={this.cbks.deleteTransaction}>Supprimer</Button>
           {
             this.state.detailViewMode !== PanelMode.SET_TEMPLATE
-              ? <FlatButton label="Set Template" onTouchTap={this.cbks.associateTemplate}/>
+              ? <Button onClick={this.cbks.associateTemplate}>Set Template</Button>
               : null
           }
-          <FlatButton label="As Template" onTouchTap={this.cbks.makeTemplate}/>
+          <Button onClick={this.cbks.makeTemplate}>As Template</Button>
         </div>
       </div>;
 

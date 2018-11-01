@@ -2,16 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
+import {Button, Input} from 'antd';
 
-import TextField from 'material-ui/TextField';
-import RaisedButton from 'material-ui/RaisedButton';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
-
-import FloatingActionButton from 'material-ui/FloatingActionButton';
-import ContentAdd from 'material-ui/svg-icons/content/add';
 
 import actions from '../../redux/actions';
 import {getEditedValue} from '../../redux/editorStore';
@@ -121,10 +117,10 @@ const doDelete = (props) => {
 
 const ObjectField = (props) => {
 	return <div>
-		<TextField
-			hintText="Objet de la transaction"
+		<Input
+			placeholder="Objet de la transaction"
 			value={props.editedTemplate.object}
-			onChange={props.setObject} />
+			onChange={(event) => props.setObject(event.currentTarget.value)} />
 	</div>;
 };
 const AccountField = (props) => {
@@ -159,11 +155,15 @@ const Forms = (props) => {
 };
 const SubmitButtons = (props) =>
 	<div>
-		<RaisedButton label="Sauver" primary={true}
-			disabled={!props.canSubmit(props)}
-			onClick={props.submit} />
-		<RaisedButton label="Supprimer" primary={true}
-			onClick={props.delete} />
+		<Button type="primary"
+				disabled={!props.canSubmit(props)}
+				onClick={props.submit}>
+			Sauver
+		</Button>
+		<Button type="primary"
+			onClick={props.delete}>
+			Supprimer
+		</Button>
 	</div>;
 const FrequencySelector = (props) => {
 	return <SelectField
@@ -199,7 +199,7 @@ const FrequencyEditor = (props) => {
 				setObject={setModelFromInput('object')}
 				{...props}/>
 		<div>
-			<TextField hintText="Montant de la transaction" type="number"
+			<Input placeholder="Montant de la transaction" type="number"
 				value={props.editedTemplate.amount}
 				onChange={setModelFromInput('amount')} />
 		</div>
@@ -228,11 +228,9 @@ const FrequencyEditor = (props) => {
 			<CategorySelector
 					setCategory={setModelValue('category')}
 					{...props} />
-			<FloatingActionButton
-					onTouchTap={() => props.toggleCategoryForm(true)}
-					mini={true}>
-				<ContentAdd />
-			</FloatingActionButton>
+			<Button
+					onClick={() => props.toggleCategoryForm(true)}
+					size="small" shape="circle" icon="plus"/>
 		</div>
 		<SubmitButtons
 				canSubmit={() => canSubmitFrequencyTemplate(props)}
@@ -261,7 +259,7 @@ const PreFillEditor = (props) => {
 				setObject={setModelFromInput('object')}
 				{...props}/>
 		<div>
-			<TextField hintText="Montant de la transaction" type="number"
+			<Input placeholder="Montant de la transaction" type="number"
 				value={props.editedTemplate.amount}
 				onChange={setModelFromInput('amount')} />
 		</div>
@@ -279,11 +277,9 @@ const PreFillEditor = (props) => {
 			<CategorySelector
 					setCategory={setModelValue('category')}
 					{...props} />
-			<FloatingActionButton
-					onTouchTap={() => props.toggleCategoryForm(true)}
-					mini={true}>
-				<ContentAdd />
-			</FloatingActionButton>
+			<Button
+					onClick={() => props.toggleCategoryForm(true)}
+					size="small" shape="circle" icon="plus" />
 		</div>
 		<SubmitButtons
 				canSubmit={() => canSubmitPrefillTemplate(props)}

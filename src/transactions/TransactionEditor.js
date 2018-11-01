@@ -3,17 +3,13 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
+import {Button, Input} from 'antd';
 
-import TextField from 'material-ui/TextField';
-import RaisedButton from 'material-ui/RaisedButton';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import DatePicker from 'material-ui/DatePicker';
 import Dialog from 'material-ui/Dialog';
 import AutoComplete from 'material-ui/AutoComplete';
-
-import FloatingActionButton from 'material-ui/FloatingActionButton';
-import ContentAdd from 'material-ui/svg-icons/content/add';
 
 import actions from '../redux/actions';
 import {getEditedValue} from '../redux/editorStore';
@@ -283,16 +279,21 @@ const TransactionEditor = reactStamp(React)
     },
     renderSubmitButtons() {
       const btns = [
-        <RaisedButton key="save-btn" label="Sauver" primary={true}
-          disabled={!this.canSubmit()}
-          onClick={this.cbks.submit} />
+        <Button key="save-btn" 
+            type="primary"
+            disabled={!this.canSubmit()}
+            onClick={this.cbks.submit}>
+          Sauver
+        </Button>
       ];
 
       if (!this.getValue('id')) {
-        btns.push(<RaisedButton key="transfer-btn" label="Transférer"
-          disabled={!this.canSubmit()}
-          onClick={this.cbks.startTransfer}/>
-        );
+        btns.push(
+          <Button key="transfer-btn"
+              disabled={!this.canSubmit()}
+              onClick={this.cbks.startTransfer}>
+            Transférer
+          </Button>);
       }
 
       return btns;
@@ -306,7 +307,7 @@ const TransactionEditor = reactStamp(React)
         {this.renderForms()}
         {this.renderObject()}
         <div>
-          <TextField hintText="Montant de la transaction" type="number"
+          <Input placeholder="Montant de la transaction" type="number"
             value={this.props.editedTransaction.amount}
             onChange={this.cbks.setAmount} />
         </div>
@@ -325,15 +326,13 @@ const TransactionEditor = reactStamp(React)
         </div>
         <div>
           {this.renderCategories()}
-          <FloatingActionButton onTouchTap={this.cbks.addCategory} mini={true}>
-            <ContentAdd />
-          </FloatingActionButton>
+          <Button onClick={this.cbks.addCategory} 
+            size="small" shape="circle" icon="plus"/>
         </div>
         <div>
           {this.renderGroups()}
-          <FloatingActionButton onTouchTap={this.cbks.addGroup} mini={true}>
-            <ContentAdd />
-          </FloatingActionButton>
+          <Button onClick={this.cbks.addGroup} 
+            size="small" shape="circle" icon="plus"/>
         </div>
         {this.renderSubmitButtons()}
       </div>;
