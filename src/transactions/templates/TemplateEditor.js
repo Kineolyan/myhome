@@ -2,10 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {Button, Input, Select} from 'antd';
+import {Button, Input, Modal, Select} from 'antd';
 
 import DatePicker from 'material-ui/DatePicker';
-import Dialog from 'material-ui/Dialog';
 
 import actions from '../../redux/actions';
 import {getEditedValue} from '../../redux/editorStore';
@@ -132,13 +131,18 @@ const CategorySelector = (props) => {
 		onSelect={props.setCategory} />;
 };
 const Forms = (props) => {
+	const onSubmit = (newCategory) => {
+		props.setCategory(newCategory.id);
+		props.closeCategoryForm();
+	};
 	return [
-		<Dialog key="category"
+		<Modal key="category"
 			title="Ajouter une catégorie"
-			modal={false} open={props.isOpen}
-			onRequestClose={props.closeCategoryForm}>
-			<CategoryEditor onSubmit={newCategory => props.setCategory(newCategory.id)} />
-		</Dialog>
+			visible={props.isOpen}
+			onOk={props.closeCategoryForm}
+			onCancel={props.closeCategoryForm}>
+			<CategoryEditor onSubmit={onSubmit} />
+		</Modal>
 	];
 };
 const SubmitButtons = (props) =>

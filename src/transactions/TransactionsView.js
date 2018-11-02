@@ -2,9 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {Button, Icon, Table, Tag} from 'antd';
-
-import Dialog from 'material-ui/Dialog';
+import {Button, Icon, Modal, Table, Tag} from 'antd';
 
 import {Type} from './models';
 import TransactionPanel, {Mode as PanelMode} from './TransactionPanel';
@@ -233,37 +231,31 @@ class TransactionsView extends React.Component {
 
   renderHighlightedTransaction() {
     if (this.state.detailledTransaction) {
-      const title = <div className="dialog-header">
-        <span className="dialog-title">Transaction</span>
-        <div className="dialog-actions">
-          {
-            this.state.detailViewMode !== PanelMode.VIEW
-              ? <Button onClick={this.cbks.closeEditor}>Voir</Button>
-              : null
-          }
-          {
-            this.state.detailViewMode !== PanelMode.EDIT
-              ? <Button onClick={this.cbks.openEditor}>Éditer</Button>
-              : null
-          }
-          <Button onClick={this.cbks.deleteTransaction}>Supprimer</Button>
-          {
-            this.state.detailViewMode !== PanelMode.SET_TEMPLATE
-              ? <Button onClick={this.cbks.associateTemplate}>Set Template</Button>
-              : null
-          }
-          <Button onClick={this.cbks.makeTemplate}>As Template</Button>
-        </div>
-      </div>;
+      const title = 'Transaction';
+      const footer = [];
+          
+      if (this.state.detailViewMode !== PanelMode.VIEW) {
+        footer.push(<Button onClick={this.cbks.closeEditor}>Voir</Button>);
+      }
+      if (this.state.detailViewMode !== PanelMode.EDIT) {
+        footer.push(<Button onClick={this.cbks.openEditor}>Éditer</Button>);
+      }
+      footer.push(<Button onClick={this.cbks.deleteTransaction}>Supprimer</Button>);
+      if (this.state.detailViewMode !== PanelMode.SET_TEMPLATE) {
+        footer.push(<Button onClick={this.cbks.associateTemplate}>Set Template</Button>);
+      }
+      footer.push(<Button onClick={this.cbks.makeTemplate}>As Template</Button>);
 
-      return <Dialog title={title}
-          modal={false} open={true}
-          onRequestClose={this.cbks.hideTransaction}
-          autoScrollBodyContent={true}>
+      return <Modal 
+          title={title}
+          visible={true}
+          onOk={this.cbks.hideTransaction}
+          onCancel={this.cbks.hideTransaction}
+          footer={footer}>
         <TransactionPanel transactionId={this.state.detailledTransaction}
           mode={this.state.detailViewMode}
           onSuccess={this.cbks.closeEditor} />
-      </Dialog>;
+      </Modal>;
     }
   }
 
@@ -274,12 +266,13 @@ class TransactionsView extends React.Component {
         <span className="dialog-title">Group {groupId}</span>
       </div>;
 
-      return <Dialog title={title}
-          modal={false} open={true}
-          onRequestClose={this.cbks.hideGroup}
-          autoScrollBodyContent={true}>
+      return <Modal 
+          title={title}
+          visible={true}
+          onOk={this.cbks.hideGroup}
+          onCancel={this.cbks.hideGroup}>
         <GroupView groupId={groupId}/>
-      </Dialog>;
+      </Modal>;
     }
   }
 
