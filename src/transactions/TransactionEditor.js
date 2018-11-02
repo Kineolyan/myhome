@@ -3,11 +3,8 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
-import {Button, Input} from 'antd';
-
-import DatePicker from 'material-ui/DatePicker';
-import Dialog from 'material-ui/Dialog';
-import AutoComplete from 'material-ui/AutoComplete';
+import {AutoComplete, Button, DatePicker, Input, Modal} from 'antd';
+import moment from 'moment';
 
 import actions from '../redux/actions';
 import {getEditedValue} from '../redux/editorStore';
@@ -66,9 +63,6 @@ const TransactionEditor = reactStamp(React)
       instance.setModelFromInput = (...args) => muiForm.setModelFromInput(
         instance.props, ELEMENT_PROP, updater,
         ...args);
-      instance.setModelFromChoice = (...args) => muiForm.setModelFromChoice(
-        instance.props, ELEMENT_PROP, updater,
-        ...args);
 
     },
     componentWillMount() {
@@ -92,7 +86,7 @@ const TransactionEditor = reactStamp(React)
         setType: this.setModelValue.bind(this, 'type'),
         setCategory: this.setModelValue.bind(this, 'category'),
         setGroup: this.setModelValue.bind(this, 'group'),
-        setDate: this.setModelFromInput.bind(this, 'date'),
+        setDate: (date) => this.setModelValue('date', date.toDate()),
         addCategory: this.toggleCategoryForm.bind(this, true),
         closeCategoryForm: this.toggleCategoryForm.bind(this, false),
         addGroup: this.toggleGroupForm.bind(this, true),
@@ -206,19 +200,22 @@ const TransactionEditor = reactStamp(React)
     },
     renderObject() {
       const suggestions = [
-        ...this.props.latestObjects,
-        ...this.props.templates.map(t => `${t.object} [t]`)
+        ...this.props.latestObjects.map(o => ({value: o, text: o})),
+        ...this.props.templates.map(t => ({
+          value: `#${t.id}`,
+          text: `${t.object} [t]`
+        }))
       ];
+      const filter = () => {};
 
       return <div>
         <AutoComplete
-          hintText="Objet de la transaction"
-          filter={AutoComplete.fuzzyFilter}
+          placeholder="Objet de la transaction"
           searchText={this.props.editedTransaction.object || ''}
           dataSource={suggestions}
-          onUpdateInput={this.cbks.setObject}
-          onNewRequest={this.cbks.selectCompletedObject}
-          maxSearchResults={10}
+          onChange={this.cbks.setObject}
+          onSelect={this.cbks.selectCompletedObject}
+          onSearch={filter}
         />
       </div>;
     },
@@ -244,25 +241,31 @@ const TransactionEditor = reactStamp(React)
     },
     renderForms() {
       return [
-        <Dialog key="category"
+        <Modal 
+          key="category"
           title="Ajouter une catégorie"
-          modal={false} open={this.state.openCategoryForm}
-          onRequestClose={this.cbks.closeCategoryForm}>
+          visible={this.state.openCategoryForm}
+          onOk={this.cbks.closeCategoryForm}
+          onCancel={this.cbks.closeCategoryForm}>
           <CategoryEditor onSubmit={newCategory => this.cbks.setCategory(newCategory.id)} />
-        </Dialog>,
-        <Dialog key="group"
+        </Modal>,
+        <Modal 
+          key="group"
           title="Ajouter un group"
-          modal={false} open={this.state.openGroupForm}
-          onRequestClose={this.cbks.closeGroupForm}>
+          visible={this.state.openGroupForm}
+          onOk={this.cbks.closeGroupForm}
+          onCancel={this.cbks.closeGroupForm}>
           <GroupEditor onSubmit={_.noop}
               editorId={`TransactioEditor-${this.props.editorId}-group-editor`}/>
-        </Dialog>,
-        <Dialog key="transfer"
+        </Modal>,
+        <Modal 
+          key="transfer"
           title="Choisir le compte pour le transfert"
-          modal={false} open={this.state.askTransferAccount}
-          onRequestClose={this.cbks.cancelTransfer}>
+          visible={this.state.askTransferAccount}
+          onOk={this.cbks.cancelTransfer}
+          onCancel={this.cbks.cancelTransfer}>
           <AccountPicker onSelect={this.cbks.completeTransfer} />
-        </Dialog>
+        </Modal>
       ];
     },
     renderSubmitButtons() {
@@ -301,10 +304,9 @@ const TransactionEditor = reactStamp(React)
         </div>
         <div>
           <DatePicker
-            hintText="Date de la transaction"
-            value={this.props.editedTransaction.date}
-            maxDate={TODAY}
-            onChange={this.cbks.setDate} autoOk={true}/>
+            placeholder="Date de la transaction"
+            value={moment(this.props.editedTransaction.date)}
+            onChange={this.cbks.setDate}/>
         </div>
         <div>
           {this.renderAccount()}

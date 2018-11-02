@@ -1,12 +1,11 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import _ from 'lodash';
-import {Button} from 'antd';
+import {Button, DatePicker} from 'antd';
+import moment from 'moment';
 
 import actions from '../redux/actions';
 import {getStateValues} from '../redux/horizonStore';
-
-import DatePicker from 'material-ui/DatePicker';
 
 import AccountPicker from '../comptes/AccountPicker';
 import {asDate} from '../core/time';
@@ -32,8 +31,9 @@ class AccountExportActivity extends React.Component {
 
 		this.cbks = {
 			setAccount: account => this.setState({account}),
-			setFrom: (e, date) => this.setState({from: date}),
-			setTo: (e, date) => this.setState({to: date}),
+			setRange: ([from, to]) => {
+				this.setState({from: from.toDate(), to: to.toDate()})
+			},
 			export: () => this.export()
 		};
 	}
@@ -57,16 +57,10 @@ class AccountExportActivity extends React.Component {
 					<AccountPicker value={this.state.account} onSelect={this.cbks.setAccount} />
 				</div>
 				<div>
-          <DatePicker
-            floatingLabelText="Début"
-            value={this.state.from}
-            maxDate={this.state.to}
-            onChange={this.cbks.setFrom} autoOk={true}/>
-					<DatePicker
-						floatingLabelText="Fin"
-						value={this.state.to}
-						maxDate={TODAY}
-						onChange={this.cbks.setTo} autoOk={true}/>
+          <DatePicker.RangePicker
+            placeholder="Début"
+            value={[moment(this.state.from), moment(this.state.to)]}
+            onChange={this.cbks.setRange}/>
 				</div>
 				<div>
 					<Button type="primary"

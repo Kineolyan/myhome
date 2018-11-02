@@ -2,9 +2,8 @@ import React from 'react';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
-import {Input, Button} from 'antd';
-
-import DatePicker from 'material-ui/DatePicker';
+import {DatePicker, Input, Button} from 'antd';
+import moment from 'moment';
 
 import actions from '../../redux/actions';
 import {getStateValues} from '../../redux/horizonStore';
@@ -44,8 +43,8 @@ const AccountValidator = reactStamp(React)
 		setBalance(event) {
 			this.setState({balance: parseFloat(event.currentTarget.value)});
 		},
-		setValidationDate(event, date) {
-			this.setState({validationDate: date});
+		setValidationDate(date) {
+			this.setState({validationDate: date.toDate()});
 		},
 		getValidation(account, balanceIdx) {
 			const validationStream = this.fetchLatestValidation(account, balanceIdx)
@@ -200,11 +199,10 @@ const AccountValidator = reactStamp(React)
 					à hauteur de <Input type="number" placeholder="Solde du compte"
 						value={this.state.balance}
 						onChange={this.cbks.setBalance} />
-					€ au <DatePicker hintText="Date"
-								value={this.state.validationDate}
-								maxDate={TODAY}
+					€ au <DatePicker placeholder="Date"
+								value={moment(this.state.validationDate)}
 								onChange={this.cbks.setValidationDate}
-								autoOk={true} style={{display: 'inline-block'}}/>
+								style={{display: 'inline-block'}}/>
 					<Button
 							type="primary"
 							onClick={this.cbks.validate}>

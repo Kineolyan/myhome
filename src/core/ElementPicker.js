@@ -27,8 +27,6 @@ const ElementPicker = reactStamp(React).compose({
       return this.renderEmpty();
     }
 
-    const hintText = _.isString(this.props.hintText) ? this.props.hintText : null;
-
     const filterOption = (input, option) => option.props.children.toLowerCase().includes(input.toLowerCase());
 		return <Select
         showSearch
@@ -37,7 +35,7 @@ const ElementPicker = reactStamp(React).compose({
         style={{ width: 300 }}
         value={this.props.value || null}
         onChange={this.props.onSelect}
-        placeholder={this.props.withEmpty ? hintText : undefined}>
+        placeholder={this.props.hintText}>
       {values.map(value => 
         <Select.Option 
             key={value.id}

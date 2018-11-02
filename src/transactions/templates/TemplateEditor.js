@@ -2,9 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import {connect} from 'react-redux';
-import {Button, Input, Modal, Select} from 'antd';
-
-import DatePicker from 'material-ui/DatePicker';
+import {Button, DatePicker, Input, Modal, Select} from 'antd';
+import moment from 'moment';
 
 import actions from '../../redux/actions';
 import {getEditedValue} from '../../redux/editorStore';
@@ -195,11 +194,9 @@ const FrequencyEditor = (props) => {
 		</div>
 		<div>
 			<DatePicker
-				hintText="Date de la transaction"
-				value={props.editedTemplate.date}
-				maxDate={TODAY}
-				onChange={setModelFromInput('date')}
-				autoOk={true}/>
+				placeholder="Date de la transaction"
+				value={moment(props.editedTemplate.date)}
+				onChange={(date) => setModelValue('date', date.toDate())}/>
 			<FrequencySelector 
 				frequency={props.editedTemplate.frequency.type}
 				setFrequency={setModelValue('frequency.type')} />
