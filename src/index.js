@@ -8,7 +8,6 @@ import {createCycleMiddleware} from 'redux-cycles';
 // import {createCycleMiddleware} from './redux/middleware';
 import Cycle from '@cycle/xstream-run';
 // import Cycle from '@cycle/rxjs-run';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
 import main from './cycle/main';
 import accountApp from './redux/store';
@@ -47,11 +46,9 @@ class MuiApp extends React.Component {
 
   render() {
     return (
-      <MuiThemeProvider>
-        <Provider store={store}>
-          <App />
-        </Provider>
-      </MuiThemeProvider>
+      <Provider store={store}>
+        <App />
+      </Provider>
     );
   }
 }
