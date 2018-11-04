@@ -200,12 +200,17 @@ const TransactionEditor = reactStamp(React)
     },
     renderObject() {
       const suggestions = [
-        ...this.props.latestObjects.map(o => ({value: o, text: o})),
+        ...this.props.latestObjects.map(o => ({key: o, value: o, text: o})),
         ...this.props.templates.map(t => ({
+          key: t.id,
           value: `#${t.id}`,
           text: `${t.object} [t]`
         }))
       ];
+      // const suggestions = [
+      //   ...this.props.latestObjects,
+      //   ...this.props.templates.map(`${t.object} [t]`)
+      // ];
       const filter = () => {};
 
       return <div>
