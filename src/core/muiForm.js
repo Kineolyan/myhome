@@ -15,10 +15,13 @@ function setModelFromChoice(state, formStateKey, udpater, key, event, index, val
 
 function setModelValue(state, formStateKey, updater, key, value, acceptEmpty = false) {
   const element = {...state[formStateKey]};
-  if (!_.isEmpty(value) || acceptEmpty || value instanceof Date) {
-    _.set(element, key, value);
-  } else {
-    _.unset(element, key);
+  const current = _.get(element, key);
+  if (current !== value) {
+    if (!_.isEmpty(value) || acceptEmpty || value instanceof Date) {
+      _.set(element, key, value);
+    } else {
+      _.unset(element, key);
+    }
   }
 
   return updater({[formStateKey]: element});

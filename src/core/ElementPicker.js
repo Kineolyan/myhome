@@ -36,8 +36,8 @@ const ElementPicker = reactStamp(React).compose({
         value={this.props.value || null}
         onChange={this.props.onSelect}
         placeholder={this.props.hintText}>
-      {values.map(value => 
-        <Select.Option 
+      {values.map(value =>
+        <Select.Option
             key={value.id}
             value={value.id}>
           {value.name}

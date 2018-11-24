@@ -16,7 +16,6 @@ import CategoryEditor from '../categories/CategoryEditor';
 import AccountPicker from '../comptes/AccountPicker';
 import GroupPicker from '../groups/GroupPicker';
 import GroupEditor from '../groups/GroupEditor';
-import {WithHorizons} from '../core/horizon';
 import * as muiForm from '../core/muiForm';
 import {prepareElement, submitElement} from '../core/ElementEditor';
 import {applyTemplate} from './templates/model';
@@ -30,7 +29,6 @@ const DEFAULT_TRANSACTION = {
 };
 
 const TransactionEditor = reactStamp(React)
-  .compose(WithHorizons)
   .compose({
     propTypes: {
       transaction: PropTypes.object,
@@ -79,7 +77,7 @@ const TransactionEditor = reactStamp(React)
       this.props.loadTemplates();
 
       this.cbks = Object.assign({}, this.cbks, {
-        setObject: value => this.setModelValue('object', value || '', true),
+        setObject: this.defineTransactionObject.bind(this),
         selectCompletedObject: this.defineTransactionObject.bind(this),
         setAmount: this.setModelFromInput.bind(this, 'amount'),
         setAccount: this.setModelValue.bind(this, 'account'),
@@ -107,16 +105,26 @@ const TransactionEditor = reactStamp(React)
       return this.props.editedTransaction[key]
         || this.props.transaction[key];
     },
-    defineTransactionObject(chosenObject, idx) {
-      const template = this.props.templates[idx - this.props.latestObjects.length];
-      if (template !== undefined && chosenObject === `${template.object} [t]`) {
-        const transaction = applyTemplate(
-          {...DEFAULT_TRANSACTION, id: this.props.editedTransaction.id},
-          template);
-        this.props.edit(transaction);
+    defineTransactionObject(chosenObject) {
+      if (chosenObject.startsWith('#')) {
+        // Template selected
+        const id = chosenObject.substring(1);
+        const template = this.props.templates.find(t => t.id === id);
+        if (template) {
+          const transaction = applyTemplate(
+            {
+              ...DEFAULT_TRANSACTION,
+              id: this.props.editedTransaction.id,
+              object: template.object
+            },
+            template);
+          this.props.edit(transaction);
+        } else {
+          console.error(`Cannot find template ${id} (from ${chosenObject}`);
+        }
       } else {
         // Just use the value without template
-        this.setModelValue('object', chosenObject);
+        this.setModelValue('object', chosenObject, true);
       }
     },
     getEditedElement() {
@@ -199,20 +207,23 @@ const TransactionEditor = reactStamp(React)
       this.setState({openGroupForm: open});
     },
     renderObject() {
+      const current = this.props.editedTransaction.object || '';
       const suggestions = [
-        ...this.props.latestObjects.map(o => ({key: o, value: o, text: o})),
-        ...this.props.templates.map(t => ({
-          key: t.id,
-          value: `#${t.id}`,
-          text: `${t.object} [t]`
-        }))
+        ...this.props.latestObjects
+            .filter(value => value.includes(current))
+            .map(o => ({key: o, value: o, text: o})),
+        ...this.props.templates
+            .filter(t => t.object.includes(current))
+            .map(t => ({
+              key: t.id,
+              value: `#${t.id}`,
+              text: `${t.object} [t]`
+            }))
       ];
       // const suggestions = [
       //   ...this.props.latestObjects,
       //   ...this.props.templates.map(`${t.object} [t]`)
       // ];
-      const filter = () => {};
-
       return <div>
         <AutoComplete
           placeholder="Objet de la transaction"
@@ -220,7 +231,6 @@ const TransactionEditor = reactStamp(React)
           dataSource={suggestions}
           onChange={this.cbks.setObject}
           onSelect={this.cbks.selectCompletedObject}
-          onSearch={filter}
         />
       </div>;
     },
@@ -246,7 +256,7 @@ const TransactionEditor = reactStamp(React)
     },
     renderForms() {
       return [
-        <Modal 
+        <Modal
           key="category"
           title="Ajouter une catégorie"
           visible={this.state.openCategoryForm}
@@ -254,7 +264,7 @@ const TransactionEditor = reactStamp(React)
           onCancel={this.cbks.closeCategoryForm}>
           <CategoryEditor onSubmit={newCategory => this.cbks.setCategory(newCategory.id)} />
         </Modal>,
-        <Modal 
+        <Modal
           key="group"
           title="Ajouter un group"
           visible={this.state.openGroupForm}
@@ -263,7 +273,7 @@ const TransactionEditor = reactStamp(React)
           <GroupEditor onSubmit={_.noop}
               editorId={`TransactioEditor-${this.props.editorId}-group-editor`}/>
         </Modal>,
-        <Modal 
+        <Modal
           key="transfer"
           title="Choisir le compte pour le transfert"
           visible={this.state.askTransferAccount}
@@ -275,7 +285,7 @@ const TransactionEditor = reactStamp(React)
     },
     renderSubmitButtons() {
       const btns = [
-        <Button key="save-btn" 
+        <Button key="save-btn"
             type="primary"
             disabled={!this.canSubmit()}
             onClick={this.cbks.submit}>
@@ -321,12 +331,12 @@ const TransactionEditor = reactStamp(React)
         </div>
         <div>
           {this.renderCategories()}
-          <Button onClick={this.cbks.addCategory} 
+          <Button onClick={this.cbks.addCategory}
             size="small" shape="circle" icon="plus"/>
         </div>
         <div>
           {this.renderGroups()}
-          <Button onClick={this.cbks.addGroup} 
+          <Button onClick={this.cbks.addGroup}
             size="small" shape="circle" icon="plus"/>
         </div>
         {this.renderSubmitButtons()}
@@ -362,11 +372,13 @@ function mapDispatchToProps(dispatch, props) {
       editorId: props.editorId,
       value: transaction
     }),
-    edit: transaction => dispatch({
+    edit: transaction => {
+      debugger;
+      dispatch({
       type: actions.editors.edit,
       editorId: props.editorId,
       value: transaction
-    }),
+    });},
     save: (transaction) => dispatch({
       type: actions.transactions.save,
       value: transaction
