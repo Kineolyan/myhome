@@ -40,11 +40,12 @@ class App extends Component {
   }
 
   renderMenu() {
+    // TODO correlate the label/target with the view name
     return (
       <Menu
       theme="dark"
       mode="horizontal"
-      defaultSelectedKeys={[menuLinks[0].label]}
+      selectedKeys={[this.props.view.id]}
       style={{ lineHeight: '64px' }}>
         {menuLinks.map(link => (
           <Menu.Item key={link.label} onClick={() => this.props.linkTo(link.target)}>

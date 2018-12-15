@@ -373,7 +373,6 @@ function mapDispatchToProps(dispatch, props) {
       value: transaction
     }),
     edit: transaction => {
-      debugger;
       dispatch({
       type: actions.editors.edit,
       editorId: props.editorId,
