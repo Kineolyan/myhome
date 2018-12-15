@@ -4,7 +4,6 @@ import _ from 'lodash';
 import reactStamp from 'react-stamp';
 
 const FEEDS = {
-  messages: 'messages',
   accounts: 'accounts',
   categories: 'categories',
   transactions: 'transactions',

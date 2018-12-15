@@ -1,9 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import _ from 'lodash';
-
-import SelectField from 'material-ui/SelectField';
-import MenuItem from 'material-ui/MenuItem';
+import {Select} from 'antd';
 
 import actions from '../redux/actions';
 import {getStateValues} from '../redux/horizonStore';
@@ -16,17 +14,23 @@ const SelectTemplate = ({templates, value, onSelected}) => {
 			const id = t.id;
 			const info = t.frequency ? ` (${JSON.stringify(t.frequency)})` : '';
 			const name = `${t.object}${info}`;
-			return <MenuItem key={id} value={id} primaryText={name} />;
-		})
+			return <Select.Option key={id} value={id}>{name}</Select.Option>;
+    })
 		.value();
-	return <SelectField
-			value={value || ''}
-			onChange={(event, index) => onSelected(index)}
-			hintText={'Select a template'}
-			floatingLabelFixed={true}>
-		{options}
-	</SelectField>;
 
+		const filterOption = (input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0;
+		return (
+			<Select
+					showSearch={true}
+					style={{ width: 400 }}
+					placeholder="Selectionner un template"
+					optionFilterProp="children"
+					onChange={(id) => onSelected(id)}
+					filterOption={filterOption}
+					value={value || ''}>
+				{options}
+			</Select>
+		);
 };
 
 class TemplateActivity extends React.Component {
@@ -46,11 +50,9 @@ class TemplateActivity extends React.Component {
 
     return <div>
 			<SelectTemplate
-					value=''
+					value={props.state.templateId}
 					templates={this.props.templates}
-					onSelected={(idx) => props.setState({
-						templateId: props.templates[idx].id
-					})} />
+					onSelected={(templateId) => props.setState({templateId})} />
 			{
 				props.editedTemplate
 						? <div>Template id: {props.editedTemplate.id}</div>

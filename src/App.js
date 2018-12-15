@@ -1,18 +1,17 @@
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
+import { Layout, Menu } from 'antd';
+
 import './App.css';
-
 import actions from './redux/actions';
-
-import AppBar from 'material-ui/AppBar';
-import Drawer from 'material-ui/Drawer';
-import MenuItem from 'material-ui/MenuItem';
 
 import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
 import AccountExportActivity from './activities/AccountExportActivity';
 import TemplateActivity from './activities/TemplateActivity';
 import Showcase from './general/Showcase';
+
+const { Header, Content } = Layout;
 
 const menuLinks = [
   {label: 'Comptes', target: {entity: 'comptes'}},
@@ -41,19 +40,20 @@ class App extends Component {
   }
 
   renderMenu() {
-    return <Drawer
-        docked={false}
-        width={200}
-        open={this.state.openMenu}
-        onRequestChange={this.cbks.toggleMenu}>
-      {menuLinks.map(link => <div 
-          onClick={() => this.props.linkTo(link.target)} 
-          key={link.label}>
-        <MenuItem onTouchTap={this.cbks.closeMenu}>
-          {link.label}
-        </MenuItem>
-      </div>)}
-    </Drawer>;
+    // TODO correlate the label/target with the view name
+    return (
+      <Menu
+      theme="dark"
+      mode="horizontal"
+      selectedKeys={[this.props.view.id]}
+      style={{ lineHeight: '64px' }}>
+        {menuLinks.map(link => (
+          <Menu.Item key={link.label} onClick={() => this.props.linkTo(link.target)}>
+            {link.label}
+          </Menu.Item>
+        ))}
+      </Menu>
+    );
   }
 
   renderTitle(viewName) {
@@ -72,14 +72,14 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
-        <AppBar
-          title={this.renderTitle(this.props.view.id)}
-          iconClassNameRight="muidocs-icon-navigation-expand-more"
-          onLeftIconButtonTouchTap={this.cbks.openMenu}/>
-        {this.renderMenu()}
-        {this.props.children}
-      </div>
+      <Layout className="layout">
+        <Header>
+          {this.renderMenu()}
+        </Header>
+        <Content style={{ padding: '0 10px' }}>
+          {this.props.children}
+        </Content>
+      </Layout>
     );
   }
 }

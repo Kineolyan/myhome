@@ -31,7 +31,7 @@ const computeDateByFrequency = (input, {type}) => {
     // Often, monthly operations do not occur on week-ends, move to the next day if needed
     if (date.getDay() === 6) {
       // Saturday, advance by 2 days
-      date.setDate(date.getDate + 2);
+      date.setDate(date.getDate() + 2);
     } else if (date.getDay() === 0) {
       // Sunday, advance by 1 day
       date.setDate(date.getDate() + 1);
@@ -43,12 +43,11 @@ const computeDateByFrequency = (input, {type}) => {
 };
 
 const applyTemplate = (base, template) => {
-  const id = base.id;
   const transaction = {...base, ...template};
 
   // Set the id of the base or remove the one of the template
-  if (id !== undefined) {
-    transaction.id = id;
+  if (base.id !== undefined) {
+    transaction.id = base.id;
   } else {
     Reflect.deleteProperty(transaction, 'id');
   }

@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-
-import TextField from 'material-ui/TextField';
-import RaisedButton from 'material-ui/RaisedButton';
+import { Form, Input, Button } from 'antd';
 
 import {submitElement, prepareElement} from '../core/ElementEditor';
 import {setModelFromInput} from '../core/muiForm';
@@ -38,13 +36,23 @@ class CategoryEditor extends React.Component {
   }
 
   render() {
-    return <div>
-      <TextField hintText="Nom de la catégorie"
-        defaultValue={this.props.category.name}
-        onChange={this.cbks.setName} />
-      <RaisedButton label="Ajouter" primary={true}
-        onClick={this.cbks.submit} />
-    </div>;
+    return (
+      <Form layout="inline">
+        <Form.Item>
+          <Input placeholder="Nom de la catégorie"
+            value={this.state[ELEMENT_KEY].name || this.props.category.name}
+            onChange={this.cbks.setName} />
+        </Form.Item>
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            onClick={this.cbks.submit}>
+            Ajouter
+          </Button>
+        </Form.Item>
+      </Form>
+    );
   }
 }
 

@@ -1,5 +1,5 @@
 import xs from 'xstream';
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 import _ from 'lodash';
 
 const Operations = {

@@ -1,4 +1,4 @@
-import Rx from 'rxjs';
+import * as Rx from 'rxjs';
 
 function createCycleMiddleware () {
   let store = null
