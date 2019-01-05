@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import actions from './actions';
 
 function makeStore() {
@@ -12,7 +14,7 @@ function storeState(state, action) {
       ...state,
       [action.editorId]: {
         ...state[action.editorId],
-        value: action.value
+        value: _.isFunction(action.value) ? action.value(state[action.editorId].value) : action.value
       }
     };
   case actions.editors.clear:
@@ -22,7 +24,7 @@ function storeState(state, action) {
   default:
     return state;
   }
-} 
+}
 
 function getEditedValue(state, editorId, defaultValue) {
   return Reflect.has(state, editorId)
@@ -31,7 +33,7 @@ function getEditedValue(state, editorId, defaultValue) {
 }
 
 export {
-  makeStore, 
+  makeStore,
   storeState,
   getEditedValue
 }
