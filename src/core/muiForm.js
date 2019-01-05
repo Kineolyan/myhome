@@ -14,7 +14,13 @@ function setModelFromChoice(state, formStateKey, udpater, key, event, index, val
 }
 
 function setModelValue(state, formStateKey, updater, key, value, acceptEmpty = false) {
-  const element = {...state[formStateKey]};
+  const current = state[formStateKey];
+  const updated = updateModelValue(current, key, value, acceptEmpty);
+  return updater({[formStateKey]: updated});
+}
+
+function updateModelValue(model, key, value, acceptEmpty = false) {
+  const element = {...model};
   const current = _.get(element, key);
   if (current !== value) {
     if (!_.isEmpty(value) || acceptEmpty || value instanceof Date) {
@@ -23,12 +29,12 @@ function setModelValue(state, formStateKey, updater, key, value, acceptEmpty = f
       _.unset(element, key);
     }
   }
-
-  return updater({[formStateKey]: element});
+  return element;
 }
 
 export {
   setModelFromInput,
   setModelFromChoice,
-  setModelValue
+  setModelValue,
+  updateModelValue,
 };

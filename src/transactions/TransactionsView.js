@@ -17,7 +17,7 @@ class TransactionsView extends React.Component {
     this.state = {
       transactions: props.transactions,
       detailledTransaction: null,
-      index: 0
+      offset: 0
     };
   }
 
@@ -26,20 +26,12 @@ class TransactionsView extends React.Component {
       highlightRow: this.highlightRow.bind(this),
       hideTransaction: this.hideTransaction.bind(this),
       hideGroup: this.hideGroup.bind(this),
-      goPrevious: () => this.setState({index: this.state.index - 1}),
-      goNext: () => this.setState({index: this.state.index + 1}),
       openEditor: () => this.setState({detailViewMode: PanelMode.EDIT}),
       closeEditor: () => this.setState({detailViewMode: PanelMode.VIEW}),
       deleteTransaction: this.deleteTransaction.bind(this),
       associateTemplate: () => this.setState({detailViewMode: PanelMode.SET_TEMPLATE}),
       makeTemplate: this.makeTemplate.bind(this)
     };
-
-    const rows = this.computeRows(this.props.transactions);
-    const maxIdx = this.getMaxIndex(rows);
-    if (maxIdx <= this.state.index) {
-      this.setState({index: maxIdx - 1});
-    }
   }
 
   componentDidMount() {
@@ -50,9 +42,9 @@ class TransactionsView extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const rows = this.computeRows(nextProps.transactions);
-    const maxIdx = this.getMaxIndex(rows);
-    if (maxIdx <= this.state.index) {
-      this.setState({index: maxIdx - 1});
+    if (rows.length <= this.state.offset) {
+      // Safely reset to the first page
+      this.setState({offset: 0});
     }
   }
 
@@ -63,16 +55,6 @@ class TransactionsView extends React.Component {
     if (!_.isEmpty(newGroupIds)) {
       this.props.loadGroups(newGroupIds);
     }
-  }
-
-  /**
-   * Gets the maximum index for pagination.
-   * The contract is that state#index < maxIndex.
-   * @param {Object[]} transactions - transactions to paginate
-   * @return {Number} max index
-   */
-  getMaxIndex(transactions) {
-    return _.isEmpty(transactions) ? 1 : parseInt((transactions.length - 1) / this.props.pagination, 10) + 1;
   }
 
   computeRows(transactions) {
@@ -109,8 +91,12 @@ class TransactionsView extends React.Component {
     return rows;
   }
 
-  highlightRow(row, rowIdx) {
-    // const rowIdx = this.state.index * this.props.pagination + tableIdx;
+  updatePage(pagination) {
+    this.setState({offset: (pagination.current - 1) * pagination.pageSize});
+  }
+
+  highlightRow(row, pageIdx) {
+    const rowIdx = this.state.offset + pageIdx;
     const transaction = this.state.transactions[rowIdx];
     if (transaction.groupRow) {
       this.setState({
@@ -118,7 +104,7 @@ class TransactionsView extends React.Component {
       });
     } else {
       this.setState({
-        detailledTransaction: this.state.transactions[rowIdx].id,
+        detailledTransaction: transaction.id,
         detailViewMode: PanelMode.VIEW
       });
     }
@@ -221,9 +207,10 @@ class TransactionsView extends React.Component {
     const dataSource = this.state.transactions.map(
       row => row.groupRow ? this.renderGroup(row) : this.renderTransaction(row));
 
-    return <Table  
+    return <Table
         size="small"
-        dataSource={dataSource} columns={columns} 
+        dataSource={dataSource} columns={columns}
+        onChange={(pagination) => this.updatePage(pagination)}
         onRow={(record, index) => ({
           onClick: () => this.highlightRow(record, index)
         })} />
@@ -233,7 +220,7 @@ class TransactionsView extends React.Component {
     if (this.state.detailledTransaction) {
       const title = 'Transaction';
       const footer = [];
-          
+
       if (this.state.detailViewMode !== PanelMode.VIEW) {
         footer.push(<Button onClick={this.cbks.closeEditor}>Voir</Button>);
       }
@@ -246,7 +233,7 @@ class TransactionsView extends React.Component {
       }
       footer.push(<Button onClick={this.cbks.makeTemplate}>As Template</Button>);
 
-      return <Modal 
+      return <Modal
           title={title}
           visible={true}
           onOk={this.cbks.hideTransaction}
@@ -266,7 +253,7 @@ class TransactionsView extends React.Component {
         <span className="dialog-title">Group {groupId}</span>
       </div>;
 
-      return <Modal 
+      return <Modal
           title={title}
           visible={true}
           onOk={this.cbks.hideGroup}

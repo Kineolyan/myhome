@@ -28,6 +28,7 @@ const DEFAULT_TRANSACTION = {
   date: TODAY
 };
 
+const ELEMENT_PROP = 'editedTransaction';
 const TransactionEditor = reactStamp(React)
   .compose({
     propTypes: {
@@ -49,7 +50,6 @@ const TransactionEditor = reactStamp(React)
       askTransferAccount: false
     },
     init(props, {instance}) {
-      const ELEMENT_PROP = 'editedTransaction';
       instance.readEditedElement = function() {
         return this.props[ELEMENT_PROP];
       };
@@ -111,20 +111,19 @@ const TransactionEditor = reactStamp(React)
         const id = chosenObject.substring(1);
         const template = this.props.templates.find(t => t.id === id);
         if (template) {
-          const transaction = applyTemplate(
+          this.props.edit(tx => applyTemplate(
             {
               ...DEFAULT_TRANSACTION,
-              id: this.props.editedTransaction.id,
+              id: tx.id,
               object: template.object
             },
-            template);
-          this.props.edit(transaction);
+            template));
         } else {
           console.error(`Cannot find template ${id} (from ${chosenObject}`);
         }
       } else {
         // Just use the value without template
-        this.setModelValue('object', chosenObject, true);
+        this.props.edit(tx => muiForm.updateModelValue(tx, 'object', chosenObject, true));
       }
     },
     getEditedElement() {
@@ -206,13 +205,13 @@ const TransactionEditor = reactStamp(React)
     toggleGroupForm(open) {
       this.setState({openGroupForm: open});
     },
-    renderObject() {
-      const current = this.props.editedTransaction.object || '';
+    renderObject(props) {
+      const current = props.editedTransaction.object || '';
       const suggestions = [
-        ...this.props.latestObjects
+        ...props.latestObjects
             .filter(value => value.includes(current))
             .map(o => ({key: o, value: o, text: o})),
-        ...this.props.templates
+        ...props.templates
             .filter(t => t.object.includes(current))
             .map(t => ({
               key: t.id,
@@ -220,41 +219,37 @@ const TransactionEditor = reactStamp(React)
               text: `${t.object} [t]`
             }))
       ];
-      // const suggestions = [
-      //   ...this.props.latestObjects,
-      //   ...this.props.templates.map(`${t.object} [t]`)
-      // ];
       return <div>
         <AutoComplete
           placeholder="Objet de la transaction"
-          searchText={this.props.editedTransaction.object || ''}
+          value={props.editedTransaction.object || ''}
           dataSource={suggestions}
           onChange={this.cbks.setObject}
           onSelect={this.cbks.selectCompletedObject}
         />
       </div>;
     },
-    renderAccount() {
+    renderAccount(props) {
       return <AccountPicker
         value={this.getValue('account')}
         onSelect={this.cbks.setAccount} />;
     },
-    renderType() {
+    renderType(props) {
       return <TypePicker
           value={this.getValue('type') || null}
           onSelect={this.cbks.setType}/>;
     },
-    renderCategories() {
+    renderCategories(props) {
       return <CategoryPicker
         value={this.getValue('category')}
         onSelect={this.cbks.setCategory} />;
     },
-    renderGroups() {
+    renderGroups(props) {
       return <GroupPicker
         value={this.getValue('group')}
         onSelect={this.cbks.setGroup} />;
     },
-    renderForms() {
+    renderForms(props) {
       return [
         <Modal
           key="category"
@@ -271,7 +266,7 @@ const TransactionEditor = reactStamp(React)
           onOk={this.cbks.closeGroupForm}
           onCancel={this.cbks.closeGroupForm}>
           <GroupEditor onSubmit={_.noop}
-              editorId={`TransactioEditor-${this.props.editorId}-group-editor`}/>
+              editorId={`TransactioEditor-${props.editorId}-group-editor`}/>
         </Modal>,
         <Modal
           key="transfer"
@@ -305,41 +300,44 @@ const TransactionEditor = reactStamp(React)
       return btns;
     },
     render() {
-      if (!this.props.editedTransaction) {
+      return this.doRender(this.props);
+    },
+    doRender(props) {
+      if (!props.editedTransaction) {
         return <p><i>Loading...</i></p>;
       }
 
       return <div>
-        {this.renderForms()}
-        {this.renderObject()}
+        {this.renderForms(props)}
+        {this.renderObject(props)}
         <div>
           <Input placeholder="Montant de la transaction" type="number"
-            value={this.props.editedTransaction.amount}
+            value={props.editedTransaction.amount}
             onChange={this.cbks.setAmount} />
         </div>
         <div>
           <DatePicker
             placeholder="Date de la transaction"
-            value={moment(this.props.editedTransaction.date)}
+            value={moment(props.editedTransaction.date)}
             onChange={this.cbks.setDate}/>
         </div>
         <div>
-          {this.renderAccount()}
+          {this.renderAccount(props)}
         </div>
         <div>
-          {this.renderType()}
+          {this.renderType(props)}
         </div>
         <div>
-          {this.renderCategories()}
+          {this.renderCategories(props)}
           <Button onClick={this.cbks.addCategory}
             size="small" shape="circle" icon="plus"/>
         </div>
         <div>
-          {this.renderGroups()}
+          {this.renderGroups(props)}
           <Button onClick={this.cbks.addGroup}
             size="small" shape="circle" icon="plus"/>
         </div>
-        {this.renderSubmitButtons()}
+        {this.renderSubmitButtons(props)}
       </div>;
     }
   });
