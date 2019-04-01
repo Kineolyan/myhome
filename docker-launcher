@@ -1,0 +1,41 @@
+#!/bin/bash
+
+print_help() {
+	cat <<HELP
+$0: Starts Home application
+
+Arguments: <rethinkdb_url> [<app_path> [<bak_dir>]]
+HELP
+}
+
+# Perform a backup if not existing yet
+backup() {
+	local readonly bak_ark="$BAK_DIR/ha_$(date +%Y%V).bak.tgz"
+	if [ ! -f "$bak_ark" ]
+	then
+		tar czf "$bak_ark" rethinkdb_data/ VERSION
+		echo -e "\e[32mDatabase backup created\e[0m ($bak_ark)"
+	fi
+}
+
+start() {
+	# We could serve it with security, but it means managing migration
+	## hz serve --secure no --permissions no --port 8000
+	# ... or just run it as dev
+	hz serve --dev --port 8000 --connect "$RETHINKDB_URL" --start-rethinkdb no --serve-static "$APP_DIR"
+}
+
+case "$1" in
+	-h|--help|help)
+		print_help
+		exit 0 ;;
+esac
+
+RETHINKDB_URL=$1; shift
+APP_DIR=$1; shift
+BAK_DIR=$1; shift;
+[ -z "$APP_DIR" ] && APP_DIR="/app"
+[ -z "$BAK_DIR" ] && BAK_DIR="/backups"
+
+backup
+start

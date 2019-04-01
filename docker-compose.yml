@@ -1,0 +1,11 @@
+version: '3'
+services:
+  web:
+
+    ports:
+     - "8000:8000"
+  redis:
+    image: "rethinkdb:2.3.6"
+    container_name: rethink-home
+    volumes:
+     - .:/data
