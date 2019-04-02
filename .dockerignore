@@ -1,0 +1,9 @@
+# Basically ignore everything ...
+*
+
+# ... but the docker file
+!Dockerfile
+# ... and what is needed in the image
+!build/
+!.hz/
+!docker-env/

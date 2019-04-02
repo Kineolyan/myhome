@@ -1,9 +1,7 @@
 version: '3'
 services:
   web:
-
-    ports:
-     - "8000:8000"
+    image: "home-again:1.0"
   redis:
     image: "rethinkdb:2.3.6"
     container_name: rethink-home
