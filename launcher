@@ -16,7 +16,22 @@ start() {
 	# We could serve it with security, but it means managing migration
 	## hz serve --secure no --permissions no --port 8000
 	# ... or just run it as dev
-	hz serve --dev --port 8000 --serve-static build/
+	local readonly container_name="rethink-home-prod"
+	local readonly running=$(docker ps --format "{{.Names}}" | grep $container_name)
+	if [ -z "$running" ]
+	then
+		# Test if the docker exist
+		local readonly existing=$(docker ps -a --format "{{.Names}}" | grep $container_name)
+		if [ -n "$existing" ]
+		then
+			# Restart the container
+			docker start "$container_name"
+		else
+			docker run -d --name "$container_name" -v "$PWD:/data" rethinkdb:2.3.6
+		fi
+	fi # else, the container is up and running
+	local readonly docker_ip="$(docker inspect --format '{{.NetworkSettings.IPAddress}}' $container_name)"
+	hz serve --dev --port 8000 --serve-static build/ --connect "$docker_ip:28015"
 }
 
 backup
