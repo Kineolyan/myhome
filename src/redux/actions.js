@@ -19,7 +19,8 @@ export default {
 		store: 'STORE_TRANSACTIONS',
 		save: 'SAVE_TRANSACTION',
 		delete: 'DELETE_TRANSACTIONS',
-		toTemplate: 'TRANSACTION_TO_TEMPLATE'
+		toTemplate: 'TRANSACTION_TO_TEMPLATE',
+		shift: 'SHIFT_TRANSACTION_DATE'
 	},
 	templates: {
 		query: 'QUERY_TEMPLATES',

@@ -323,8 +323,8 @@ function main(sources) {
 
   const log$ = Streams.merge(
     // loadUrl$.map(a => ({_stream: 'loadUrl', ...a})),
-    hQueries$.map(a => ({_stream: 'hQuery', ...a})),
-    sources.HORIZONS.map(a => ({_stream: 'hResponse', ...a})),
+    // hQueries$.map(a => ({_stream: 'hQuery', ...a})),
+    // sources.HORIZONS.map(a => ({_stream: 'hResponse', ...a})),
     actions$.map(a => ({_stream: 'sinkActions', ...a})),
     sources.ACTION.map(a => ({_stream: 'sourceActions', ...a}))
   );

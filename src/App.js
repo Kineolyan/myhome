@@ -42,7 +42,6 @@ class App extends Component {
   }
 
   renderMenu() {
-    // TODO correlate the label/target with the view name
     return (
       <Menu
       theme="dark"

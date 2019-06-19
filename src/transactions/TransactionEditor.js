@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import reactStamp from 'react-stamp';
 import {connect} from 'react-redux';
-import {AutoComplete, Button, DatePicker, Input, Modal} from 'antd';
+import {AutoComplete, Button, DatePicker, Input, Modal, Icon} from 'antd';
 import moment from 'moment';
 
 import actions from '../redux/actions';
@@ -19,7 +19,6 @@ import GroupEditor from '../groups/GroupEditor';
 import * as muiForm from '../core/muiForm';
 import {prepareElement, submitElement} from '../core/ElementEditor';
 import {applyTemplate} from './templates/model';
-
 
 const TODAY = new Date();
 const DEFAULT_TRANSACTION = {
@@ -320,6 +319,16 @@ const TransactionEditor = reactStamp(React)
             placeholder="Date de la transaction"
             value={moment(props.editedTransaction.date)}
             onChange={this.cbks.setDate}/>
+            <Button.Group>
+              <Button type="primary" onClick={() => props.shiftDate(-1)}>
+                <Icon type="left" />
+                -1d
+              </Button>
+              <Button type="primary" onClick={() => props.shiftDate(1)}>
+                +1d
+                <Icon type="right" />
+              </Button>
+            </Button.Group>
         </div>
         <div>
           {this.renderAccount(props)}
@@ -389,6 +398,11 @@ function mapDispatchToProps(dispatch, props) {
     loadTemplates: () => dispatch({
       type: actions.templates.query,
       queryId: TEMPLATES_KEY
+    }),
+    shiftDate: (shift) => dispatch({
+      type: actions.transactions.shift,
+      editorId: props.editorId,
+      shift
     })
   }
 }
