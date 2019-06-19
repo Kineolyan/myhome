@@ -236,6 +236,9 @@ const routing = (sources) => {
           case 'edit':
             type = actions.activities.transactions;
             break;
+          case 'validate':
+            type = actions.activities.validate;
+            break;
           default:
             type = actions.activities.accounts;
           }

@@ -40,7 +40,8 @@ export default {
 		accounts: 'LOAD_ACCOUNT_ACTIVITY',
 		export: 'LOAD_ACCOUNT_EXPORT',
 		templates: 'LOAD_ACCOUNT_TEMPLATES',
-		showcase: 'LOAD_SHOWCASE_ACTIVITY'
+		showcase: 'LOAD_SHOWCASE_ACTIVITY',
+		validate: 'LOAD_ACCOUNT_VALIDATION'
 	},
 	editors: {
 		setup: 'EDITOR_SETUP',

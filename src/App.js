@@ -8,6 +8,7 @@ import actions from './redux/actions';
 import TransactionActivity from './activities/TransactionActivity';
 import AccountActivity from './activities/AccountActivity';
 import AccountExportActivity from './activities/AccountExportActivity';
+import AccountValidationActivity from './activities/AccountValidationActivity';
 import TemplateActivity from './activities/TemplateActivity';
 import Showcase from './general/Showcase';
 
@@ -16,6 +17,7 @@ const { Header, Content } = Layout;
 const menuLinks = [
   {label: 'Comptes', target: {entity: 'comptes'}},
   {label: 'Ajouter', target: {entity: 'comptes', section: 'edit'}},
+  {label: 'Valider', target: {entity: 'comptes', section: 'validate'}},
   {label: 'Templates', target: {entity: 'templates'}},
   {label: 'Export', target: {entity: 'comptes', section: 'export'}},
   {label: 'Showcase', target: {entity: 'showcase'}}
@@ -65,6 +67,7 @@ class App extends Component {
         case 'transactions': return 'My Home | Transactions';
         case 'templates': return 'My Home | Templates';
         case 'export': return 'My Home | Account Export';
+        case 'validate': return 'My Home | Account Validation';
         default: return `My Home | [${viewName}]`;
       }
     }
@@ -90,6 +93,7 @@ const getView = (viewId) => {
     case 'transactions': return TransactionActivity;
     case 'templates': return TemplateActivity;
     case 'export': return AccountExportActivity;
+    case 'validate': return AccountValidationActivity;
     default: return Showcase;
   }
 };
