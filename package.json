@@ -28,7 +28,7 @@
     "build": "react-scripts build",
     "eject": "react-scripts eject",
     "test": "react-scripts test --env=jsdom",
-    "db": "hz serve --dev",
+    "db": "hz serve --dev --port 8181 --serve-static build/ --connect 'localhost:28015'",
     "flow": "flow"
   },
   "eslintConfig": {

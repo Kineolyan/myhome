@@ -19,7 +19,8 @@ export default {
 		store: 'STORE_TRANSACTIONS',
 		save: 'SAVE_TRANSACTION',
 		delete: 'DELETE_TRANSACTIONS',
-		toTemplate: 'TRANSACTION_TO_TEMPLATE'
+		toTemplate: 'TRANSACTION_TO_TEMPLATE',
+		shift: 'SHIFT_TRANSACTION_DATE'
 	},
 	templates: {
 		query: 'QUERY_TEMPLATES',
@@ -40,7 +41,8 @@ export default {
 		accounts: 'LOAD_ACCOUNT_ACTIVITY',
 		export: 'LOAD_ACCOUNT_EXPORT',
 		templates: 'LOAD_ACCOUNT_TEMPLATES',
-		showcase: 'LOAD_SHOWCASE_ACTIVITY'
+		showcase: 'LOAD_SHOWCASE_ACTIVITY',
+		validate: 'LOAD_ACCOUNT_VALIDATION'
 	},
 	editors: {
 		setup: 'EDITOR_SETUP',
